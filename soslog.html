@@ -1747,42 +1747,42 @@ window.SOSCrypto = {
         <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:8px;">
           <div class="id-field-wrap" style="margin:0;">
             <div class="id-label">Country Code <span class="req">*</span></div>
-            <input type="text" id="vml-cc" class="bar-input" placeholder="+1" value="+1" maxlength="6"
+            <input type="text" id="panel-vml-cc" class="bar-input" placeholder="+1" value="+1" maxlength="6"
               style="width:100%;margin-top:4px;" oninput="syncIdField('id-cc',this.value)">
           </div>
           <div class="id-field-wrap" style="margin:0;">
             <div class="id-label">Phone <span class="req">*</span></div>
-            <input type="tel" id="vml-phone" class="bar-input" placeholder="Phone number"
+            <input type="tel" id="panel-vml-phone" class="bar-input" placeholder="Phone number"
               style="width:100%;margin-top:4px;" oninput="syncIdField('id-phone',this.value)">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div class="id-field-wrap" style="margin:0;">
             <div class="id-label">Country <span class="req">*</span></div>
-            <input type="text" id="vml-country" class="bar-input" placeholder="Country name"
+            <input type="text" id="panel-vml-country" class="bar-input" placeholder="Country name"
               style="width:100%;margin-top:4px;" oninput="syncIdField('id-country',this.value)">
           </div>
           <div class="id-field-wrap" style="margin:0;">
             <div class="id-label">Email <span class="req">*</span></div>
-            <input type="text" id="vml-email" class="bar-input" placeholder="Email address"
+            <input type="text" id="panel-vml-email" class="bar-input" placeholder="Email address"
               style="width:100%;margin-top:4px;" oninput="syncIdField('id-email',this.value)">
           </div>
         </div>
 
         <div style="margin-bottom:8px;">
           <div class="id-label">New Password <span class="req">*</span></div>
-          <input type="password" id="vml-newpw" class="bar-input" placeholder="Create a password (min 8 chars)"
+          <input type="password" id="panel-vml-newpw" class="bar-input" placeholder="Create a password (min 8 chars)"
             style="width:100%;margin-top:4px;"
             onkeydown="if(event.key==='Enter')document.getElementById('vml-newpw2').focus()">
         </div>
         <div style="margin-bottom:12px;">
           <div class="id-label">Confirm Password <span class="req">*</span></div>
-          <input type="password" id="vml-newpw2" class="bar-input" placeholder="Repeat password"
+          <input type="password" id="panel-vml-newpw2" class="bar-input" placeholder="Repeat password"
             style="width:100%;margin-top:4px;"
             onkeydown="if(event.key==='Enter')window.vmlCreateAccount&&vmlCreateAccount()">
         </div>
 
-        <button onclick="window.vmlCreateAccount&&vmlCreateAccount()" class="btn btn-safe" style="width:100%;padding:11px;">
+        <button onclick="window.panelCreateAccount&&panelCreateAccount()" class="btn btn-safe" style="width:100%;padding:11px;">
           Create Account &amp; Secure My Log
         </button>
       </div>
@@ -3117,11 +3117,15 @@ window.openViewLog = function(){
   const vmlPhone2=document.getElementById('vml-phone');
   const vmlEmail2=document.getElementById('vml-email');
   const vmlCountry2=document.getElementById('vml-country');
-  if(ccEl&&vmlCC&&!vmlCC.value) vmlCC.value=ccEl.value||'+1';
-  if(phoneEl&&vmlPhone2&&!vmlPhone2.value) vmlPhone2.value=phoneEl.value||'';
-  if(emailEl&&vmlEmail2&&!vmlEmail2.value) vmlEmail2.value=emailEl.value||'';
+  const panelCC=document.getElementById('panel-vml-cc');
+  const panelPhone=document.getElementById('panel-vml-phone');
+  const panelEmail=document.getElementById('panel-vml-email');
+  const panelCountry=document.getElementById('panel-vml-country');
+  if(ccEl&&panelCC&&!panelCC.value) panelCC.value=ccEl.value||'+1';
+  if(phoneEl&&panelPhone&&!panelPhone.value) panelPhone.value=phoneEl.value||'';
+  if(emailEl&&panelEmail&&!panelEmail.value) panelEmail.value=emailEl.value||'';
   const cntryEl=document.getElementById('id-country');
-  if(cntryEl&&vmlCountry2&&!vmlCountry2.value) vmlCountry2.value=cntryEl.value||'';
+  if(cntryEl&&panelCountry&&!panelCountry.value) panelCountry.value=cntryEl.value||'';
 
   // Clear state
   const pwField = document.getElementById('panel-pw-field');
@@ -3321,6 +3325,87 @@ window.panelForgotPw = async function(){
 };
 
 window.vmlCreateAccount=vmlCreateAccount;
+
+// ── PANEL CREATE ACCOUNT ──
+window.panelCreateAccount = async function(){
+  const pw  = (document.getElementById('panel-vml-newpw')||{value:''}).value;
+  const pw2 = (document.getElementById('panel-vml-newpw2')||{value:''}).value;
+  const errEl = document.getElementById('panel-pw-err');
+
+  if(pw.length<8){ if(errEl){errEl.textContent='Password must be at least 8 characters.';errEl.classList.add('show');} return; }
+  if(pw!==pw2){    if(errEl){errEl.textContent='Passwords do not match.';errEl.classList.add('show');} return; }
+  if(errEl) errEl.classList.remove('show');
+
+  const vmlCC      = (document.getElementById('panel-vml-cc')||{value:'+1'}).value||'+1';
+  const vmlPhone   = ((document.getElementById('panel-vml-phone')||{value:''}).value||'').replace(/\D/g,'');
+  const vmlEmail   = ((document.getElementById('panel-vml-email')||{value:''}).value||'').trim();
+  const vmlCountry = ((document.getElementById('panel-vml-country')||{value:''}).value||'').trim();
+
+  // Sync to main page fields
+  [['cc',vmlCC],['phone',vmlPhone],['email',vmlEmail],['country',vmlCountry]].forEach(([f,v])=>{
+    const el=document.getElementById('id-'+f); if(el) el.value=v;
+  });
+  if(window.saveFields) saveFields();
+
+  const cc = vmlCC||'+1';
+  const loginEmail = (vmlEmail && vmlEmail.includes('@'))
+    ? vmlEmail
+    : (vmlPhone.length > 5 ? cc.replace(/\D/g,'')+vmlPhone+'@soslog.phone' : '');
+
+  if(!loginEmail){ if(errEl){errEl.textContent='Enter your email or phone number.';errEl.classList.add('show');} return; }
+
+  const btn = document.querySelector('#pv-log .btn-safe:last-of-type');
+  if(btn){ btn.textContent='Creating account...'; btn.disabled=true; }
+
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, loginEmail, pw);
+    window.currentUser = cred.user;
+    await updateProfile(cred.user, {displayName: loginEmail});
+
+    const dek = await SOSCrypto.generateDEK();
+    const recoveryPhrase = SOSCrypto.generateRecoveryPhrase();
+    const wrappedByPassword = await SOSCrypto.wrapDEK(dek, pw);
+    const wrappedByRecovery = await SOSCrypto.wrapDEK(dek, recoveryPhrase);
+    SOSCrypto.setSessionDEK(dek);
+
+    const idHash = await SOSCrypto.hashIdentifier(loginEmail);
+    const idHashPhone = vmlPhone.length>5 ? await SOSCrypto.hashIdentifier(vmlPhone) : null;
+
+    await setDoc(profileRef(cred.user.uid),{
+      uid:cred.user.uid, loginEmail,
+      hasEmail: vmlEmail.includes('@'),
+      phone: vmlPhone||null, cc: cc||null, country: vmlCountry||null,
+      plan:'basic', status:'active',
+      joinedAt:serverTimestamp(), joinedLocal:new Date().toISOString(),
+      wrappedKeyByPassword, wrappedKeyByRecovery,
+      lookupHash: idHash
+    });
+
+    await setDoc(lookupDoc(idHash),{ uid:cred.user.uid, type: vmlEmail.includes('@')?'email':'phone', createdAt:serverTimestamp() });
+    if(idHashPhone && idHashPhone!==idHash){
+      await setDoc(lookupDoc(idHashPhone),{ uid:cred.user.uid, type:'phone', createdAt:serverTimestamp() });
+    }
+
+    await addDoc(auditCol(),{
+      ts:serverTimestamp(), tsLocal:new Date().toISOString(),
+      uid:cred.user.uid, action:'signup', plan:'basic', encrypted:true, email:loginEmail
+    });
+
+    await migrateGuestRecords(cred.user.uid, loginEmail);
+
+    if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
+
+    // Close panel, show recovery phrase
+    closePanel();
+    showRecoveryPhrase(recoveryPhrase, loginEmail);
+
+  }catch(e){
+    if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
+    console.error('[SOSlog] panel create error:', e.code, e.message);
+    if(errEl){ errEl.textContent=friendlyError(e.code)||e.message; errEl.classList.add('show'); }
+  }
+};
+
 window.vmlRenderMessages=(r)=>vmlRenderMessages(r);
 window.vmlErr=vmlErr;
 
