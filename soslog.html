@@ -1640,10 +1640,28 @@ window.SOSCrypto = {
           <span style="color:var(--muted);font-size:0.7rem">Identifier</span><br>
           <span style="color:var(--safe);font-weight:600" id="s-id">—</span>
         </div>
-        <div style="font-size:0.8rem;color:var(--text);padding:6px 0">
-          <span style="color:var(--muted);font-size:0.7rem">Plan</span><br>
-          <span id="s-plan">Basic — 1 Year</span>
+        <div style="font-size:0.8rem;color:var(--text);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:12px;">
+          <span style="color:var(--muted);font-size:0.7rem;">Plan</span><br>
+          <span id="s-plan" style="font-weight:600;color:var(--white);">Basic — 1 Year</span>
         </div>
+
+        <!-- Subscription management -->
+        <a href="https://billing.stripe.com/p/login/4gMaEWdDD7uj1In8A5ew800" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;justify-content:space-between;
+                 background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);
+                 border-radius:10px;padding:12px 14px;text-decoration:none;margin-bottom:8px;">
+          <div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--safe);">Manage Subscription</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Cancel, upgrade, update payment method</div>
+          </div>
+          <div style="color:var(--safe);font-size:1.1rem;">→</div>
+        </a>
+
+        <div style="font-size:0.7rem;color:var(--muted);line-height:1.5;padding:0 2px;">
+          Cancellations take effect at end of billing period.<br>
+          Your records remain readable after cancellation.
+        </div>
+
       </div>
       <div class="warn-zone">
         <div class="zone-title" style="color:var(--warn)">Deactivate Account</div>
