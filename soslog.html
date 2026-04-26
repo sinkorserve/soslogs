@@ -3491,7 +3491,7 @@ window.exportAdminReport=async function(){
 
 // ── PLANS ──
 const PLANS={
-  us:[{name:'Basic',years:1,price:'$4.99',stripe:'https://buy.stripe.com/4gMaEWdDD7uj1In8A5ew800'},{name:'Standard',years:2,price:'$8.99'},{name:'Extended',years:4,price:'$14.99'},{name:'Archive',years:8,price:'$22.99'}],
+  us:[{name:'Basic',years:1,price:'$4.99',stripe:'https://buy.stripe.com/4gMaEWdDD7uj1In8A5ew800'},{name:'Standard',years:2,price:'$8.99',soon:true},{name:'Extended',years:4,price:'$14.99',soon:true},{name:'Archive',years:8,price:'$22.99',soon:true}],
   t1:[{name:'Basic',years:1,price:'$4.99'},{name:'Standard',years:2,price:'$8.99'}],
   t2:[{name:'Basic',years:1,price:'$1.99'},{name:'Standard',years:2,price:'$3.99'}],
   t3:[{name:'Basic',years:1,price:'$0.99'},{name:'Standard',years:2,price:'$1.99'}],
@@ -3508,7 +3508,8 @@ window.renderPanelPlans=function(){
       </div>
       <div class="plan-detail">${p.years<1?Math.round(p.years*12)+' months':p.years+(p.years===1?' year':' years')} retention · Unlimited logs · Search &amp; export</div>
       <button class="btn ${p.free?'btn-warn':'btn-outline-danger'} btn-sm btn-full"
-        onclick="${p.stripe?`window.open('${p.stripe}','_blank')`:`toast('Coming soon.','info')`}">
+        onclick="${p.stripe?`window.open('${p.stripe}','_blank')`:`toast('Coming soon — check back shortly!','info')`}"
+        style="${p.soon?'opacity:0.6;cursor:default;':''}">
         ${p.free?'Free — Create Account':'Subscribe — '+p.price+'/mo'}
       </button>
     </div>`).join('');
