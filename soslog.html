@@ -1807,6 +1807,19 @@ window.SOSCrypto = {
       </div>
       <div id="panel-messages" style="flex:1;overflow-y:auto;padding:0 20px;"></div>
 
+      <!-- Test mode: quick delete -->
+      <div id="panel-quick-delete" style="display:none;padding:10px 20px;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="panel-del-confirm" placeholder="Type DELETE to confirm"
+            style="flex:1;background:var(--dark);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:0.8rem;outline:none;">
+          <button onclick="panelDeleteAccount()" class="btn btn-sm"
+            style="background:var(--danger2);color:#fff;font-weight:700;flex-shrink:0;">
+            🗑 Delete Account
+          </button>
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">🧪 Test mode only — wipes all records and Firebase Auth</div>
+      </div>
+
       <!-- Share section -->
       <div id="panel-share-section" style="display:none;padding:14px 20px;border-top:1px solid var(--border);background:var(--card2);">
         <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Share via Email</div>
@@ -2128,7 +2141,7 @@ async function loadProfile(){
     const p=snap.exists()?snap.data():{};
     document.getElementById('s-id').textContent=currentUser.email||p.identifier||'—';
     document.getElementById('s-plan').textContent=(p.plan||'Basic')+' — 1 Year';
-    if(isAdmin||isTestUser) document.getElementById('test-del-zone').style.display='block';
+    if(!IS_PROD) document.getElementById('test-del-zone').style.display='block';
     if(isAdmin){document.getElementById('pnav-admin').style.display='inline-block';document.getElementById('pnav-le').style.display='inline-block';}
   }catch(e){}
 }
@@ -3192,6 +3205,10 @@ window.panelSubmitPassword = async function(){
     _vmlVerified = true;
     if(btn){ btn.textContent='View My Log →'; btn.disabled=false; }
 
+    // Show quick delete in test mode
+    const qdel=document.getElementById('panel-quick-delete');
+    if(qdel&&!IS_PROD) qdel.style.display='block';
+
     // Hide gate, show records
     const gate = document.getElementById('panel-pw-gate');
     const logView = document.getElementById('panel-log-view');
@@ -3325,6 +3342,48 @@ window.panelForgotPw = async function(){
 };
 
 window.vmlCreateAccount=vmlCreateAccount;
+
+// ── PANEL QUICK DELETE (test mode only) ──
+window.panelDeleteAccount = async function(){
+  if(IS_PROD){ toast('Deletion disabled in production.','err'); return; }
+  const confirm = (document.getElementById('panel-del-confirm')||{value:''}).value.trim();
+  if(confirm !== 'DELETE'){ toast('Type DELETE to confirm.','err'); return; }
+  if(!currentUser){ toast('Not logged in.','err'); return; }
+  try{
+    // Delete all records
+    const snap = await getDocs(userCol(currentUser.uid));
+    if(snap.docs.length > 0){
+      const batch = writeBatch(db);
+      snap.docs.forEach(d=>batch.delete(d.ref));
+      await batch.commit();
+    }
+    // Delete profile
+    try{ await deleteDoc(profileRef(currentUser.uid)); }catch(e){}
+    // Delete lookup entries
+    try{
+      const prof = await getDoc(profileRef(currentUser.uid));
+      if(prof.exists()&&prof.data().lookupHash){
+        await deleteDoc(lookupDoc(prof.data().lookupHash));
+      }
+    }catch(e){}
+    // Audit log
+    await addDoc(auditCol(),{
+      ts:serverTimestamp(), tsLocal:new Date().toISOString(),
+      uid:currentUser.uid, email:currentUser.email,
+      action:'account_deleted_test'
+    });
+    // Delete Firebase Auth user
+    await deleteUser(auth.currentUser);
+    toast('Account deleted. You can re-register now.','ok');
+    setTimeout(()=>location.reload(), 1500);
+  }catch(e){
+    if(e.code==='auth/requires-recent-login')
+      toast('Session expired — log out, log back in, then delete.','err');
+    else
+      toast('Error: '+e.message,'err');
+  }
+};
+
 
 // ── PANEL CREATE ACCOUNT ──
 window.panelCreateAccount = async function(){
@@ -3525,7 +3584,7 @@ window.openDel=function(){
   gb.style.display=gb.style.display==='none'?'block':'none';
 };
 window.doDeleteAccount=async function(){
-  if(IS_PROD||(!isAdmin&&!isTestUser)){toast('Not available.','err');return;}
+  if(IS_PROD){toast('Deletion disabled in production.','err');return;}
   if(document.getElementById('del-confirm').value.trim()!=='DELETE'){toast('Type DELETE to confirm.','err');return;}
   try{
     const snap=await getDocs(userCol(currentUser.uid));
