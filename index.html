@@ -1,15 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<style>
+/* Prevent white flash on load — dark mode by default */
+html,body{background:#0a0c0e !important;}
+html[data-theme="light"],html[data-theme="light"] body{background:#f0f2f5 !important;}
+</style>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SOSlog — Steps · Output · Sleep</title>
-<meta name="description" content="SOSlog — Your personal Steps, Output & Sleep fitness tracker. Log workouts, monitor performance, track sleep quality.">
+<meta name="description" content="SOSlog — Secure, private safety log for law enforcement and HR documentation. Timestamped, encrypted incident logging.">
+<meta name="keywords" content="safety log, harassment documentation, workplace harassment, law enforcement log, incident log, encrypted diary, HR documentation">
 <meta name="robots" content="index, follow">
+<meta name="author" content="SOSlog">
 <link rel="canonical" href="https://www.soslog.org">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.soslog.org">
+<meta property="og:title" content="SOSlog — Private Safety & Incident Logger">
+<meta property="og:description" content="Securely document workplace harassment and personal safety incidents. Timestamped encrypted records ready for law enforcement or HR.">
+<meta property="og:site_name" content="SOSlog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SOSlog — Private Safety & Incident Logger">
+<meta name="twitter:description" content="Securely document workplace harassment and personal safety incidents. Timestamped encrypted records ready for law enforcement or HR.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"SOSlog","url":"https://www.soslog.org","description":"Secure private safety log for documenting workplace harassment and personal safety incidents with encrypted timestamped records.","applicationCategory":"SecurityApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"4.99","priceCurrency":"USD"},"creator":{"@type":"Organization","name":"SOSlog","url":"https://www.soslog.org","email":"support@soslog.org"}}</script>
 <style>
 :root {
   --black:#0a0c0e; --dark:#111518; --card:#161c21; --card2:#1b242c;
@@ -1403,10 +1419,10 @@ window.SOSCrypto = {
         <div class="pfield">
           <label style="font-size:0.65rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);">Confirm Password <span style="color:rgba(230,62,47,0.7);">*</span></label>
           <input type="password" id="vml-newpw2" placeholder="Repeat password"
-            onkeydown="if(event.key==='Enter')vmlCreateAccount()"
+            onkeydown="if(event.key==='Enter')window.vmlCreateAccount&&window.vmlCreateAccount()"
             class="bar-input" style="width:100%;margin-top:4px;">
         </div>
-        <button class="btn btn-safe" style="width:100%;margin-top:8px;" onclick="vmlCreateAccount()">Create Account &amp; Secure My Log</button>
+        <button class="btn btn-safe" style="width:100%;margin-top:8px;" onclick="window.vmlCreateAccount&&window.vmlCreateAccount()">Create Account &amp; Secure My Log</button>
       </div>
     </div>
 
@@ -1782,7 +1798,7 @@ window.SOSCrypto = {
             onkeydown="if(event.key==='Enter')window.vmlCreateAccount&&vmlCreateAccount()">
         </div>
 
-        <button onclick="window.panelCreateAccount&&panelCreateAccount()" class="btn btn-safe" style="width:100%;padding:11px;">
+        <button onclick="if(window.panelCreateAccount){window.panelCreateAccount();}else{var e=document.getElementById('panel-pw-err');if(e){e.textContent='Still loading — please try again in a moment.';e.classList.add('show');}}" class="btn btn-safe" style="width:100%;padding:11px;">
           Create Account &amp; Secure My Log
         </button>
       </div>
@@ -3342,6 +3358,7 @@ window.panelForgotPw = async function(){
 };
 
 window.vmlCreateAccount=vmlCreateAccount;
+window.panelCreateAccount=panelCreateAccount;
 
 // ── PANEL QUICK DELETE (test mode only) ──
 window.panelDeleteAccount = async function(){
@@ -3714,13 +3731,15 @@ function toggleTheme(){
 }
 (function(){
   const saved=localStorage.getItem('soslog-theme');
-  if(saved==='light'){
-    document.documentElement.setAttribute('data-theme','light');
-    document.addEventListener('DOMContentLoaded',()=>{
-      const b=document.getElementById('theme-btn');if(b)b.textContent='☀️';
-      const lb=document.getElementById('nav-login-btn');if(lb)lb.style.display='flex';
-        });
-  }
+  // Always dark unless user explicitly chose light
+  const theme = saved==='light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.addEventListener('DOMContentLoaded',()=>{
+    const b=document.getElementById('theme-btn');
+    if(b) b.textContent = theme==='light' ? '☀️' : '🌙';
+    const lb=document.getElementById('nav-login-btn');
+    if(lb) lb.style.display='flex';
+  });
 })();
 
 // Safe stubs in case module hasn't loaded yet
