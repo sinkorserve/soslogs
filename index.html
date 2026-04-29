@@ -3271,10 +3271,19 @@ window.panelSubmitPassword = async function(){
     const qdel=document.getElementById('panel-quick-delete');
     if(qdel&&!IS_PROD) qdel.style.display='block';
 
-    // Hide gate, show records
+    // Hide entire gate — both login and signup sections
     const gate = document.getElementById('panel-pw-gate');
-    const logView = document.getElementById('panel-log-view');
     if(gate) gate.style.display='none';
+
+    // Clear signup fields so they don't show stale data if panel reopens
+    ['panel-vml-cc','panel-vml-phone','panel-vml-email','panel-vml-country',
+     'panel-vml-newpw','panel-vml-newpw2'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value=id==='panel-vml-cc'?'+1':'';
+    });
+
+    // Show records
+    const logView = document.getElementById('panel-log-view');
     if(logView) logView.style.display='flex';
 
     await panelFilter('all', document.querySelector('#pv-log .tpill'));
@@ -3516,16 +3525,22 @@ window.panelCreateAccount = async function(){
 
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
 
-    // Show success in panel, then recovery phrase
+    // ── HIDE ENTIRE GATE (login + signup) — show only records view ──
     const gate=document.getElementById('panel-pw-gate');
     if(gate) gate.style.display='none';
+
+    // Clear any prefilled email from signup fields so it doesn't pollute login
+    const panelIdField=document.getElementById('panel-id-field');
+    if(panelIdField) panelIdField.value='';
+
+    // Show records view
     const logView=document.getElementById('panel-log-view');
     if(logView) logView.style.display='flex';
 
-    // Show recovery phrase overlay
+    // Show recovery phrase overlay AFTER panel transition
     if(window.showRecoveryPhrase) showRecoveryPhrase(recoveryPhrase, loginEmail);
 
-    // Load records (empty for new user)
+    // Load records (empty for new user — just shows "No records")
     await panelFilter('all', document.querySelector('#pv-log .tpill'));
 
   }catch(e){
