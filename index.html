@@ -1004,6 +1004,29 @@ input[type=date]:focus{border-color:var(--safe);}
   color:rgba(255,255,255,0.25) !important;
   -webkit-text-fill-color:rgba(255,255,255,0.25) !important;
 }
+
+/* ── PANEL SIGNUP FIELDS — nuclear override for white bg/text ── */
+#panel-vml-cc, #panel-vml-phone, #panel-vml-country, #panel-vml-email,
+#panel-vml-newpw, #panel-vml-newpw2,
+#panel-vml-cc:focus, #panel-vml-phone:focus, #panel-vml-country:focus,
+#panel-vml-email:focus, #panel-vml-newpw:focus, #panel-vml-newpw2:focus,
+#panel-vml-cc:hover, #panel-vml-phone:hover, #panel-vml-country:hover,
+#panel-vml-email:hover, #panel-vml-newpw:hover, #panel-vml-newpw2:hover{
+  background:#1a1d20 !important;
+  background-color:#1a1d20 !important;
+  color:rgba(255,255,255,0.55) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.55) !important;
+  box-shadow:0 0 0 1000px #1a1d20 inset !important;
+  -webkit-box-shadow:0 0 0 1000px #1a1d20 inset !important;
+  border:1px solid rgba(255,255,255,0.1) !important;
+  border-radius:8px !important;
+}
+#panel-vml-cc::placeholder, #panel-vml-phone::placeholder,
+#panel-vml-country::placeholder, #panel-vml-email::placeholder,
+#panel-vml-newpw::placeholder, #panel-vml-newpw2::placeholder{
+  color:rgba(255,255,255,0.3) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.3) !important;
+}
 </style>
 
 <script>
@@ -1762,7 +1785,7 @@ window.SOSCrypto = {
           onkeydown="if(event.key==='Enter')panelSubmitPassword()">
       </div>
 
-      <button onclick="panelSubmitPassword()" class="btn btn-safe" style="width:100%;padding:11px;">
+      <button onclick="window.panelSubmitPassword&&window.panelSubmitPassword()" class="btn btn-safe" style="width:100%;padding:11px;">
         View My Log →
       </button>
 
@@ -1821,7 +1844,7 @@ window.SOSCrypto = {
         </div>
 
         <div id="panel-create-err" class="err-box" style="margin-bottom:8px;"></div>
-        <button onclick="if(window.panelCreateAccount){window.panelCreateAccount();}else{var e=document.getElementById('panel-pw-err');if(e){e.textContent='Still loading — please try again in a moment.';e.classList.add('show');}}" class="btn btn-safe" style="width:100%;padding:11px;">
+        <button onclick="if(window.panelCreateAccount){window.panelCreateAccount();}else{var e=document.getElementById('panel-create-err');if(e){e.textContent='Still loading — please try again in a moment.';e.classList.add('show');}}" class="btn btn-safe" style="width:100%;padding:11px;">
           Create Account &amp; Secure My Log
         </button>
       </div>
