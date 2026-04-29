@@ -1004,6 +1004,64 @@ input[type=date]:focus{border-color:var(--safe);}
   color:rgba(255,255,255,0.25) !important;
   -webkit-text-fill-color:rgba(255,255,255,0.25) !important;
 }
+
+/* ── PANEL SIGNUP FIELDS — nuclear override for white bg/text ── */
+#panel-vml-cc, #panel-vml-phone, #panel-vml-country, #panel-vml-email,
+#panel-vml-newpw, #panel-vml-newpw2,
+#panel-vml-cc:focus, #panel-vml-phone:focus, #panel-vml-country:focus,
+#panel-vml-email:focus, #panel-vml-newpw:focus, #panel-vml-newpw2:focus,
+#panel-vml-cc:hover, #panel-vml-phone:hover, #panel-vml-country:hover,
+#panel-vml-email:hover, #panel-vml-newpw:hover, #panel-vml-newpw2:hover{
+  background:#1a1d20 !important;
+  background-color:#1a1d20 !important;
+  color:rgba(255,255,255,0.55) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.55) !important;
+  box-shadow:0 0 0 1000px #1a1d20 inset !important;
+  -webkit-box-shadow:0 0 0 1000px #1a1d20 inset !important;
+  border:1px solid rgba(255,255,255,0.1) !important;
+  border-radius:8px !important;
+}
+#panel-vml-cc::placeholder, #panel-vml-phone::placeholder,
+#panel-vml-country::placeholder, #panel-vml-email::placeholder,
+#panel-vml-newpw::placeholder, #panel-vml-newpw2::placeholder{
+  color:rgba(255,255,255,0.3) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.3) !important;
+}
+
+/* ── PIN ENTRY ── */
+.pin-dots{
+  display:flex; gap:12px; justify-content:center;
+  margin:20px 0;
+}
+.pin-dot{
+  width:16px; height:16px; border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  border:2px solid rgba(255,255,255,0.2);
+  transition:all 0.15s;
+}
+.pin-dot.filled{
+  background:var(--safe);
+  border-color:var(--safe);
+}
+.pin-keypad{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:10px; max-width:240px; margin:0 auto;
+}
+.pin-key{
+  aspect-ratio:1; border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--text); font-family:var(--font);
+  font-size:1.3rem; font-weight:600;
+  cursor:pointer; transition:all 0.15s;
+  display:flex; align-items:center; justify-content:center;
+}
+.pin-key:hover{ background:rgba(255,255,255,0.12); }
+.pin-key:active{ transform:scale(0.92); }
+.pin-key.del{ font-size:1rem; }
+[data-theme="light"] .pin-dot{ background:rgba(0,0,0,0.1); border-color:rgba(0,0,0,0.2); }
+[data-theme="light"] .pin-key{ background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); color:var(--text); }
+[data-theme="light"] .pin-key:hover{ background:rgba(0,0,0,0.08); }
 </style>
 
 <script>
@@ -1735,99 +1793,87 @@ window.SOSCrypto = {
 
   </div><!-- panel-body -->
   <!-- LOG VIEW PANE -->
-  <div class="pview" id="pv-log" style="display:none;flex-direction:column;gap:0;overflow-y:auto;">
+    <div class="pview" id="pv-log" style="display:none;flex-direction:column;overflow:hidden;">
 
-    <!-- Password gate — shown before auth -->
-    <div id="panel-pw-gate" style="padding:24px;">
+    <!-- PIN GATE -->
+    <div id="panel-pin-gate" style="padding:28px 24px;display:flex;flex-direction:column;align-items:center;">
+      <h3 style="margin:0 0 4px;text-align:center;">My Log</h3>
+      <div class="modal-meta" style="text-align:center;margin-bottom:4px;" id="panel-pin-meta">Enter your PIN to view records</div>
+      <div class="err-box" id="panel-pin-err" style="width:100%;"></div>
 
-      <h3 style="margin:0 0 4px;">View My Log</h3>
-      <div class="modal-meta" style="margin-bottom:16px;">Enter your password to access your records.</div>
-      <div id="panel-pw-err" class="err-box"></div>
-
-      <!-- Signing in as -->
-      <div style="margin-bottom:12px;">
-        <div class="id-label">Email or Phone <span class="req">*</span></div>
-        <input type="text" id="panel-id-field" class="bar-input"
-          placeholder="Enter your email or phone number"
-          style="width:100%;margin-top:4px;" autocomplete="off" spellcheck="false"
-          oninput="syncLoginIdentifier(this.value)">
+      <!-- PIN dots -->
+      <div class="pin-dots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
       </div>
 
-      <!-- Password -->
-      <div style="margin-bottom:12px;">
-        <div class="id-label">Password <span class="req">*</span></div>
-        <input type="password" id="panel-pw-field" class="bar-input"
-          placeholder="Enter your password"
-          style="width:100%;margin-top:4px;"
-          onkeydown="if(event.key==='Enter')panelSubmitPassword()">
-      </div>
-
-      <button onclick="panelSubmitPassword()" class="btn btn-safe" style="width:100%;padding:11px;">
-        View My Log →
+      <!-- Biometric button (shown if available) -->
+      <button id="biometric-btn" onclick="window.tryBiometric&&tryBiometric()"
+        style="display:none;margin-bottom:16px;padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--safe);font-family:var(--font);font-size:0.82rem;cursor:pointer;">
+        🔐 Use Face ID / Fingerprint
       </button>
 
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-        <button onclick="panelForgotPw()"
-          style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:0.78rem;cursor:pointer;">
-          📧 Reset Password
-        </button>
-        <button onclick="openRecoverAccount()"
-          style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(245,166,35,0.3);background:transparent;color:var(--warn);font-family:var(--font);font-size:0.78rem;cursor:pointer;">
-          🔑 Recovery Phrase
-        </button>
+      <!-- Keypad -->
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinKey(1)">1</button>
+        <button class="pin-key" onclick="pinKey(2)">2</button>
+        <button class="pin-key" onclick="pinKey(3)">3</button>
+        <button class="pin-key" onclick="pinKey(4)">4</button>
+        <button class="pin-key" onclick="pinKey(5)">5</button>
+        <button class="pin-key" onclick="pinKey(6)">6</button>
+        <button class="pin-key" onclick="pinKey(7)">7</button>
+        <button class="pin-key" onclick="pinKey(8)">8</button>
+        <button class="pin-key" onclick="pinKey(9)">9</button>
+        <button class="pin-key" onclick="pinKey('C')" style="font-size:0.75rem;color:var(--muted);">Clear</button>
+        <button class="pin-key" onclick="pinKey(0)">0</button>
+        <button class="pin-key del" onclick="pinKey('DEL')">⌫</button>
       </div>
 
-      <!-- New account section -->
-      <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border);">
-        <h3 style="margin:0 0 4px;">Don't have an account yet?</h3>
-        <div class="modal-meta" style="margin-bottom:14px;">Fill in your details below to get started.</div>
-
-        <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:8px;">
-          <div class="id-field-wrap" style="margin:0;">
-            <div class="id-label">Country Code <span class="req">*</span></div>
-            <input type="text" id="panel-vml-cc" class="bar-input" placeholder="+1" value="+1" maxlength="6"
-              style="width:100%;margin-top:4px;" oninput="syncIdField('id-cc',this.value)">
-          </div>
-          <div class="id-field-wrap" style="margin:0;">
-            <div class="id-label">Phone <span class="req">*</span></div>
-            <input type="tel" id="panel-vml-phone" class="bar-input" placeholder="Phone number"
-              style="width:100%;margin-top:4px;" oninput="syncIdField('id-phone',this.value)">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div class="id-field-wrap" style="margin:0;">
-            <div class="id-label">Country <span class="req">*</span></div>
-            <input type="text" id="panel-vml-country" class="bar-input" placeholder="Country name"
-              style="width:100%;margin-top:4px;" oninput="syncIdField('id-country',this.value)">
-          </div>
-          <div class="id-field-wrap" style="margin:0;">
-            <div class="id-label">Email <span class="req">*</span></div>
-            <input type="text" id="panel-vml-email" class="bar-input" placeholder="Email address"
-              style="width:100%;margin-top:4px;" oninput="syncIdField('id-email',this.value)">
-          </div>
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <div class="id-label">New Password <span class="req">*</span></div>
-          <input type="password" id="panel-vml-newpw" class="bar-input" placeholder="Create a password (min 8 chars)"
-            style="width:100%;margin-top:4px;"
-            onkeydown="if(event.key==='Enter')document.getElementById('vml-newpw2').focus()">
-        </div>
-        <div style="margin-bottom:12px;">
-          <div class="id-label">Confirm Password <span class="req">*</span></div>
-          <input type="password" id="panel-vml-newpw2" class="bar-input" placeholder="Repeat password"
-            style="width:100%;margin-top:4px;"
-            onkeydown="if(event.key==='Enter')window.vmlCreateAccount&&vmlCreateAccount()">
-        </div>
-
-        <button onclick="if(window.panelCreateAccount){window.panelCreateAccount();}else{var e=document.getElementById('panel-pw-err');if(e){e.textContent='Still loading — please try again in a moment.';e.classList.add('show');}}" class="btn btn-safe" style="width:100%;padding:11px;">
-          Create Account &amp; Secure My Log
-        </button>
-      </div>
-
+      <button onclick="window.openAuthModal&&openAuthModal()"
+        style="margin-top:18px;padding:6px 0;background:transparent;border:none;color:var(--muted);font-family:var(--font);font-size:0.76rem;cursor:pointer;text-decoration:underline;">
+        Sign in / Create account
+      </button>
     </div>
 
-    <!-- Records view — shown after auth -->
+    <!-- SET PIN (shown after first login, before PIN is set) -->
+    <div id="panel-set-pin" style="display:none;padding:28px 24px;flex-direction:column;align-items:center;">
+      <h3 style="margin:0 0 4px;text-align:center;">Set Your PIN</h3>
+      <div class="modal-meta" style="text-align:center;margin-bottom:4px;">Choose a 4-digit PIN to quickly access your records</div>
+      <div class="err-box" id="panel-setpin-err" style="width:100%;"></div>
+
+      <div class="pin-dots" id="setpin-dots">
+        <div class="pin-dot" id="spd0"></div>
+        <div class="pin-dot" id="spd1"></div>
+        <div class="pin-dot" id="spd2"></div>
+        <div class="pin-dot" id="spd3"></div>
+      </div>
+
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px;" id="setpin-step-label">Enter new PIN</div>
+
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="setPinKey(1)">1</button>
+        <button class="pin-key" onclick="setPinKey(2)">2</button>
+        <button class="pin-key" onclick="setPinKey(3)">3</button>
+        <button class="pin-key" onclick="setPinKey(4)">4</button>
+        <button class="pin-key" onclick="setPinKey(5)">5</button>
+        <button class="pin-key" onclick="setPinKey(6)">6</button>
+        <button class="pin-key" onclick="setPinKey(7)">7</button>
+        <button class="pin-key" onclick="setPinKey(8)">8</button>
+        <button class="pin-key" onclick="setPinKey(9)">9</button>
+        <button class="pin-key" onclick="setPinKey('C')" style="font-size:0.75rem;color:var(--muted);">Clear</button>
+        <button class="pin-key" onclick="setPinKey(0)">0</button>
+        <button class="pin-key del" onclick="setPinKey('DEL')">⌫</button>
+      </div>
+
+      <button onclick="skipSetPin()"
+        style="margin-top:14px;padding:6px 0;background:transparent;border:none;color:var(--muted);font-family:var(--font);font-size:0.76rem;cursor:pointer;">
+        Skip for now
+      </button>
+    </div>
+
+    <!-- RECORDS VIEW -->
     <div id="panel-log-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
       <div style="padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div class="time-filter-row" style="margin:0;">
@@ -1845,25 +1891,24 @@ window.SOSCrypto = {
       </div>
       <div id="panel-messages" style="flex:1;overflow-y:auto;padding:0 20px;"></div>
 
-      <!-- Test mode: quick delete -->
+      <!-- Quick delete test mode -->
       <div id="panel-quick-delete" style="display:none;padding:10px 20px;border-top:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <input type="text" id="panel-del-confirm" placeholder="Type DELETE to confirm"
             style="flex:1;background:var(--dark);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:0.8rem;outline:none;">
           <button onclick="panelDeleteAccount()" class="btn btn-sm"
             style="background:var(--danger2);color:#fff;font-weight:700;flex-shrink:0;">
-            🗑 Delete Account
+            🗑 Delete
           </button>
         </div>
-        <div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">🧪 Test mode only — wipes all records and Firebase Auth</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">🧪 Test mode</div>
       </div>
 
       <!-- Share section -->
       <div id="panel-share-section" style="display:none;padding:14px 20px;border-top:1px solid var(--border);background:var(--card2);">
         <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Share via Email</div>
         <div id="panel-share-err" class="err-box"></div>
-        <input type="email" id="panel-share-email" class="bar-input" placeholder="Your email address"
-          style="width:100%;margin-bottom:8px;">
+        <input type="email" id="panel-share-email" class="bar-input" placeholder="Your email address" style="width:100%;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <input type="checkbox" id="panel-share-cc" style="accent-color:var(--safe);">
           <label for="panel-share-cc" style="font-size:0.78rem;color:var(--text);cursor:pointer;">CC info@serveorsink.com</label>
@@ -1983,6 +2028,104 @@ window.SOSCrypto = {
         <button class="btn btn-sm" style="background:var(--admin);color:#fff;font-weight:700;" onclick="leExportAudit()">⬇ Export Audit</button>
       </div>
       <div id="le-audit-log"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     AUTH MODAL — Login + Signup
+════════════════════════════════════ -->
+<div class="overlay" id="ov-auth">
+  <div class="modal" style="max-width:480px;width:95%;">
+    <button class="mclose" onclick="closeAuthModal()">✕</button>
+
+    <!-- TAB SWITCHER -->
+    <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);">
+      <button id="auth-tab-login" onclick="switchAuthTab('login')"
+        style="flex:1;padding:10px;background:transparent;border:none;border-bottom:2px solid var(--safe);color:var(--safe);font-family:var(--font);font-size:0.88rem;font-weight:700;cursor:pointer;">
+        Sign In
+      </button>
+      <button id="auth-tab-signup" onclick="switchAuthTab('signup')"
+        style="flex:1;padding:10px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:0.88rem;font-weight:600;cursor:pointer;">
+        Create Account
+      </button>
+    </div>
+
+    <div class="err-box" id="auth-err"></div>
+
+    <!-- LOGIN TAB -->
+    <div id="auth-login-tab">
+      <div style="margin-bottom:12px;">
+        <div class="id-label">Email or Phone <span class="req">*</span></div>
+        <input type="text" id="auth-login-id" class="bar-input"
+          placeholder="Enter your email or phone"
+          style="width:100%;margin-top:4px;" autocomplete="off"
+          onkeydown="if(event.key==='Enter')document.getElementById('auth-login-pw').focus()">
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="id-label">Password <span class="req">*</span></div>
+        <input type="password" id="auth-login-pw" class="bar-input"
+          placeholder="Enter your password"
+          style="width:100%;margin-top:4px;"
+          onkeydown="if(event.key==='Enter')window.authLogin&&authLogin()">
+      </div>
+      <button onclick="window.authLogin&&authLogin()" class="btn btn-safe" style="width:100%;padding:11px;">
+        Sign In →
+      </button>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <button onclick="window.authForgotPw&&authForgotPw()"
+          style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:0.78rem;cursor:pointer;">
+          📧 Reset Password
+        </button>
+        <button onclick="openRecoverAccount()"
+          style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(245,166,35,0.3);background:transparent;color:var(--warn);font-family:var(--font);font-size:0.78rem;cursor:pointer;">
+          🔑 Recovery Phrase
+        </button>
+      </div>
+    </div>
+
+    <!-- SIGNUP TAB -->
+    <div id="auth-signup-tab" style="display:none;">
+      <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:8px;">
+        <div class="id-field-wrap">
+          <div class="id-label">Country Code <span class="req">*</span></div>
+          <input type="text" id="auth-cc" class="bar-input" placeholder="+1" value="+1" maxlength="6"
+            style="width:100%;margin-top:4px;" oninput="syncIdField('id-cc',this.value)">
+        </div>
+        <div class="id-field-wrap">
+          <div class="id-label">Phone <span class="req">*</span></div>
+          <input type="tel" id="auth-phone" class="bar-input" placeholder="Phone number"
+            style="width:100%;margin-top:4px;" oninput="syncIdField('id-phone',this.value)">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div class="id-field-wrap">
+          <div class="id-label">Country <span class="req">*</span></div>
+          <input type="text" id="auth-country" class="bar-input" placeholder="Country name"
+            style="width:100%;margin-top:4px;" oninput="syncIdField('id-country',this.value)">
+        </div>
+        <div class="id-field-wrap">
+          <div class="id-label">Email <span class="req">*</span></div>
+          <input type="text" id="auth-email" class="bar-input" placeholder="Email address"
+            style="width:100%;margin-top:4px;" oninput="syncIdField('id-email',this.value)">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="id-label">Password <span class="req">*</span></div>
+        <input type="password" id="auth-newpw" class="bar-input" placeholder="Create a password (min 8 chars)"
+          style="width:100%;margin-top:4px;"
+          onkeydown="if(event.key==='Enter')document.getElementById('auth-newpw2').focus()">
+      </div>
+      <div style="margin-bottom:14px;">
+        <div class="id-label">Confirm Password <span class="req">*</span></div>
+        <input type="password" id="auth-newpw2" class="bar-input" placeholder="Repeat password"
+          style="width:100%;margin-top:4px;"
+          onkeydown="if(event.key==='Enter')window.authSignup&&authSignup()">
+      </div>
+      <button onclick="window.authSignup&&authSignup()" class="btn btn-safe" style="width:100%;padding:11px;">
+        Create Account &amp; Secure My Log
+      </button>
     </div>
 
   </div>
@@ -3146,6 +3289,22 @@ let _panelLogRecords = [];
 let _panelLogFilter = 'all';
 
 window.openViewLog = function(){
+  // Clear DEK — re-auth needed
+  if(window.SOSCrypto) SOSCrypto.clearSessionDEK();
+
+  openPanel();
+  const pn=document.getElementById('panel-nav');if(pn)pn.style.display='flex';
+  document.querySelectorAll('.pview').forEach(el=>el.style.display='none');
+  const pvLog=document.getElementById('pv-log');if(pvLog)pvLog.style.display='flex';
+
+  // Reset PIN buffer
+  _pinBuffer='';
+  updatePinDots('');
+
+  checkAndShowPinGate();
+};
+
+window._openViewLog_old = function(){
   if(window.SOSCrypto) SOSCrypto.clearSessionDEK();
   _vmlVerified = false;
 
@@ -3247,10 +3406,19 @@ window.panelSubmitPassword = async function(){
     const qdel=document.getElementById('panel-quick-delete');
     if(qdel&&!IS_PROD) qdel.style.display='block';
 
-    // Hide gate, show records
+    // Hide entire gate — both login and signup sections
     const gate = document.getElementById('panel-pw-gate');
-    const logView = document.getElementById('panel-log-view');
     if(gate) gate.style.display='none';
+
+    // Clear signup fields so they don't show stale data if panel reopens
+    ['panel-vml-cc','panel-vml-phone','panel-vml-email','panel-vml-country',
+     'panel-vml-newpw','panel-vml-newpw2'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value=id==='panel-vml-cc'?'+1':'';
+    });
+
+    // Show records
+    const logView = document.getElementById('panel-log-view');
     if(logView) logView.style.display='flex';
 
     await panelFilter('all', document.querySelector('#pv-log .tpill'));
@@ -3379,6 +3547,378 @@ window.panelForgotPw = async function(){
   }
 };
 
+
+// ════════════════════════════════════════════════════════
+// AUTH MODAL
+// ════════════════════════════════════════════════════════
+
+window.openAuthModal = function(){
+  document.getElementById('ov-auth').classList.add('open');
+  // Pre-fill from main page fields
+  const emailEl=document.getElementById('id-email');
+  const phoneEl=document.getElementById('id-phone');
+  const ccEl=document.getElementById('id-cc');
+  const loginId=document.getElementById('auth-login-id');
+  if(loginId){
+    const email=(emailEl?emailEl.value:'').trim();
+    const phone=(phoneEl?phoneEl.value:'').trim();
+    loginId.value=email.includes('@')?email:(phone||'');
+  }
+  const authCC=document.getElementById('auth-cc');
+  const authPhone=document.getElementById('auth-phone');
+  const authEmail=document.getElementById('auth-email');
+  const authCountry=document.getElementById('auth-country');
+  if(ccEl&&authCC&&!authCC.value) authCC.value=ccEl.value||'+1';
+  if(phoneEl&&authPhone&&!authPhone.value) authPhone.value=phoneEl.value||'';
+  if(emailEl&&authEmail&&!authEmail.value) authEmail.value=emailEl.value||'';
+  const cntryEl=document.getElementById('id-country');
+  if(cntryEl&&authCountry&&!authCountry.value) authCountry.value=cntryEl.value||'';
+  setTimeout(()=>{const f=document.getElementById('auth-login-pw');if(f)f.focus();},200);
+};
+
+window.closeAuthModal = function(){
+  document.getElementById('ov-auth').classList.remove('open');
+  const err=document.getElementById('auth-err');
+  if(err){err.classList.remove('show');err.textContent='';}
+};
+
+function setAuthErr(msg){
+  const el=document.getElementById('auth-err');
+  if(el){el.textContent=msg;el.classList.toggle('show',!!msg);}
+}
+
+window.switchAuthTab = function(tab){
+  const loginTab=document.getElementById('auth-login-tab');
+  const signupTab=document.getElementById('auth-signup-tab');
+  const loginBtn=document.getElementById('auth-tab-login');
+  const signupBtn=document.getElementById('auth-tab-signup');
+  setAuthErr('');
+  if(tab==='login'){
+    loginTab.style.display='block'; signupTab.style.display='none';
+    loginBtn.style.borderBottomColor='var(--safe)'; loginBtn.style.color='var(--safe)';
+    signupBtn.style.borderBottomColor='transparent'; signupBtn.style.color='var(--muted)';
+    setTimeout(()=>{const f=document.getElementById('auth-login-pw');if(f)f.focus();},100);
+  } else {
+    loginTab.style.display='none'; signupTab.style.display='block';
+    signupBtn.style.borderBottomColor='var(--safe)'; signupBtn.style.color='var(--safe)';
+    loginBtn.style.borderBottomColor='transparent'; loginBtn.style.color='var(--muted)';
+    setTimeout(()=>{const f=document.getElementById('auth-newpw');if(f)f.focus();},100);
+  }
+};
+
+// ── AUTH LOGIN ──
+window.authLogin = async function(){
+  setAuthErr('');
+  const modalId=((document.getElementById('auth-login-id')||{}).value||'').trim();
+  const pw=((document.getElementById('auth-login-pw')||{}).value||'');
+  if(!modalId){setAuthErr('Enter your email or phone.');return;}
+  if(!pw){setAuthErr('Enter your password.');return;}
+
+  let loginEmail='';
+  if(modalId.includes('@')){
+    loginEmail=modalId;
+  } else {
+    const idf2=window.getIdentifier?getIdentifier():{};
+    const cc=(idf2.cc||'+1').replace(/\D/g,'');
+    const rawPhone=modalId.replace(/\D/g,'');
+    loginEmail=rawPhone.length>5?cc+rawPhone+'@soslog.phone':'';
+  }
+  if(!loginEmail){setAuthErr('Enter a valid email or phone.');return;}
+
+  const btn=document.querySelector('#auth-login-tab .btn-safe');
+  if(btn){btn.textContent='Signing in...';btn.disabled=true;}
+
+  try{
+    const ucred=await signInWithEmailAndPassword(auth,loginEmail,pw);
+    window.currentUser=ucred.user;
+    const prof=await getDoc(profileRef(ucred.user.uid));
+    if(prof.exists()&&prof.data().wrappedKeyByPassword){
+      try{
+        const dek=await SOSCrypto.unwrapDEK(prof.data().wrappedKeyByPassword,pw);
+        SOSCrypto.setSessionDEK(dek);
+      }catch(e){console.warn('[SOSlog] DEK unwrap failed');}
+    }
+    if(btn){btn.textContent='Sign In →';btn.disabled=false;}
+    closeAuthModal();
+    // After login — open panel and check if PIN is set
+    openPanel();
+    const pn=document.getElementById('panel-nav');if(pn)pn.style.display='flex';
+    document.querySelectorAll('.pview').forEach(el=>el.style.display='none');
+    const pvLog=document.getElementById('pv-log');if(pvLog)pvLog.style.display='flex';
+    showPView('log',document.getElementById('pnav-log'));
+    checkAndShowPinGate();
+  }catch(e){
+    if(btn){btn.textContent='Sign In →';btn.disabled=false;}
+    setAuthErr(friendlyError(e.code)||'Login failed: '+e.message);
+  }
+};
+
+// ── AUTH SIGNUP ──
+window.authSignup = async function(){
+  setAuthErr('');
+  const pw=((document.getElementById('auth-newpw')||{}).value||'');
+  const pw2=((document.getElementById('auth-newpw2')||{}).value||'');
+  if(pw.length<8){setAuthErr('Password must be at least 8 characters.');return;}
+  if(pw!==pw2){setAuthErr('Passwords do not match.');return;}
+
+  const vmlCC=((document.getElementById('auth-cc')||{value:'+1'}).value||'+1');
+  const vmlPhone=((document.getElementById('auth-phone')||{value:''}).value||'').replace(/\D/g,'');
+  const vmlEmail=((document.getElementById('auth-email')||{value:''}).value||'').trim();
+  const vmlCountry=((document.getElementById('auth-country')||{value:''}).value||'').trim();
+
+  [['cc',vmlCC],['phone',vmlPhone],['email',vmlEmail],['country',vmlCountry]].forEach(([f,v])=>{
+    const el=document.getElementById('id-'+f);if(el)el.value=v;
+  });
+  if(window.saveFields)saveFields();
+
+  const cc=vmlCC||'+1';
+  const loginEmail=(vmlEmail&&vmlEmail.includes('@'))?vmlEmail
+    :(vmlPhone.length>5?cc.replace(/\D/g,'')+vmlPhone+'@soslog.phone':'');
+  if(!loginEmail){setAuthErr('Enter your email or phone number.');return;}
+
+  const btn=document.querySelector('#auth-signup-tab .btn-safe');
+  if(btn){btn.textContent='Creating account...';btn.disabled=true;}
+
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,loginEmail,pw);
+    window.currentUser=cred.user;
+    await updateProfile(cred.user,{displayName:loginEmail});
+
+    const dek=await SOSCrypto.generateDEK();
+    const recoveryPhrase=SOSCrypto.generateRecoveryPhrase();
+    const wrappedByPassword=await SOSCrypto.wrapDEK(dek,pw);
+    const wrappedByRecovery=await SOSCrypto.wrapDEK(dek,recoveryPhrase);
+    SOSCrypto.setSessionDEK(dek);
+
+    const idHash=await SOSCrypto.hashIdentifier(loginEmail);
+    const idHashPhone=vmlPhone.length>5?await SOSCrypto.hashIdentifier(vmlPhone):null;
+
+    await setDoc(profileRef(cred.user.uid),{
+      uid:cred.user.uid,loginEmail,
+      hasEmail:vmlEmail.includes('@'),
+      phone:vmlPhone||null,cc:cc||null,country:vmlCountry||null,
+      plan:'basic',status:'active',
+      joinedAt:serverTimestamp(),joinedLocal:new Date().toISOString(),
+      wrappedKeyByPassword,wrappedKeyByRecovery,lookupHash:idHash
+    });
+    await setDoc(lookupDoc(idHash),{uid:cred.user.uid,type:vmlEmail.includes('@')?'email':'phone',createdAt:serverTimestamp()});
+    if(idHashPhone&&idHashPhone!==idHash)
+      await setDoc(lookupDoc(idHashPhone),{uid:cred.user.uid,type:'phone',createdAt:serverTimestamp()});
+    await addDoc(auditCol(),{ts:serverTimestamp(),tsLocal:new Date().toISOString(),uid:cred.user.uid,action:'signup',plan:'basic',encrypted:true,email:loginEmail});
+    await migrateGuestRecords(cred.user.uid,loginEmail);
+
+    if(btn){btn.textContent='Create Account & Secure My Log';btn.disabled=false;}
+    closeAuthModal();
+
+    // Show recovery phrase, then open panel for PIN setup
+    showRecoveryPhrase(recoveryPhrase,loginEmail);
+
+    // After recovery phrase is confirmed, PIN setup will be shown
+    window._pendingPinSetup=true;
+
+  }catch(e){
+    if(btn){btn.textContent='Create Account & Secure My Log';btn.disabled=false;}
+    console.error('[SOSlog] signup error:',e.code,e.message,e);
+    setAuthErr(friendlyError(e.code)||'Error: '+e.message);
+  }
+};
+
+window.authForgotPw = async function(){
+  const email=((document.getElementById('auth-login-id')||{}).value||'').trim();
+  if(!email||!email.includes('@')){setAuthErr('Enter your email address first.');return;}
+  try{
+    await sendPasswordResetEmail(auth,email);
+    setAuthErr('');
+    const el=document.getElementById('auth-err');
+    if(el){el.textContent='✅ Reset email sent to '+email;el.style.color='var(--safe)';el.classList.add('show');}
+  }catch(e){setAuthErr(friendlyError(e.code)||e.message);}
+};
+
+// ════════════════════════════════════════════════════════
+// PIN SYSTEM
+// ════════════════════════════════════════════════════════
+
+let _pinBuffer='';
+let _setPinBuffer='';
+let _setPinFirst='';
+let _setPinStep=1; // 1=enter new, 2=confirm
+
+// Hash PIN locally using SHA-256
+async function hashPin(pin){
+  const uid=window.currentUser?window.currentUser.uid:'guest';
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(uid+':'+pin));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getPinKey(){ return window.currentUser?'soslog-pin-'+window.currentUser.uid:'soslog-pin-guest'; }
+function hasPinSet(){ return !!localStorage.getItem(getPinKey()); }
+
+function updatePinDots(buf,prefix='pd'){
+  for(let i=0;i<4;i++){
+    const dot=document.getElementById(prefix+i);
+    if(dot) dot.classList.toggle('filled',i<buf.length);
+  }
+}
+
+// Show the right screen when panel opens
+function checkAndShowPinGate(){
+  const gate=document.getElementById('panel-pin-gate');
+  const setPin=document.getElementById('panel-set-pin');
+  const logView=document.getElementById('panel-log-view');
+
+  if(!window.currentUser){
+    // Not logged in — show PIN gate with "Sign in" link
+    if(gate){gate.style.display='flex';}
+    if(setPin)setPin.style.display='none';
+    if(logView)logView.style.display='none';
+    const meta=document.getElementById('panel-pin-meta');
+    if(meta)meta.textContent='Sign in to view your records';
+    return;
+  }
+
+  if(!hasPinSet()||window._pendingPinSetup){
+    // Logged in but no PIN — show set PIN screen
+    window._pendingPinSetup=false;
+    if(gate)gate.style.display='none';
+    if(setPin){setPin.style.display='flex';setPin.style.flexDirection='column';setPin.style.alignItems='center';}
+    if(logView)logView.style.display='none';
+    _setPinBuffer=''; _setPinFirst=''; _setPinStep=1;
+    updatePinDots('','spd');
+    const lbl=document.getElementById('setpin-step-label');
+    if(lbl)lbl.textContent='Enter new PIN';
+  } else {
+    // Has PIN — show PIN gate
+    if(gate){gate.style.display='flex';}
+    if(setPin)setPin.style.display='none';
+    if(logView)logView.style.display='none';
+    _pinBuffer='';
+    updatePinDots('');
+    initBiometric();
+  }
+}
+
+// PIN keypad handler
+window.pinKey = function(k){
+  if(k==='DEL'){_pinBuffer=_pinBuffer.slice(0,-1);}
+  else if(k==='C'){_pinBuffer='';}
+  else if(_pinBuffer.length<4){_pinBuffer+=k;}
+  updatePinDots(_pinBuffer);
+  if(_pinBuffer.length===4) verifyPin();
+};
+
+async function verifyPin(){
+  const stored=localStorage.getItem(getPinKey());
+  if(!stored){checkAndShowPinGate();return;}
+  const hash=await hashPin(_pinBuffer);
+  if(hash===stored){
+    // PIN correct
+    _pinBuffer='';
+    updatePinDots('');
+    const gate=document.getElementById('panel-pin-gate');
+    const logView=document.getElementById('panel-log-view');
+    if(gate)gate.style.display='none';
+    if(logView)logView.style.display='flex';
+    const qdel=document.getElementById('panel-quick-delete');
+    if(qdel&&!IS_PROD)qdel.style.display='block';
+    await panelFilter('all',document.querySelector('#pv-log .tpill'));
+  } else {
+    _pinBuffer='';
+    updatePinDots('');
+    const err=document.getElementById('panel-pin-err');
+    if(err){err.textContent='Incorrect PIN. Try again.';err.classList.add('show');}
+    setTimeout(()=>{if(err)err.classList.remove('show');},2000);
+  }
+}
+
+// Set PIN keypad handler
+window.setPinKey = function(k){
+  if(k==='DEL'){_setPinBuffer=_setPinBuffer.slice(0,-1);}
+  else if(k==='C'){_setPinBuffer='';}
+  else if(_setPinBuffer.length<4){_setPinBuffer+=k;}
+  updatePinDots(_setPinBuffer,'spd');
+  if(_setPinBuffer.length===4){
+    if(_setPinStep===1){
+      _setPinFirst=_setPinBuffer;
+      _setPinBuffer='';
+      _setPinStep=2;
+      updatePinDots('','spd');
+      const lbl=document.getElementById('setpin-step-label');
+      if(lbl)lbl.textContent='Confirm PIN';
+    } else {
+      if(_setPinBuffer===_setPinFirst){
+        // Save PIN
+        hashPin(_setPinBuffer).then(hash=>{
+          localStorage.setItem(getPinKey(),hash);
+          // Show records
+          const setPin=document.getElementById('panel-set-pin');
+          const logView=document.getElementById('panel-log-view');
+          if(setPin)setPin.style.display='none';
+          if(logView)logView.style.display='flex';
+          if(window.toast)toast('PIN set! You can now use it to view your log.','ok');
+          panelFilter('all',document.querySelector('#pv-log .tpill'));
+        });
+      } else {
+        _setPinBuffer=''; _setPinFirst=''; _setPinStep=1;
+        updatePinDots('','spd');
+        const lbl=document.getElementById('setpin-step-label');
+        if(lbl)lbl.textContent='PINs did not match. Try again.';
+        setTimeout(()=>{if(lbl)lbl.textContent='Enter new PIN';},2000);
+      }
+    }
+  }
+};
+
+window.skipSetPin = function(){
+  // Skip PIN setup — go straight to records without PIN
+  // Mark as skipped so we don't ask again this session
+  sessionStorage.setItem('soslog-pin-skipped','1');
+  const setPin=document.getElementById('panel-set-pin');
+  const logView=document.getElementById('panel-log-view');
+  if(setPin)setPin.style.display='none';
+  if(logView)logView.style.display='flex';
+  panelFilter('all',document.querySelector('#pv-log .tpill'));
+};
+
+// Biometric via WebAuthn
+async function initBiometric(){
+  const btn=document.getElementById('biometric-btn');
+  if(!btn)return;
+  if(!window.PublicKeyCredential){btn.style.display='none';return;}
+  try{
+    const avail=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    btn.style.display=avail?'block':'none';
+  }catch(e){btn.style.display='none';}
+}
+
+window.tryBiometric = async function(){
+  if(!window.currentUser){return;}
+  try{
+    const challenge=new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    const credential=await navigator.credentials.get({
+      publicKey:{
+        challenge,
+        timeout:60000,
+        userVerification:'required',
+        rpId:window.location.hostname
+      }
+    });
+    if(credential){
+      // Biometric verified — show records
+      const gate=document.getElementById('panel-pin-gate');
+      const logView=document.getElementById('panel-log-view');
+      if(gate)gate.style.display='none';
+      if(logView)logView.style.display='flex';
+      await panelFilter('all',document.querySelector('#pv-log .tpill'));
+    }
+  }catch(e){
+    console.warn('[SOSlog] Biometric failed:',e.message);
+    // Fall back to PIN
+    if(window.toast)toast('Biometric unavailable — use PIN','info');
+  }
+};
+
+
 window.vmlCreateAccount=vmlCreateAccount;
 
 // ── PANEL QUICK DELETE (test mode only) ──
@@ -3427,7 +3967,7 @@ window.panelDeleteAccount = async function(){
 window.panelCreateAccount = async function(){
   const pw  = (document.getElementById('panel-vml-newpw')||{value:''}).value;
   const pw2 = (document.getElementById('panel-vml-newpw2')||{value:''}).value;
-  const errEl = document.getElementById('panel-pw-err');
+  const errEl = document.getElementById('panel-create-err');
 
   if(pw.length<8){ if(errEl){errEl.textContent='Password must be at least 8 characters.';errEl.classList.add('show');} return; }
   if(pw!==pw2){    if(errEl){errEl.textContent='Passwords do not match.';errEl.classList.add('show');} return; }
@@ -3492,22 +4032,29 @@ window.panelCreateAccount = async function(){
 
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
 
-    // Show success in panel, then recovery phrase
+    // ── HIDE ENTIRE GATE (login + signup) — show only records view ──
     const gate=document.getElementById('panel-pw-gate');
     if(gate) gate.style.display='none';
+
+    // Clear any prefilled email from signup fields so it doesn't pollute login
+    const panelIdField=document.getElementById('panel-id-field');
+    if(panelIdField) panelIdField.value='';
+
+    // Show records view
     const logView=document.getElementById('panel-log-view');
     if(logView) logView.style.display='flex';
 
-    // Show recovery phrase overlay
+    // Show recovery phrase overlay AFTER panel transition
     if(window.showRecoveryPhrase) showRecoveryPhrase(recoveryPhrase, loginEmail);
 
-    // Load records (empty for new user)
+    // Load records (empty for new user — just shows "No records")
     await panelFilter('all', document.querySelector('#pv-log .tpill'));
 
   }catch(e){
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
-    console.error('[SOSlog] panel create error:', e.code, e.message);
-    if(errEl){ errEl.textContent=friendlyError(e.code)||e.message; errEl.classList.add('show'); }
+    console.error('[SOSlog] panel create error:', e.code, e.message, e);
+    const msg = friendlyError(e.code) || e.message || ('Error: '+JSON.stringify(e.code));
+    if(errEl){ errEl.textContent=msg; errEl.classList.add('show'); }
   }
 };
 
@@ -3714,7 +4261,7 @@ function escRegex(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 function showAuthErr(msg){const el=document.getElementById('auth-err');el.textContent=msg;el.classList.toggle('show',!!msg);}
 function friendlyError(code){
   const m={
-    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/email-already-in-use':'An account with this email already exists. Try logging in instead.',
     'auth/invalid-email':'Please enter a valid email.',
     'auth/weak-password':'Password must be at least 8 characters.',
     'auth/user-not-found':'No account found.',
