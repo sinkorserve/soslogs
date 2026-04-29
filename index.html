@@ -982,6 +982,28 @@ input[type=date]:focus{border-color:var(--safe);}
   color:rgba(0,0,0,0.25) !important;
   -webkit-text-fill-color:rgba(0,0,0,0.25) !important;
 }
+
+/* ── PANEL CREATE ACCOUNT FIELDS — always dark, never white ── */
+#pv-log input[type="text"],
+#pv-log input[type="tel"],
+#pv-log input[type="email"],
+#pv-log input[type="password"],
+#pv-log input[type="text"]:focus,
+#pv-log input[type="tel"]:focus,
+#pv-log input[type="email"]:focus,
+#pv-log input[type="password"]:focus{
+  background:var(--card) !important;
+  background-color:var(--card) !important;
+  color:rgba(255,255,255,0.55) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.55) !important;
+  box-shadow:0 0 0 1000px var(--card) inset !important;
+  -webkit-box-shadow:0 0 0 1000px var(--card) inset !important;
+  border-color:rgba(255,255,255,0.1) !important;
+}
+#pv-log input::placeholder{
+  color:rgba(255,255,255,0.25) !important;
+  -webkit-text-fill-color:rgba(255,255,255,0.25) !important;
+}
 </style>
 
 <script>
@@ -3358,7 +3380,6 @@ window.panelForgotPw = async function(){
 };
 
 window.vmlCreateAccount=vmlCreateAccount;
-window.panelCreateAccount=panelCreateAccount;
 
 // ── PANEL QUICK DELETE (test mode only) ──
 window.panelDeleteAccount = async function(){
@@ -3471,9 +3492,17 @@ window.panelCreateAccount = async function(){
 
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
 
-    // Close panel, show recovery phrase
-    closePanel();
-    showRecoveryPhrase(recoveryPhrase, loginEmail);
+    // Show success in panel, then recovery phrase
+    const gate=document.getElementById('panel-pw-gate');
+    if(gate) gate.style.display='none';
+    const logView=document.getElementById('panel-log-view');
+    if(logView) logView.style.display='flex';
+
+    // Show recovery phrase overlay
+    if(window.showRecoveryPhrase) showRecoveryPhrase(recoveryPhrase, loginEmail);
+
+    // Load records (empty for new user)
+    await panelFilter('all', document.querySelector('#pv-log .tpill'));
 
   }catch(e){
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
