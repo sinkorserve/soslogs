@@ -1820,6 +1820,7 @@ window.SOSCrypto = {
             onkeydown="if(event.key==='Enter')window.vmlCreateAccount&&vmlCreateAccount()">
         </div>
 
+        <div id="panel-create-err" class="err-box" style="margin-bottom:8px;"></div>
         <button onclick="if(window.panelCreateAccount){window.panelCreateAccount();}else{var e=document.getElementById('panel-pw-err');if(e){e.textContent='Still loading — please try again in a moment.';e.classList.add('show');}}" class="btn btn-safe" style="width:100%;padding:11px;">
           Create Account &amp; Secure My Log
         </button>
@@ -3427,7 +3428,7 @@ window.panelDeleteAccount = async function(){
 window.panelCreateAccount = async function(){
   const pw  = (document.getElementById('panel-vml-newpw')||{value:''}).value;
   const pw2 = (document.getElementById('panel-vml-newpw2')||{value:''}).value;
-  const errEl = document.getElementById('panel-pw-err');
+  const errEl = document.getElementById('panel-create-err');
 
   if(pw.length<8){ if(errEl){errEl.textContent='Password must be at least 8 characters.';errEl.classList.add('show');} return; }
   if(pw!==pw2){    if(errEl){errEl.textContent='Passwords do not match.';errEl.classList.add('show');} return; }
@@ -3506,8 +3507,9 @@ window.panelCreateAccount = async function(){
 
   }catch(e){
     if(btn){ btn.textContent='Create Account & Secure My Log'; btn.disabled=false; }
-    console.error('[SOSlog] panel create error:', e.code, e.message);
-    if(errEl){ errEl.textContent=friendlyError(e.code)||e.message; errEl.classList.add('show'); }
+    console.error('[SOSlog] panel create error:', e.code, e.message, e);
+    const msg = friendlyError(e.code) || e.message || ('Error: '+JSON.stringify(e.code));
+    if(errEl){ errEl.textContent=msg; errEl.classList.add('show'); }
   }
 };
 
@@ -3714,7 +3716,7 @@ function escRegex(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 function showAuthErr(msg){const el=document.getElementById('auth-err');el.textContent=msg;el.classList.toggle('show',!!msg);}
 function friendlyError(code){
   const m={
-    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/email-already-in-use':'An account with this email already exists. Try logging in instead.',
     'auth/invalid-email':'Please enter a valid email.',
     'auth/weak-password':'Password must be at least 8 characters.',
     'auth/user-not-found':'No account found.',
