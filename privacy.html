@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — SOSLogs</title>
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0f14;
+      --surface: #111720;
+      --border:  #1e2a38;
+      --accent:  #1db87a;
+      --text:    #e8f0fe;
+      --muted:   #5a7090;
+      --mono:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+      --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(11,15,20,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .logo {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(29,184,122,0.08);
+      border: 1px solid rgba(29,184,122,0.2);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+    }
+
+    .toc-title {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .toc ol {
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .toc a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    /* ── Sections ── */
+    section {
+      margin-bottom: 48px;
+      scroll-margin-top: 80px;
+    }
+
+    h2 {
+      font-family: var(--display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(29,184,122,0.08);
+      border: 1px solid rgba(29,184,122,0.2);
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-weight: 400;
+    }
+
+    p { margin-bottom: 14px; color: #c8d8ee; }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 14px;
+      display: grid;
+      gap: 6px;
+    }
+
+    li { color: #c8d8ee; }
+
+    strong { color: var(--text); font-weight: 500; }
+
+    .callout {
+      background: rgba(29,184,122,0.05);
+      border: 1px solid rgba(29,184,122,0.15);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #a8c8b8;
+    }
+
+    .warning {
+      background: rgba(255,79,106,0.05);
+      border: 1px solid rgba(255,79,106,0.15);
+      border-left: 3px solid #ff4f6a;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #e8a0a8;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 2;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      .container { padding: 40px 20px 80px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="https://soslogs.org" class="logo">
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient>
+          <radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#e63e2f" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/>
+        <ellipse cx="21" cy="27" rx="7.5" ry="2" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="21" cy="21" r="11.5" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.8"/>
+        <circle cx="21" cy="21" r="1.1" fill="rgba(255,255,255,0.22)"/>
+        <circle cx="17" cy="16" r="0.6" fill="rgba(255,255,255,0.28)"/>
+      </svg>
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gb" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient>
+          <radialGradient id="gg" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="gi" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#1db87a" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#gi)"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#gb)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg)"/>
+        <ellipse cx="21" cy="27" rx="7.5" ry="2" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="21" cy="21" r="11.5" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.8"/>
+        <path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="17" cy="16" r="0.6" fill="rgba(255,255,255,0.28)"/>
+      </svg>
+  </a>
+  <a href="https://soslogs.org" class="back-link">← Back to SOSLogs</a>
+</header>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="badge">Legal</div>
+    <h1>Privacy <span>Policy</span></h1>
+    <p class="meta">Last updated: May 2026 &nbsp;·&nbsp; Athens Innovation and Development LLC &nbsp;·&nbsp; soslogs.org</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1">Information We Collect</a></li>
+      <li><a href="#s2">How We Use Your Information</a></li>
+      <li><a href="#s3">SMS Messaging</a></li>
+      <li><a href="#s4">Data Sharing</a></li>
+      <li><a href="#s5">Data Retention</a></li>
+      <li><a href="#s6">Your Rights</a></li>
+      <li><a href="#s7">Security</a></li>
+      <li><a href="#s8">Children's Privacy</a></li>
+      <li><a href="#s9">Changes to This Policy</a></li>
+      <li><a href="#s10">Contact Us</a></li>
+    </ol>
+  </div>
+
+  <div class="callout">
+    SOSLogs is a personal safety documentation platform. We are committed to protecting your privacy and handling your data with care and transparency.
+  </div>
+
+  <section id="s1">
+    <h2><span class="num">01</span> Information We Collect</h2>
+    <p>We collect the following types of information when you use SOSLogs:</p>
+    <ul>
+      <li><strong>Account information:</strong> name, email address, and password when you create an account</li>
+      <li><strong>Log entries:</strong> text, voice recordings, uploaded files, and timestamps you submit as documentation</li>
+      <li><strong>Phone number:</strong> if you use our SMS logging feature, we collect your mobile number</li>
+      <li><strong>Usage data:</strong> pages visited, features used, and general interaction data</li>
+      <li><strong>Payment information:</strong> processed securely through Stripe; we do not store card numbers</li>
+    </ul>
+  </section>
+
+  <section id="s2">
+    <h2><span class="num">02</span> How We Use Your Information</h2>
+    <p>We use your information solely to provide and improve the SOSLogs platform:</p>
+    <ul>
+      <li>To store and display your personal safety documentation logs</li>
+      <li>To send SMS confirmation messages when you submit a log entry via text</li>
+      <li>To process subscription payments through Stripe</li>
+      <li>To improve platform reliability and performance</li>
+      <li>To respond to your support requests</li>
+    </ul>
+    <p>We do not use your data for advertising, marketing profiling, or sale to third parties.</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="num">03</span> SMS Messaging</h2>
+    <p>SOSLogs operates an SMS documentation service via toll-free number <strong>1-888-799-5647</strong>.</p>
+    <ul>
+      <li><strong>Opt-in:</strong> You opt in by texting our number directly. The act of texting constitutes explicit consent.</li>
+      <li><strong>Message types:</strong> We send confirmation replies only — no marketing or promotional messages.</li>
+      <li><strong>Opt-out:</strong> Reply <strong>STOP</strong> at any time to stop receiving messages. Reply <strong>HELP</strong> for assistance.</li>
+      <li><strong>Message frequency:</strong> One confirmation per log submission.</li>
+      <li><strong>Carriers:</strong> Message and data rates may apply depending on your carrier plan.</li>
+    </ul>
+    <div class="callout">
+      We do not share your phone number with third parties for marketing purposes.
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2><span class="num">04</span> Data Sharing</h2>
+    <p>We do not sell your personal data. We may share data only in the following limited circumstances:</p>
+    <ul>
+      <li><strong>Law enforcement:</strong> In response to a valid court order, subpoena, or legal process</li>
+      <li><strong>Imminent danger:</strong> If we have reason to believe sharing information is necessary to prevent harm</li>
+      <li><strong>Service providers:</strong> With Stripe (payments) and Twilio (SMS delivery) — both bound by their own privacy policies</li>
+      <li><strong>Business transfer:</strong> In the event of a merger or acquisition, with notice provided to users</li>
+    </ul>
+    <div class="warning">
+      SOSLogs is not a law enforcement agency, legal counsel, or emergency service. If you are in immediate danger, call 911.
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2><span class="num">05</span> Data Retention</h2>
+    <p>Your data is retained while your account remains active. Upon account cancellation:</p>
+    <ul>
+      <li>Log entries are deleted within 90 days of cancellation</li>
+      <li>You may request immediate deletion by contacting us at <strong>admin@soslogs.org</strong></li>
+      <li>Billing records are retained as required by law</li>
+    </ul>
+  </section>
+
+  <section id="s6">
+    <h2><span class="num">06</span> Your Rights</h2>
+    <p>You have the right to:</p>
+    <ul>
+      <li>Access the personal data we hold about you</li>
+      <li>Request correction of inaccurate data</li>
+      <li>Request deletion of your data</li>
+      <li>Export your log entries</li>
+      <li>Opt out of SMS messaging at any time by replying STOP</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <strong>admin@soslogs.org</strong>.</p>
+  </section>
+
+  <section id="s7">
+    <h2><span class="num">07</span> Security</h2>
+    <p>We implement industry-standard security measures to protect your data including encrypted data transmission (HTTPS), secure password hashing, and access controls. No system is completely secure — if you believe your account has been compromised, contact us immediately.</p>
+  </section>
+
+  <section id="s8">
+    <h2><span class="num">08</span> Children's Privacy</h2>
+    <p>SOSLogs is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, contact us at <strong>admin@soslogs.org</strong>.</p>
+  </section>
+
+  <section id="s9">
+    <h2><span class="num">09</span> Changes to This Policy</h2>
+    <p>We may update this Privacy Policy periodically. We will notify registered users of material changes via email. Continued use of SOSLogs after changes constitutes acceptance of the updated policy.</p>
+  </section>
+
+  <section id="s10">
+    <h2><span class="num">10</span> Contact Us</h2>
+    <p>Athens Innovation and Development LLC<br/>
+    Operating SOSLogs at soslogs.org<br/>
+    Email: <strong>admin@soslogs.org</strong></p>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2026 Athens Innovation and Development LLC · SOSLogs · soslogs.org</p>
+  <p>Not an emergency service. If in immediate danger, call 911.</p>
+  <p><a href="/terms.html">Terms of Service</a> &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://soslogs.org">Home</a></p>
+</footer>
+
+</body>
+</html>

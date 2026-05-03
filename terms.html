@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms of Service — SOSLogs</title>
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0f14;
+      --surface: #111720;
+      --border:  #1e2a38;
+      --accent:  #1db87a;
+      --text:    #e8f0fe;
+      --muted:   #5a7090;
+      --mono:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+      --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(11,15,20,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .logo {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+    }
+
+    .hero {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(29,184,122,0.08);
+      border: 1px solid rgba(29,184,122,0.2);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+    }
+
+    .toc-title {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .toc ol {
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .toc a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    section {
+      margin-bottom: 48px;
+      scroll-margin-top: 80px;
+    }
+
+    h2 {
+      font-family: var(--display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(29,184,122,0.08);
+      border: 1px solid rgba(29,184,122,0.2);
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-weight: 400;
+    }
+
+    p { margin-bottom: 14px; color: #c8d8ee; }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 14px;
+      display: grid;
+      gap: 6px;
+    }
+
+    li { color: #c8d8ee; }
+
+    strong { color: var(--text); font-weight: 500; }
+
+    .callout {
+      background: rgba(29,184,122,0.05);
+      border: 1px solid rgba(29,184,122,0.15);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #a8c8b8;
+    }
+
+    .warning {
+      background: rgba(255,79,106,0.05);
+      border: 1px solid rgba(255,79,106,0.15);
+      border-left: 3px solid #ff4f6a;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #e8a0a8;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 2;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      .container { padding: 40px 20px 80px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="https://soslogs.org" class="logo">
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient>
+          <radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#e63e2f" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/>
+        <ellipse cx="21" cy="27" rx="7.5" ry="2" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="21" cy="21" r="11.5" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.8"/>
+        <circle cx="21" cy="21" r="1.1" fill="rgba(255,255,255,0.22)"/>
+        <circle cx="17" cy="16" r="0.6" fill="rgba(255,255,255,0.28)"/>
+      </svg>
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gb" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient>
+          <radialGradient id="gg" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="gi" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#1db87a" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#gi)"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#gb)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg)"/>
+        <ellipse cx="21" cy="27" rx="7.5" ry="2" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="21" cy="21" r="11.5" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.8"/>
+        <path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="17" cy="16" r="0.6" fill="rgba(255,255,255,0.28)"/>
+      </svg>
+  </a>
+  <a href="https://soslogs.org" class="back-link">← Back to SOSLogs</a>
+</header>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="badge">Legal</div>
+    <h1>Terms of <span>Service</span></h1>
+    <p class="meta">Last updated: May 2026 &nbsp;·&nbsp; Athens Innovation and Development LLC &nbsp;·&nbsp; soslogs.org</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1">Acceptance of Terms</a></li>
+      <li><a href="#s2">Platform Purpose & Limitations</a></li>
+      <li><a href="#s3">User Responsibilities</a></li>
+      <li><a href="#s4">SMS Messaging Terms</a></li>
+      <li><a href="#s5">PII & Third Party Information</a></li>
+      <li><a href="#s6">Data Sharing with Law Enforcement</a></li>
+      <li><a href="#s7">Data Retention & Deletion</a></li>
+      <li><a href="#s8">Subscription & Billing</a></li>
+      <li><a href="#s9">Prohibited Use</a></li>
+      <li><a href="#s10">Disclaimer of Warranties</a></li>
+      <li><a href="#s11">Limitation of Liability</a></li>
+      <li><a href="#s12">Governing Law</a></li>
+      <li><a href="#s13">Contact</a></li>
+    </ol>
+  </div>
+
+  <div class="warning">
+    SOSLogs is not an emergency service. If you are in immediate danger, call 911 immediately.
+  </div>
+
+  <section id="s1">
+    <h2><span class="num">01</span> Acceptance of Terms</h2>
+    <p>By creating an account, texting our number, or otherwise using SOSLogs ("the Platform"), you agree to these Terms of Service. These terms constitute a legally binding agreement between you and Athens Innovation and Development LLC, operating SOSLogs at soslogs.org.</p>
+    <p>If you do not agree to these terms, do not use the Platform.</p>
+  </section>
+
+  <section id="s2">
+    <h2><span class="num">02</span> Platform Purpose & Limitations</h2>
+    <p>SOSLogs provides a digital documentation tool for individuals to record personal safety concerns, incidents, and communications in a timestamped, secure environment.</p>
+    <div class="warning">
+      <strong>SOSLogs is not:</strong> a law enforcement agency, legal counsel, emergency service, or crisis intervention service. Records created on SOSLogs do not constitute legal filings. Always contact appropriate authorities for emergencies.
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2><span class="num">03</span> User Responsibilities</h2>
+    <p>By using SOSLogs you agree to:</p>
+    <ul>
+      <li>Submit only records based on your direct, factual knowledge</li>
+      <li>Not use the Platform to harass, defame, stalk, or target individuals maliciously</li>
+      <li>Not submit knowingly false or misleading information</li>
+      <li>Maintain the security of your account credentials</li>
+      <li>Comply with all applicable local, state, and federal laws</li>
+    </ul>
+  </section>
+
+  <section id="s4">
+    <h2><span class="num">04</span> SMS Messaging Terms</h2>
+    <p>SOSLogs operates an SMS documentation service via toll-free number <strong>1-888-799-5647</strong>.</p>
+    <ul>
+      <li><strong>Opt-in:</strong> By texting our number you consent to receive confirmation messages from SOSLogs</li>
+      <li><strong>Message types:</strong> Confirmation replies only — no marketing messages</li>
+      <li><strong>Opt-out:</strong> Reply <strong>STOP</strong> at any time to unsubscribe</li>
+      <li><strong>Help:</strong> Reply <strong>HELP</strong> for assistance</li>
+      <li><strong>Frequency:</strong> One message per log submission</li>
+      <li><strong>Rates:</strong> Message and data rates may apply</li>
+    </ul>
+    <div class="callout">
+      Your phone number is used solely for SMS log confirmation. It is never sold or shared for marketing purposes.
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2><span class="num">05</span> PII & Third Party Information</h2>
+    <p>Records you submit may contain Personally Identifiable Information (PII) about yourself or third parties. You acknowledge and understand:</p>
+    <ul>
+      <li>Do not include Social Security Numbers, financial account numbers, or medical records</li>
+      <li>Records about third parties may constitute personal data under GDPR, CCPA, or other applicable privacy laws</li>
+      <li>You are responsible for ensuring your submissions comply with applicable privacy laws</li>
+      <li>SOSLogs is not responsible for the content of user-submitted records</li>
+    </ul>
+  </section>
+
+  <section id="s6">
+    <h2><span class="num">06</span> Data Sharing with Law Enforcement</h2>
+    <p>SOSLogs may share records with law enforcement under the following circumstances:</p>
+    <ul>
+      <li>Valid court orders, subpoenas, or other legally binding legal process</li>
+      <li>Situations involving imminent danger to a person</li>
+      <li>Investigations of platform abuse or illegal activity conducted through the Platform</li>
+    </ul>
+    <p>SOSLogs does not proactively share user data with law enforcement absent a legal obligation.</p>
+  </section>
+
+  <section id="s7">
+    <h2><span class="num">07</span> Data Retention & Deletion</h2>
+    <p>Records are retained while your account is active. Upon cancellation, records are deleted within 90 days. To request immediate deletion contact <strong>admin@soslogs.org</strong>. Billing records are retained as required by law.</p>
+  </section>
+
+  <section id="s8">
+    <h2><span class="num">08</span> Subscription & Billing</h2>
+    <p>Paid subscriptions are billed monthly through Stripe. You may cancel at any time through your account settings. No refunds are issued for partial billing periods. We reserve the right to change pricing with 30 days advance notice to registered users.</p>
+  </section>
+
+  <section id="s9">
+    <h2><span class="num">09</span> Prohibited Use</h2>
+    <p>You may not use SOSLogs to:</p>
+    <ul>
+      <li>Submit false reports or fabricated documentation</li>
+      <li>Harass, stalk, or target individuals</li>
+      <li>Violate any applicable law or regulation</li>
+      <li>Attempt to gain unauthorized access to the Platform or other user accounts</li>
+      <li>Reverse engineer or copy the Platform</li>
+    </ul>
+    <p>Violation of these terms may result in immediate account termination without refund.</p>
+  </section>
+
+  <section id="s10">
+    <h2><span class="num">10</span> Disclaimer of Warranties</h2>
+    <p>SOSLogs is provided "as is" without warranties of any kind, express or implied. We do not warrant that the Platform will be uninterrupted, error-free, or that records will be preserved indefinitely. Use the Platform as a supplemental documentation tool, not as your sole means of record keeping.</p>
+  </section>
+
+  <section id="s11">
+    <h2><span class="num">11</span> Limitation of Liability</h2>
+    <p>To the maximum extent permitted by law, Athens Innovation and Development LLC shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of SOSLogs, including loss of data or records.</p>
+  </section>
+
+  <section id="s12">
+    <h2><span class="num">12</span> Governing Law</h2>
+    <p>These Terms are governed by the laws of the State of Texas. Any disputes shall be resolved in Tarrant County, Texas.</p>
+  </section>
+
+  <section id="s13">
+    <h2><span class="num">13</span> Contact</h2>
+    <p>Athens Innovation and Development LLC<br/>
+    Operating SOSLogs at soslogs.org<br/>
+    Email: <strong>admin@soslogs.org</strong></p>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2026 Athens Innovation and Development LLC · SOSLogs · soslogs.org</p>
+  <p>Not an emergency service. If in immediate danger, call 911.</p>
+  <p><a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms of Service</a> &nbsp;·&nbsp; <a href="https://soslogs.org">Home</a></p>
+</footer>
+
+</body>
+</html>
