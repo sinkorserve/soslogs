@@ -301,7 +301,15 @@ const decEmail = e => e.replace(/_dot_/g,'.').replace(/_at_/g,'@');
 const profileRef  = p => doc(db,'users',p,'profile','data');
 const emailsCol   = p => collection(db,'users',p,'emails');
 const recordsCol  = (p,e) => collection(db,'users',p,'emails',encEmail(e),'records');
-const normPhone   = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
+const normPhone = (cc, ph) => {
+  const ccDigits = cc.replace(/\D/g,'');
+  let phDigits = ph.replace(/\D/g,'');
+  // If US/Canada (+1) and user included leading 1, strip it
+  if(ccDigits === '1' && phDigits.length === 11 && phDigits[0] === '1'){
+    phDigits = phDigits.slice(1);
+  }
+  return '+' + ccDigits + phDigits;
+};
 
 let currentPhone = null;
 let userEmails   = [];
