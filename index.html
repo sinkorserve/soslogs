@@ -320,8 +320,10 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('app-loading').classList.add('hide');
   if(user){
     // displayName stores the phone number set at signup
-    currentPhone = user.displayName || user.email;
-    await showMap(user);
+    // Re-fetch user to get latest profile after updateProfile
+  await user.reload();
+  currentPhone = user.displayName || user.email;
+  await showMap(user);
   } else {
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
@@ -404,8 +406,12 @@ async function showMap(user){
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('map-screen').classList.remove('hidden');
   document.getElementById('nav-phone').textContent = fmtPhone(currentPhone);
+  if(currentPhone && !currentPhone.includes('@')){
   const slug = currentPhone.replace(/\+/g,'').replace(/\s/g,'');
   window.history.replaceState({}, '', `/${slug}`);
+} else {
+  window.history.replaceState({}, '', '/');
+}
   await loadEmails();
   renderDropdown();
   loadMaps();
