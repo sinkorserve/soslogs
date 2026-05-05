@@ -291,9 +291,10 @@ const db   = getFirestore(fbApp);
 
 const encEmail = e => e.replace(/\./g,'_dot_').replace(/@/g,'_at_');
 const decEmail = e => e.replace(/_dot_/g,'.').replace(/_at_/g,'@');
-const emailsCol  = p => collection(db,'users',p,'emails');
-const recordsCol = (p,e) => collection(db,'users',p,'emails',e,'records');
-// Note: pass the encoded email key (e.id from Firestore), not the decoded email
+const emailsCol   = p => collection(db,'users',p,'emails');
+const recordsCol  = (p,e) => collection(db,'users',p,'emails',e,'records');
+const flatRecords = p => collection(db,'users',p,'records');
+// flatRecords: direct path users/{phone}/records for seeded/SMS logs
 const normPhone  = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
 
 let currentPhone = null;
@@ -314,21 +315,53 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// Resolve phone from Firestore profile (handles accounts where displayName is a name not a phone)
+// Resolve phone from Firestore (handles accounts where displayName is a name not a phone)
 async function resolvePhone(user){
-  // If displayName already looks like a phone number use it
-  if(user.displayName && /^\+?\d{7,}$/.test(user.displayName.replace(/\s/g,''))){
+  // 1. If displayName looks like a phone number use it directly
+  if(user.displayName && /^\+?\d{7,}$/.test(user.displayName.replace(/[\s\-()]/g,''))){
     return user.displayName;
   }
-  // Look up phone from Firestore profile using uid
+
+  // 2. Look up phone via collectionGroup query on profile docs matching uid
   try{
     const profileQ = query(collectionGroup(db,'profile'), where('uid','==',user.uid));
     const snap = await getDocs(profileQ);
     if(!snap.empty){
       const phone = snap.docs[0].data().phone;
-      if(phone) return phone;
+      if(phone){ console.log('resolvePhone via profile uid:', phone); return phone; }
     }
-  } catch(e){ console.warn('resolvePhone:',e); }
+  } catch(e){ console.warn('resolvePhone profile query:',e); }
+
+  // 3. Look up phone by matching user email in emails subcollections
+  try{
+    const emailKey = encEmail(user.email);
+    const emailQ = query(collectionGroup(db,'emails'), where('email','==',user.email));
+    const snap = await getDocs(emailQ);
+    if(!snap.empty){
+      // Parent path: users/{phone}/emails/{emailKey}
+      const ref = snap.docs[0].ref;
+      const phone = ref.parent.parent.id; // users/{phone}
+      if(phone && phone.startsWith('+')){ console.log('resolvePhone via email match:', phone); return phone; }
+    }
+  } catch(e){ console.warn('resolvePhone email query:',e); }
+
+  // 4. Hardcoded fallback for seeded data — check known phones
+  // This handles the case where seeded profile has uid:'seeded' not real uid
+  // Try to find which phone has an emails doc matching user.email
+  try{
+    const emailKey = encEmail(user.email);
+    // Direct path attempt with known email
+    const testPhones = ['+19167900975']; // Add known phones here for fallback
+    for(const phone of testPhones){
+      try{
+        const emailDoc = await getDocs(collection(db,'users',phone,'emails'));
+        const match = emailDoc.docs.find(d=>d.data().email===user.email);
+        if(match){ console.log('resolvePhone via direct scan:', phone); return phone; }
+      } catch(_){}
+    }
+  } catch(e){ console.warn('resolvePhone direct scan:',e); }
+
+  console.warn('resolvePhone: could not find phone, falling back to displayName');
   return user.displayName || user.email;
 }
 
@@ -406,23 +439,52 @@ async function showDashboard(user){
 
 async function loadAllRecords(){
   const records=[];
+  if(!currentPhone){ console.warn('loadAllRecords: no currentPhone'); return records; }
+  console.log('Loading records for phone:', currentPhone);
+
   try{
-    const emailSnap=await getDocs(emailsCol(currentPhone));
-    const emailIds=[];
-    emailSnap.forEach(d=>emailIds.push({id:d.id,email:d.data().email||decEmail(d.id)}));
-    for(const e of emailIds){
-      try{
-        // Use e.id (already encoded key) directly in Firestore path
-        const snap=await getDocs(query(recordsCol(currentPhone,e.id),orderBy('timestamp','desc')));
-        snap.forEach(d=>records.push({...d.data(),_email:e.email,_id:d.id}));
-      } catch(err){ console.warn('records fetch error:',err); }
-    }
+    // Strategy 1: flat records at users/{phone}/records (seeded data + SMS logs)
     try{
-      const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
-      snap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id}));
-    } catch(_){}
-    records.sort((a,b)=>getTs(b)-getTs(a));
-  } catch(e){ console.error('loadAllRecords:',e); }
+      const flatSnap=await getDocs(query(flatRecords(currentPhone),orderBy('timestamp','desc')));
+      flatSnap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id,_source:'flat'}));
+      console.log('Flat records found:', flatSnap.size);
+    } catch(e){ console.warn('flat records error:',e); }
+
+    // Strategy 2: nested emails/{email}/records
+    try{
+      const emailSnap=await getDocs(emailsCol(currentPhone));
+      const emailIds=[];
+      emailSnap.forEach(d=>emailIds.push({id:d.id,email:d.data().email||decEmail(d.id)}));
+      console.log('Email subcollections found:', emailIds.length);
+
+      for(const e of emailIds){
+        try{
+          const snap=await getDocs(query(recordsCol(currentPhone,e.id),orderBy('timestamp','desc')));
+          snap.forEach(d=>records.push({...d.data(),_email:e.email,_id:d.id,_source:'email'}));
+          console.log('Records in',e.id,':', snap.size);
+        } catch(err){ console.warn('email records error:',err); }
+      }
+
+      // Also try unlinked bucket
+      try{
+        const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
+        snap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id,_source:'unlinked'}));
+      } catch(_){}
+    } catch(e){ console.warn('email subcollection error:',e); }
+
+    // Deduplicate by messageSid or _id
+    const seen=new Set();
+    const unique=records.filter(r=>{
+      const key=r.messageSid||r._id;
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+
+    unique.sort((a,b)=>getTs(b)-getTs(a));
+    console.log('Total unique records:', unique.length);
+    return unique;
+
+  } catch(e){ console.error('loadAllRecords fatal:',e); }
   return records;
 }
 
@@ -623,7 +685,8 @@ function showScreen(id){
   });
   const el=document.getElementById(id);
   el.classList.add('active');
-  el.style.display='block';
+  // login-screen uses flex for centering, dashboard uses block
+  el.style.display = id==='login-screen' ? 'flex' : 'block';
 }
 window.stepShow = id => { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
