@@ -1,296 +1,276 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<style>html,body{background:#0a0c0e!important;}</style>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-<title>SOSLogs — Document. Protect. Prove.</title>
-<meta name="description" content="SOSLogs — Personal safety documentation. Log incidents via SMS or web. Timestamped, secure, always yours.">
+<title>SOSLogs — Dashboard</title>
 <style>
 :root{
-  --black:#0a0c0e;--dark:#111518;--card:#161c21;--card2:#1b242c;
-  --border:rgba(255,255,255,0.08);
-  --danger:#e63e2f;--danger2:#ff6b4a;
-  --safe:#1db87a;--safe2:#3dd68c;--safe-dim:rgba(29,184,122,0.12);
-  --warn:#f5a623;--muted:#6b8099;--text:#d8e4ee;--white:#fff;
+  --black:#080a0c;--dark:#0e1318;--card:#13191f;--card2:#192028;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --danger:#e63e2f;--safe:#1db87a;--safe2:#3dd68c;--safe-dim:rgba(29,184,122,0.1);
+  --warn:#f5a623;--blue:#3b82f6;--purple:#a855f7;
+  --muted:#5a7090;--text:#ccd8e8;--white:#f0f6ff;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  --nav-h:54px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;}
-body{background:var(--black);color:var(--text);overflow:hidden;}
-
-.screen{position:fixed;inset:0;transition:opacity 0.35s,transform 0.35s;z-index:1;}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.98);}
+html,body{height:100%;font-family:var(--font);background:var(--black);color:var(--text);-webkit-font-smoothing:antialiased;}
 
 #app-loading{position:fixed;inset:0;z-index:999;background:var(--black);display:flex;align-items:center;justify-content:center;}
 #app-loading.hide{display:none;}
 .loading-logo{display:flex;align-items:center;gap:10px;animation:blink 1.4s ease infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
 .loading-text{font-size:22px;font-weight:800;color:var(--white);}
 .loading-text span{color:var(--safe);}
 
+.screen{display:none;}.screen.active{display:block;}
+
 /* LOGIN */
-#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:24px 16px;background:var(--black);overflow-y:auto;}
-#login-screen::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,184,122,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(29,184,122,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
-.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;animation:fadeUp 0.45s cubic-bezier(.22,.68,0,1.2) both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+#login-screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--black);overflow-y:auto;}
+#login-screen::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,184,122,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,184,122,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
-.login-logo-text{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:var(--white);}
+.login-logo-text{font-size:26px;font-weight:800;color:var(--white);}
 .login-logo-text span{color:var(--safe);}
 .login-tagline{text-align:center;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:28px;}
 .login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px;position:relative;overflow:hidden;}
-.login-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(29,184,122,0.06) 0%,transparent 70%);pointer-events:none;}
-
+.login-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(29,184,122,0.05) 0%,transparent 70%);pointer-events:none;}
 .f-label{display:block;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.f-label .req{color:rgba(230,62,47,0.7);}
 .f-input{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-text-fill-color:var(--text);}
 .f-input::placeholder{color:var(--muted);}
 .f-input:focus{border-color:rgba(29,184,122,0.45);box-shadow:0 0 0 3px rgba(29,184,122,0.07);}
-.grid-cc-phone{display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:10px;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .field-wrap{margin-bottom:10px;}
+.grid-cc{display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:10px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .pw-row{display:flex;gap:8px;margin-top:5px;}
-
 .btn-safe{width:100%;padding:12px;border:none;border-radius:10px;background:var(--safe);color:#000;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-safe:hover:not(:disabled){background:var(--safe2);transform:translateY(-1px);}
 .btn-safe:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-.btn-icon{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:none;background:var(--safe);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+.btn-icon{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:none;background:var(--safe);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
 .btn-icon:hover{background:var(--safe2);}
 .btn-ghost{flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
-.btn-ghost:hover{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.2);}
 .btn-warn{border-color:rgba(245,166,35,0.3)!important;color:var(--warn)!important;}
-.btn-warn:hover{border-color:var(--warn)!important;background:rgba(245,166,35,0.06)!important;}
-
 .err-box{display:none;padding:9px 12px;border-radius:8px;font-size:13px;margin:8px 0;background:rgba(230,62,47,0.08);border:1px solid rgba(230,62,47,0.18);color:#ff6b4a;}
 .err-box.show{display:block;}
 .ok-box{display:none;padding:9px 12px;border-radius:8px;font-size:13px;margin:8px 0;background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.18);color:var(--safe2);}
 .ok-box.show{display:block;}
 .toggle-link{font-size:12px;color:var(--safe);cursor:pointer;text-decoration:none;display:inline-block;margin-top:10px;}
-.toggle-link:hover{text-decoration:underline;}
 .muted-link{color:var(--muted)!important;}
-
-.step{display:none;}
-.step.active{display:block;}
-
-.sms-hint{margin-top:18px;padding:11px 14px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:10px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
-.sms-hint strong{color:var(--safe);}
-
+.step{display:none;}.step.active{display:block;}
 .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;}
 .spinner-g{border-color:rgba(29,184,122,0.2);border-top-color:var(--safe);}
 @keyframes spin{to{transform:rotate(360deg);}}
+.sms-hint{margin-top:18px;padding:11px 14px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:10px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.sms-hint strong{color:var(--safe);}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--muted);line-height:2;}
+.login-footer a{color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.login-footer a:hover{color:var(--safe);}
 
-/* MAP SCREEN */
-#map-screen{background:var(--black);}
-.map-nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(10,12,14,0.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);gap:8px;}
-.map-nav-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--white);flex-shrink:0;}
-.map-nav-logo span{color:var(--safe);}
-.map-nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
-.phone-pill{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text);font-weight:600;}
-.phone-pill .udot{width:7px;height:7px;border-radius:50%;background:var(--safe);box-shadow:0 0 6px var(--safe);flex-shrink:0;}
-.email-dropdown-wrap{position:relative;}
-.email-dropdown-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.18s;white-space:nowrap;font-family:var(--font);}
-.email-dropdown-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
-.email-dropdown-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:300;overflow:hidden;display:none;}
-.email-dropdown-menu.open{display:block;}
-.email-option{padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;transition:background 0.15s;display:flex;align-items:center;gap:8px;}
-.email-option:hover{background:rgba(255,255,255,0.05);}
-.email-option.active{color:var(--safe);}
-.eo-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
-.email-option.active .eo-dot{background:var(--safe);}
-.logout-btn{background:transparent;border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.18s;}
-.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
-
-#map{position:fixed;inset:0;top:53px;width:100%;height:calc(100dvh - 53px);}
-#loc-overlay{position:fixed;inset:0;top:53px;z-index:150;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
-#loc-overlay.hide{display:none;}
-.loc-pulse{width:64px;height:64px;border-radius:50%;background:rgba(230,62,47,0.12);display:flex;align-items:center;justify-content:center;animation:locpulse 1.6s ease infinite;}
-@keyframes locpulse{0%,100%{box-shadow:0 0 0 0 rgba(230,62,47,0.25);}50%{box-shadow:0 0 0 22px rgba(230,62,47,0);}}
-.loc-pulse-inner{width:30px;height:30px;border-radius:50%;background:var(--danger);}
-.loc-text{font-size:13px;color:var(--muted);}
-
-#log-drawer{position:fixed;bottom:-100%;left:0;right:0;z-index:300;background:var(--dark);border-top:1px solid var(--border);border-radius:20px 20px 0 0;max-height:75dvh;transition:bottom 0.38s cubic-bezier(0.4,0,0.2,1);overflow:hidden;display:flex;flex-direction:column;}
-#log-drawer.open{bottom:0;}
-.drawer-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0;flex-shrink:0;}
-.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px;flex-shrink:0;}
-.drawer-header h3{font-size:14px;font-weight:700;color:var(--white);}
-.drawer-close{width:28px;height:28px;border-radius:7px;border:none;background:rgba(255,255,255,0.06);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-.drawer-close:hover{background:rgba(255,255,255,0.1);color:var(--white);}
-.drawer-body{flex:1;overflow-y:auto;padding:0 20px 32px;}
-.log-entry{padding:13px 0;border-bottom:1px solid var(--border);animation:fadeIn 0.22s ease both;}
-.log-entry:last-child{border-bottom:none;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
-.log-time{font-size:11px;color:var(--muted);letter-spacing:0.03em;margin-bottom:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.log-badge{background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.18);border-radius:4px;padding:1px 6px;font-size:10px;color:var(--safe);letter-spacing:0.05em;}
-.log-email-tag{font-size:10px;color:var(--muted);}
-.log-body{font-size:14px;color:var(--text);line-height:1.6;}
-.logs-empty{padding:44px 0;text-align:center;}
-.logs-empty-icon{font-size:34px;margin-bottom:10px;}
-.logs-empty-text{font-size:13px;color:var(--muted);line-height:1.7;}
-.logs-empty-text strong{color:var(--safe);}
-#map-backdrop{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0);display:none;transition:background 0.3s;}
-#map-backdrop.open{display:block;background:rgba(0,0,0,0.6);}
+/* DASHBOARD */
+#dashboard-screen{min-height:100dvh;background:var(--black);}
+.dash-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:var(--nav-h);background:rgba(8,10,12,0.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.dash-nav-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--white);}
+.dash-nav-logo span{color:var(--safe);}
+.dash-nav-right{display:flex;align-items:center;gap:10px;}
+.phone-chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text);font-weight:600;}
+.udot{width:7px;height:7px;border-radius:50%;background:var(--safe);box-shadow:0 0 6px var(--safe);}
+.nav-btn{background:transparent;border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.18s;}
+.nav-btn:hover{border-color:var(--danger);color:var(--danger);}
+.dash-body{padding:24px 20px 60px;max-width:1200px;margin:0 auto;}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.cards-row{display:grid;gap:14px;margin-bottom:24px;}
+.cols-4{grid-template-columns:repeat(4,1fr);}
+.cols-3{grid-template-columns:repeat(3,1fr);}
+.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.cols-4,.cols-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.cols-4,.cols-3,.cols-2{grid-template-columns:1fr;}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-size:32px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;}
+.stat-sub{font-size:12px;color:var(--muted);}
+.stat-icon{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.35;}
+.wide-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.wide-card-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.log-list{display:flex;flex-direction:column;gap:8px;}
+.log-item{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--dark);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color 0.18s;}
+.log-item:hover{border-color:var(--border2);}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.log-date{font-size:11px;color:var(--muted);flex-shrink:0;min-width:90px;}
+.log-body{font-size:13px;color:var(--text);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.freq-list{display:flex;flex-direction:column;gap:8px;}
+.freq-item{display:flex;align-items:center;gap:10px;}
+.freq-name{font-size:13px;color:var(--text);min-width:90px;flex-shrink:0;}
+.freq-bar-wrap{flex:1;background:var(--dark);border-radius:4px;height:6px;overflow:hidden;}
+.freq-bar{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.freq-count{font-size:11px;color:var(--muted);min-width:24px;text-align:right;}
+#mini-map{width:100%;height:220px;border-radius:10px;overflow:hidden;background:var(--dark);}
+.integrity-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.integrity-score{font-size:48px;font-weight:800;color:var(--safe);line-height:1;}
+.integrity-label{font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px;}
+.integrity-desc{font-size:13px;color:var(--text);line-height:1.6;flex:1;min-width:180px;}
+.show-msgs-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;border:1px solid var(--safe);background:transparent;color:var(--safe);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+.show-msgs-btn:hover{background:var(--safe-dim);}
+.msg-panel{display:none;margin-top:4px;}
+.msg-panel.open{display:block;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.filter-input{flex:1;min-width:130px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color 0.2s;}
+.filter-input:focus{border-color:rgba(29,184,122,0.4);}
+.filter-select{background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
+.filter-btn{padding:8px 14px;border-radius:10px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;}
+.msg-count{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.msg-card{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;animation:fadeIn 0.2s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.msg-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.msg-time{font-size:11px;color:var(--muted);}
+.msg-badge{background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:1px 7px;font-size:10px;color:var(--safe);letter-spacing:0.05em;}
+.msg-loc{font-size:10px;color:var(--muted);}
+.msg-body{font-size:14px;color:var(--text);line-height:1.7;}
+.msg-body mark{background:rgba(245,166,35,0.2);color:var(--warn);border-radius:2px;padding:0 2px;}
+.empty{padding:24px 0;text-align:center;color:var(--muted);font-size:13px;}
+.map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
+.map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div id="app-loading">
   <div class="loading-logo">
-    <svg width="28" height="28" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="rb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri0)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg0)"/></svg>
-    <svg width="28" height="28" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#gi0)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg0)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="28" height="28" viewBox="0 0 42 42"><defs><radialGradient id="rb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri0)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg0)"/></svg>
+    <svg width="28" height="28" viewBox="0 0 42 42"><defs><radialGradient id="gb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#gi0)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg0)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span class="loading-text">SOS<span>Logs</span></span>
   </div>
 </div>
 
-<!-- ══════════ LOGIN SCREEN ══════════ -->
-<div id="login-screen" class="screen hidden">
+<!-- LOGIN -->
+<div id="login-screen" class="screen">
 <div class="login-wrap">
-
   <div class="login-logo">
-    <svg width="34" height="34" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
-    <svg width="34" height="34" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
+    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span class="login-logo-text">SOS<span>Logs</span></span>
   </div>
   <p class="login-tagline">Document · Protect · Prove</p>
-
   <div class="login-card">
-
-    <!-- STEP: Login -->
     <div id="step-login" class="step active">
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Access your records</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Enter your phone or email and password.</div>
-      <div class="field-wrap">
-        <label class="f-label">Phone or Email <span class="req">*</span></label>
-        <input class="f-input" id="login-id" type="text" placeholder="Phone number or email address" autocomplete="off" spellcheck="false">
-      </div>
-      <div class="field-wrap">
-        <label class="f-label">Password <span class="req">*</span></label>
+      <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Phone number or email address" autocomplete="off"></div>
+      <div class="field-wrap"><label class="f-label">Password</label>
         <div class="pw-row">
           <input class="f-input" id="login-pw" type="password" placeholder="Your password" style="flex:1;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-          <button class="btn-icon" onclick="doLogin()" id="login-btn" title="Sign in">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+          <button class="btn-icon" onclick="doLogin()" id="login-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
-      <div class="err-box" id="login-err"></div>
-      <div class="ok-box" id="login-ok"></div>
+      <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-        <button class="btn-ghost" onclick="doForgotPw()">📧 Reset Password</button>
-        <button class="btn-ghost btn-warn" onclick="switchToSignup()">Create Account →</button>
+        <button class="btn-ghost" onclick="doForgotPw()">Reset Password</button>
+        <button class="btn-ghost btn-warn" onclick="stepShow('step-signup')">Create Account</button>
       </div>
     </div>
-
-    <!-- STEP: Signup -->
     <div id="step-signup" class="step">
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Your phone number is your primary identity.</div>
-      <div class="grid-cc-phone">
-        <div>
-          <label class="f-label">Code <span class="req">*</span></label>
-          <input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6">
-        </div>
-        <div>
-          <label class="f-label">Phone <span class="req">*</span></label>
-          <input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel">
-        </div>
-      </div>
-      <div class="grid-2">
-        <div>
-          <label class="f-label">Country <span class="req">*</span></label>
-          <input class="f-input" id="su-country" type="text" placeholder="Country name">
-        </div>
-        <div>
-          <label class="f-label">Email <span class="req">*</span></label>
-          <input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email">
-        </div>
-      </div>
-      <div class="field-wrap">
-        <label class="f-label">Password <span class="req">*</span></label>
-        <input class="f-input" id="su-pw" type="password" placeholder="Create a password (min 8 chars)" autocomplete="new-password">
-      </div>
-      <div class="field-wrap">
-        <label class="f-label">Confirm Password <span class="req">*</span></label>
-        <input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()">
-      </div>
+      <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
+      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
+      <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
       <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
-      <div class="err-box" id="signup-err"></div>
-      <div class="ok-box" id="signup-ok"></div>
-      <div style="text-align:center;margin-top:10px;">
-        <a class="toggle-link muted-link" onclick="switchToLogin()">Already have an account? Sign in →</a>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="sms-hint">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-    <div>Text your logs directly to <strong>1-888-799-LOGS</strong></div>
-  </div>
-
-  <!-- Footer links -->
-  <div style="text-align:center;margin-top:20px;font-size:11px;color:var(--muted);line-height:2;">
-    <div>© 2026 Athens Innovation and Development LLC</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:4px;">
-      <a href="/privacy.html" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#1db87a'" onmouseout="this.style.color='#6b8099'">Privacy Policy</a>
-      <span style="color:var(--border);">·</span>
-      <a href="/terms.html" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#1db87a'" onmouseout="this.style.color='#6b8099'">Terms of Service</a>
-      <span style="color:var(--border);">·</span>
-      <a href="mailto:admin@soslogs.org" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#1db87a'" onmouseout="this.style.color='#6b8099'">Contact</a>
+      <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
+      <div style="text-align:center;margin-top:10px;"><a class="toggle-link muted-link" onclick="stepShow('step-login')">Already have an account? Sign in</a></div>
     </div>
   </div>
-
+  <div class="sms-hint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div>Text your logs to <strong>1-888-799-LOGS</strong></div></div>
+  <div class="login-footer">
+    <div>2026 Athens Innovation and Development LLC</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;"><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
+  </div>
 </div>
 </div>
 
-<!-- ══════════ MAP SCREEN ══════════ -->
-<div id="map-screen" class="screen hidden">
-  <nav class="map-nav">
-    <div class="map-nav-logo">
-      <svg width="20" height="20" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/></svg>
+<!-- DASHBOARD -->
+<div id="dashboard-screen" class="screen">
+  <nav class="dash-nav">
+    <div class="dash-nav-logo">
+      <svg width="20" height="20" viewBox="0 0 42 42"><defs><radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient><radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/></svg>
       SOS<span>Logs</span>
     </div>
-    <div class="map-nav-right">
-      <div class="phone-pill"><div class="udot"></div><span id="nav-phone">…</span></div>
-      <div class="email-dropdown-wrap">
-        <button class="email-dropdown-btn" onclick="toggleEmailDropdown()">
-          <span id="nav-email-label">All emails</span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="email-dropdown-menu" id="email-dropdown-menu"></div>
-      </div>
-      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    <div class="dash-nav-right">
+      <div class="phone-chip"><div class="udot"></div><span id="nav-phone">...</span></div>
+      <button class="nav-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </nav>
-  <div id="loc-overlay" style="display:none;"></div>
 
-  <!-- Map legend -->
-  <div style="position:fixed;bottom:80px;left:16px;z-index:150;background:rgba(22,28,33,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;font-size:11px;color:#6b8099;backdrop-filter:blur(8px);">
-    <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:#e63e2f;flex-shrink:0;"></div>
-      Street-level precision
+  <div class="dash-body">
+    <div class="section-hdr"><span class="section-title">Overview — Last 90 Days</span></div>
+
+    <!-- Stat cards -->
+    <div class="cards-row cols-4">
+      <div class="stat-card"><div class="stat-accent" style="background:var(--safe);"></div><div class="stat-icon">📋</div><div class="stat-label">Total Logs</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub" id="stat-total-sub">Loading...</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--blue);"></div><div class="stat-icon">📅</div><div class="stat-label">Active Days</div><div class="stat-value" id="stat-days">—</div><div class="stat-sub">Days with logs</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--warn);"></div><div class="stat-icon">👤</div><div class="stat-label">People Mentioned</div><div class="stat-value" id="stat-people">—</div><div class="stat-sub" id="stat-people-sub">Unique names</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--purple);"></div><div class="stat-icon">📍</div><div class="stat-label">Locations Logged</div><div class="stat-value" id="stat-places">—</div><div class="stat-sub" id="stat-places-sub">Unique places</div></div>
     </div>
-    <div style="display:flex;align-items:center;gap:7px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:#f5a623;flex-shrink:0;"></div>
-      City-level only
+
+    <!-- Recent + People + Places -->
+    <div class="cards-row cols-3">
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Recent Activity</div><div id="recent-logs" class="log-list"><div class="empty">Loading...</div></div></div>
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">People Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="people-list" class="freq-list"><div class="empty">Loading...</div></div></div>
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Places Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="places-list" class="freq-list"><div class="empty">Loading...</div></div></div>
     </div>
-  </div>
-  <div id="map"></div>
-  <div id="map-backdrop" onclick="closeDrawer()"></div>
-  <div id="log-drawer">
-    <div class="drawer-handle"></div>
-    <div class="drawer-header">
-      <h3 id="drawer-title">Your SOSLogs</h3>
-      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    <div style="margin-bottom:24px;"></div>
+
+    <!-- Spider + Map -->
+    <div class="cards-row cols-2">
+      <div class="wide-card" style="margin-bottom:0;">
+        <div class="wide-card-title">Credibility Profile <span style="font-size:10px;color:var(--muted);font-weight:400;">Law enforcement standards</span></div>
+        <div class="integrity-row">
+          <div><div class="integrity-score" id="integrity-score">—</div><div class="integrity-label">Overall Score</div></div>
+          <div class="integrity-desc" id="integrity-desc">Analyzing your log entries...</div>
+        </div>
+        <canvas id="spider-canvas" width="300" height="260" style="display:block;margin:0 auto;"></canvas>
+      </div>
+      <div class="wide-card" style="margin-bottom:0;">
+        <div class="wide-card-title">Incident Locations <span style="font-size:10px;color:var(--muted);font-weight:400;">City level from SMS origin</span></div>
+        <div id="mini-map"></div>
+        <div class="map-legend">
+          <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--danger);"></div>Street level</div>
+          <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--warn);"></div>City level</div>
+        </div>
+      </div>
     </div>
-    <div class="drawer-body" id="drawer-body">
-      <div class="logs-empty"><div class="logs-empty-icon">📭</div><div class="logs-empty-text">No logs yet.<br>Text <strong>1-888-799-LOGS</strong> to start.</div></div>
+    <div style="margin-bottom:24px;"></div>
+
+    <!-- Messages -->
+    <div class="wide-card">
+      <div class="wide-card-title">
+        Message Log
+        <button class="show-msgs-btn" id="show-msgs-btn" onclick="toggleMessages()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Show Messages
+        </button>
+      </div>
+      <div class="msg-panel" id="msg-panel">
+        <div class="filter-bar">
+          <input class="filter-input" id="filter-keyword" type="text" placeholder="Search keyword e.g. Robert, Arlington..." oninput="applyFilters()">
+          <input class="filter-input" id="filter-date-from" type="date" onchange="applyFilters()" style="max-width:150px;">
+          <input class="filter-input" id="filter-date-to" type="date" onchange="applyFilters()" style="max-width:150px;">
+          <button class="filter-btn" onclick="clearFilters()">Clear</button>
+        </div>
+        <div class="msg-count" id="msg-count"></div>
+        <div id="msg-list"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script type="module">
-import { initializeApp }      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -309,373 +289,314 @@ const fbApp = initializeApp({
 const auth = getAuth(fbApp);
 const db   = getFirestore(fbApp);
 
-// ══════════════════════════════════════════════════════════════
-// FIRESTORE STRUCTURE
-// users/{phone}/profile/data          — profile doc
-// users/{phone}/emails/{encodedEmail} — email identity doc
-// users/{phone}/emails/{encodedEmail}/records/{id} — SMS logs
-//
-// phone = E.164 e.g. "+12145551234"  (primary key shown in nav)
-// email = Firebase Auth login credential (secondary identity)
-// One phone → many emails → many records each
-// ══════════════════════════════════════════════════════════════
-
 const encEmail = e => e.replace(/\./g,'_dot_').replace(/@/g,'_at_');
 const decEmail = e => e.replace(/_dot_/g,'.').replace(/_at_/g,'@');
-const profileRef  = p => doc(db,'users',p,'profile','data');
-const emailsCol   = p => collection(db,'users',p,'emails');
-const recordsCol  = (p,e) => collection(db,'users',p,'emails',encEmail(e),'records');
-const normPhone   = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
+const emailsCol  = p => collection(db,'users',p,'emails');
+const recordsCol = (p,e) => collection(db,'users',p,'emails',encEmail(e),'records');
+const normPhone  = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
 
 let currentPhone = null;
-let userEmails   = [];
-let activeEmail  = 'all';
+let allRecords   = [];
+let msgsVisible  = false;
 
-// ── Auth state ───────────────────────────────────────────────
+const STOP_WORDS = new Set(['The','This','That','Then','When','With','From','Have','Been','They','Also','Were','Your','Their','After','Before','During','About','Which','Would','Could','Should','Reply','Stop','Help','Message','Record','Saved','Incident','Meeting','March','April','January','February','October','November','December','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Direct','Please','Texas']);
+
+// AUTH STATE
 onAuthStateChanged(auth, async user => {
   document.getElementById('app-loading').classList.add('hide');
   if(user){
-    // displayName stores the phone number set at signup
+    await user.reload();
     currentPhone = user.displayName || user.email;
-    await showMap(user);
+    await showDashboard(user);
   } else {
-    document.getElementById('map-screen').classList.add('hidden');
-    document.getElementById('login-screen').classList.remove('hidden');
+    showScreen('login-screen');
   }
 });
 
-// ── Login ────────────────────────────────────────────────────
+// LOGIN
 window.doLogin = async function(){
-  const id  = document.getElementById('login-id').value.trim();
-  const pw  = document.getElementById('login-pw').value;
-  const btn = document.getElementById('login-btn');
+  const id=document.getElementById('login-id').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  const btn=document.getElementById('login-btn');
   clearMsg('login-err'); clearMsg('login-ok');
   if(!id||!pw){ showErr('login-err','Please enter your phone/email and password.'); return; }
   btn.innerHTML='<div class="spinner"></div>'; btn.disabled=true;
   const loginEmail = id.includes('@') ? id : id.replace(/\D/g,'')+'@soslog.phone';
-  try{
-    await signInWithEmailAndPassword(auth, loginEmail, pw);
-  } catch(e){
+  try{ await signInWithEmailAndPassword(auth,loginEmail,pw); }
+  catch(e){
     btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    btn.disabled=false;
-    showErr('login-err', fErr(e.code));
+    btn.disabled=false; showErr('login-err',fErr(e.code));
   }
 };
 
-// ── Signup ───────────────────────────────────────────────────
+// SIGNUP
 window.doSignup = async function(){
-  const cc      = (document.getElementById('su-cc').value.trim()||'+1');
-  const phone   = document.getElementById('su-phone').value.trim();
-  const country = document.getElementById('su-country').value.trim();
-  const email   = document.getElementById('su-email').value.trim();
-  const pw      = document.getElementById('su-pw').value;
-  const pw2     = document.getElementById('su-pw2').value;
-  const btn     = document.getElementById('signup-btn');
+  const cc=document.getElementById('su-cc').value.trim()||'+1';
+  const phone=document.getElementById('su-phone').value.trim();
+  const country=document.getElementById('su-country').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pw=document.getElementById('su-pw').value;
+  const pw2=document.getElementById('su-pw2').value;
+  const btn=document.getElementById('signup-btn');
   clearMsg('signup-err'); clearMsg('signup-ok');
   if(!phone||!email||!country){ showErr('signup-err','Please fill in all fields.'); return; }
   if(pw.length<8){ showErr('signup-err','Password must be at least 8 characters.'); return; }
   if(pw!==pw2){ showErr('signup-err','Passwords do not match.'); return; }
-  const fullPhone = normPhone(cc, phone);
-  btn.disabled=true; btn.innerHTML='<div class="spinner spinner-g"></div> Creating account…';
+  const fullPhone=normPhone(cc,phone);
+  btn.disabled=true; btn.innerHTML='<div class="spinner spinner-g"></div> Creating...';
   try{
-    const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    // Store phone as displayName — primary identity
-    await updateProfile(cred.user,{ displayName: fullPhone });
-    // Firestore: phone-first hierarchy
-    await setDoc(profileRef(fullPhone),{
-      uid: cred.user.uid, phone: fullPhone, country,
-      plan:'basic', status:'active',
-      joinedAt: serverTimestamp(), joinedLocal: new Date().toISOString()
-    });
-    await setDoc(doc(emailsCol(fullPhone), encEmail(email)),{
-      email, addedAt: serverTimestamp(), primary: true
-    });
-    showOk('signup-ok','Account created! Signing you in…');
-  } catch(e){
-    btn.disabled=false; btn.innerHTML='Create Account &amp; Secure My Log';
-    showErr('signup-err', fErr(e.code));
-  }
+    const cred=await createUserWithEmailAndPassword(auth,email,pw);
+    await updateProfile(cred.user,{displayName:fullPhone});
+    await setDoc(doc(db,'users',fullPhone,'profile','data'),{uid:cred.user.uid,phone:fullPhone,country,plan:'basic',status:'active',joinedAt:serverTimestamp(),joinedLocal:new Date().toISOString()});
+    await setDoc(doc(emailsCol(fullPhone),encEmail(email)),{email,addedAt:serverTimestamp(),primary:true});
+    showOk('signup-ok','Account created! Signing you in...');
+  } catch(e){ btn.disabled=false; btn.innerHTML='Create Account &amp; Secure My Log'; showErr('signup-err',fErr(e.code)); }
 };
 
-// ── Forgot password ──────────────────────────────────────────
 window.doForgotPw = async function(){
-  const id = document.getElementById('login-id').value.trim();
+  const id=document.getElementById('login-id').value.trim();
   clearMsg('login-err');
-  if(!id||!id.includes('@')){ showErr('login-err','Enter your email address first, then click Reset Password.'); return; }
-  try{
-    await sendPasswordResetEmail(auth, id);
-    showOk('login-ok','Reset email sent — check your inbox.');
-  } catch(e){ showErr('login-err', fErr(e.code)); }
+  if(!id||!id.includes('@')){ showErr('login-err','Enter your email address first.'); return; }
+  try{ await sendPasswordResetEmail(auth,id); showOk('login-ok','Reset email sent.'); }
+  catch(e){ showErr('login-err',fErr(e.code)); }
 };
 
-window.switchToSignup = () => stepShow('step-signup');
-window.switchToLogin  = () => stepShow('step-login');
-window.doLogout = async () => {
-  await signOut(auth);
-  window.history.replaceState({},'','/');
-};
+window.doLogout = async () => { await signOut(auth); window.history.replaceState({},'','/'); };
 
-// ── Map screen ───────────────────────────────────────────────
-async function showMap(user){
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('map-screen').classList.remove('hidden');
+// DASHBOARD
+async function showDashboard(user){
+  showScreen('dashboard-screen');
   document.getElementById('nav-phone').textContent = fmtPhone(currentPhone);
   const slug = currentPhone.replace(/\+/g,'').replace(/\s/g,'');
-  window.history.replaceState({}, '', `/${slug}`);
-  await loadEmails();
-  renderDropdown();
-  loadMaps();
+  window.history.replaceState({},'','/'+slug);
+  allRecords = await loadAllRecords();
+  renderStats(allRecords);
+  renderRecentLogs(allRecords);
+  renderPeople(allRecords);
+  renderPlaces(allRecords);
+  renderSpider(allRecords);
+  loadMiniMap(allRecords);
 }
 
-async function loadEmails(){
-  userEmails=[];
-  if(!currentPhone) return;
+async function loadAllRecords(){
+  const records=[];
   try{
-    const snap = await getDocs(emailsCol(currentPhone));
-    snap.forEach(d => userEmails.push({ id:d.id, email:d.data().email||decEmail(d.id), primary:d.data().primary }));
-  } catch(e){ console.warn('loadEmails:',e); }
+    const emailSnap=await getDocs(emailsCol(currentPhone));
+    const emailIds=[];
+    emailSnap.forEach(d=>emailIds.push({id:d.id,email:d.data().email||decEmail(d.id)}));
+    for(const e of emailIds){
+      try{
+        const snap=await getDocs(query(recordsCol(currentPhone,e.email),orderBy('timestamp','desc')));
+        snap.forEach(d=>records.push({...d.data(),_email:e.email,_id:d.id}));
+      } catch(_){}
+    }
+    try{
+      const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
+      snap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id}));
+    } catch(_){}
+    records.sort((a,b)=>getTs(b)-getTs(a));
+  } catch(e){ console.error('loadAllRecords:',e); }
+  return records;
 }
 
-function renderDropdown(){
-  const menu  = document.getElementById('email-dropdown-menu');
-  const label = document.getElementById('nav-email-label');
-  let html = `<div class="email-option ${activeEmail==='all'?'active':''}" onclick="selectEmail('all')"><div class="eo-dot"></div>All emails</div>`;
-  userEmails.forEach(e=>{
-    html+=`<div class="email-option ${activeEmail===e.id?'active':''}" onclick="selectEmail('${e.id}')"><div class="eo-dot"></div>${e.email}${e.primary?' ★':''}</div>`;
+function getTs(r){
+  if(r.timestamp?.toDate) return r.timestamp.toDate().getTime();
+  if(r.timestampLocal) return new Date(r.timestampLocal).getTime();
+  return 0;
+}
+
+function last90(records){
+  const cutoff=Date.now()-90*24*60*60*1000;
+  return records.filter(r=>getTs(r)>cutoff);
+}
+
+// STATS
+function renderStats(records){
+  const r90=last90(records);
+  document.getElementById('stat-total').textContent=r90.length;
+  document.getElementById('stat-total-sub').textContent=records.length+' total all time';
+  const days=new Set(r90.map(r=>new Date(getTs(r)).toDateString())).size;
+  document.getElementById('stat-days').textContent=days;
+  const people=extractPeople(r90);
+  document.getElementById('stat-people').textContent=people.length;
+  document.getElementById('stat-people-sub').textContent=people[0]?.name?'Top: '+people[0].name:'None found';
+  const places=extractPlaces(r90);
+  document.getElementById('stat-places').textContent=places.length;
+  document.getElementById('stat-places-sub').textContent=places[0]?.name?'Top: '+places[0].name:'None found';
+}
+
+// RECENT LOGS
+function renderRecentLogs(records){
+  const el=document.getElementById('recent-logs');
+  const recent=last90(records).slice(0,8);
+  if(!recent.length){ el.innerHTML='<div class="empty">No logs in last 90 days.</div>'; return; }
+  el.innerHTML=recent.map(r=>{
+    const ts=new Date(getTs(r));
+    const dateStr=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const timeStr=ts.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    const dotColor=r.location?.precision==='address'?'var(--danger)':'var(--warn)';
+    return '<div class="log-item" onclick="openMessages()"><div class="log-dot" style="background:'+dotColor+';"></div><div style="flex:1;min-width:0;"><div class="log-date">'+dateStr+' '+timeStr+'</div><div class="log-body">'+esc((r.body||r.message||'').slice(0,100))+'</div></div></div>';
+  }).join('');
+}
+
+// PEOPLE
+function extractPeople(records){
+  const namePatterns=['Robert','Morgan','Mike','Brad','Alex','Robbie','Dylan','River','Dana','Lori','Gabriel','Brendan','Jennifer','Thanaa','Naveen','Vin'];
+  const counts={};
+  const allText=records.map(r=>r.body||r.message||'').join(' ');
+  namePatterns.forEach(name=>{
+    const matches=allText.match(new RegExp('\\b'+name+'\\b','gi'));
+    if(matches&&matches.length>0) counts[name]=matches.length;
   });
-  menu.innerHTML=html;
-  label.textContent = activeEmail==='all' ? 'All emails' : (userEmails.find(e=>e.id===activeEmail)?.email||'All emails');
+  const capWords=allText.match(/\b[A-Z][a-z]{2,}\b/g)||[];
+  const capCounts={};
+  capWords.forEach(w=>{capCounts[w]=(capCounts[w]||0)+1;});
+  Object.entries(capCounts).forEach(([w,c])=>{ if(c>=2&&!counts[w]&&!STOP_WORDS.has(w)) counts[w]=c; });
+  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,8);
 }
 
-window.selectEmail = function(eid){
-  activeEmail=eid; renderDropdown(); toggleEmailDropdown();
-  // Refresh map pins for selected email
-  if(gmap) placeSMSPins();
-  // Refresh drawer if open
-  if(document.getElementById('log-drawer').classList.contains('open')) loadLogs();
-};
-window.toggleEmailDropdown = ()=>document.getElementById('email-dropdown-menu').classList.toggle('open');
-document.addEventListener('click',e=>{
-  const w=document.querySelector('.email-dropdown-wrap');
-  if(w&&!w.contains(e.target)) document.getElementById('email-dropdown-menu').classList.remove('open');
-});
+// PLACES
+function extractPlaces(records){
+  const placePatterns=['Arlington','Fort Worth','Dallas','Texas','TX','office','conference room','meeting room','Arlington Water Utility','City of Arlington'];
+  const counts={};
+  const allText=records.map(r=>r.body||r.message||'').join(' ');
+  placePatterns.forEach(p=>{
+    const matches=allText.match(new RegExp('\\b'+p.replace(/\s/g,'\\s')+'\\b','gi'));
+    if(matches&&matches.length>0) counts[p]=matches.length;
+  });
+  records.forEach(r=>{ if(r.location?.city){ const c=r.location.city; counts[c]=(counts[c]||0)+1; } });
+  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,8);
+}
 
-// ── Google Maps ──────────────────────────────────────────────
-let gmap = null;
-let gmarkers = [];
+function renderFreqList(elId,items,color){
+  const el=document.getElementById(elId);
+  if(!items.length){ el.innerHTML='<div class="empty">None found</div>'; return; }
+  const max=items[0].count;
+  el.innerHTML=items.map(item=>'<div class="freq-item"><div class="freq-name">'+esc(item.name)+'</div><div class="freq-bar-wrap"><div class="freq-bar" style="width:'+Math.round(item.count/max*100)+'%;background:'+color+';"></div></div><div class="freq-count">'+item.count+'</div></div>').join('');
+}
+function renderPeople(r){ renderFreqList('people-list',extractPeople(last90(r)),'var(--warn)'); }
+function renderPlaces(r){ renderFreqList('places-list',extractPlaces(last90(r)),'var(--purple)'); }
 
-function loadMaps(){
-  if(typeof google!=='undefined'){ initMap(); return; }
+// SPIDER
+function scoreCredibility(records){
+  const r90=last90(records);
+  if(!r90.length) return {scores:{},overall:0,desc:''};
+  const allText=r90.map(r=>r.body||r.message||'').join(' ');
+  const avgLen=allText.length/Math.max(r90.length,1);
+  const dateMatches=(allText.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|\d{1,2}\/\d{1,2}|\d{1,2}:\d{2}|am|pm)\b/gi)||[]).length;
+  const specificity=Math.min(100,Math.round(dateMatches/r90.length*20));
+  const keyTermCounts={};
+  r90.forEach(r=>{ const words=(r.body||'').match(/\b[A-Z][a-z]{2,}\b/g)||[]; words.forEach(w=>{keyTermCounts[w]=(keyTermCounts[w]||0)+1;}); });
+  const repeatedTerms=Object.values(keyTermCounts).filter(c=>c>2).length;
+  const consistency=Math.min(100,Math.round(repeatedTerms*8));
+  const density=Math.min(100,Math.round(avgLen/3));
+  const people=extractPeople(r90);
+  const corroboration=Math.min(100,people.length*14);
+  const days=new Set(r90.map(r=>new Date(getTs(r)).toDateString())).size;
+  const timeline=Math.min(100,Math.round(days/90*400));
+  const patternScore=Math.min(100,repeatedTerms*6+people.length*5);
+  const emotionalWords=(allText.match(/\b(hate|angry|furious|unfair|terrible|horrible|worst|awful|racist|discrimination)\b/gi)||[]).length;
+  const factualWords=(allText.match(/\b(meeting|email|date|time|sent|received|confirmed|documented|recorded|witnessed)\b/gi)||[]).length;
+  const objectivity=Math.min(100,Math.max(0,50+factualWords*3-emotionalWords*5));
+  const scores={Specificity:specificity,Consistency:consistency,'Doc Density':density,Corroboration:corroboration,Timeline:timeline,Patterns:patternScore,Objectivity:objectivity};
+  const overall=Math.round(Object.values(scores).reduce((a,b)=>a+b,0)/Object.keys(scores).length);
+  const desc=overall>=80?'Strong credibility profile. Your documentation shows high specificity, consistency, and factual objectivity — characteristics that hold up under scrutiny.':overall>=60?'Good credibility profile. Continue documenting with specific dates, times, and witness names to strengthen your record.':'Building credibility profile. Include more specific details — dates, times, locations, and names — in each log entry.';
+  return {scores,overall,desc};
+}
+
+function renderSpider(records){
+  const {scores,overall,desc}=scoreCredibility(records);
+  document.getElementById('integrity-score').textContent=overall||'—';
+  document.getElementById('integrity-desc').textContent=desc||'Add more logs to generate your profile.';
+  const canvas=document.getElementById('spider-canvas');
+  const ctx=canvas.getContext('2d');
+  const keys=Object.keys(scores);
+  const vals=Object.values(scores);
+  const n=keys.length;
+  if(!n) return;
+  const W=300,H=260,cx=W/2,cy=H/2,R=90;
+  ctx.clearRect(0,0,W,H);
+  [20,40,60,80,100].forEach(pct=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(pct/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.closePath(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+  });
+  keys.forEach((_,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(angle),cy+R*Math.sin(angle)); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke(); });
+  ctx.beginPath();
+  vals.forEach((v,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(v/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.closePath(); ctx.fillStyle='rgba(29,184,122,0.15)'; ctx.strokeStyle='rgba(29,184,122,0.8)'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  vals.forEach((v,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(v/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle='#1db87a'; ctx.fill(); });
+  ctx.fillStyle='rgba(204,216,232,0.8)'; ctx.font='11px -apple-system,sans-serif'; ctx.textAlign='center';
+  keys.forEach((k,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R+22; const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle)+4; ctx.fillText(k,x,y); });
+}
+
+// MINI MAP
+function loadMiniMap(records){
+  if(typeof google!=='undefined'){ initMiniMap(records); return; }
   const s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=mapReady';
+  s.src='https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=miniMapReady';
   s.async=true; document.head.appendChild(s);
-  window.mapReady=initMap;
+  window.miniMapReady=()=>initMiniMap(records);
 }
-
-function initMap(){
-  document.getElementById('loc-overlay').classList.add('hide');
-  // Default center — DFW area. Pins will appear where SMS were actually sent from.
-  gmap = new google.maps.Map(document.getElementById('map'),{
-    center:{lat:32.7767,lng:-96.7970},
-    zoom:10,
-    styles:DARK_MAP,
-    disableDefaultUI:true,
-    zoomControl:true,
-    zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM}
+function initMiniMap(records){
+  const mapEl=document.getElementById('mini-map');
+  const gmap=new google.maps.Map(mapEl,{center:{lat:32.7767,lng:-96.7970},zoom:8,styles:DARK_MAP,disableDefaultUI:true});
+  const geoRecords=records.filter(r=>r.location?.lat&&r.location?.lng);
+  if(!geoRecords.length) return;
+  const bounds=new google.maps.LatLngBounds();
+  geoRecords.forEach(r=>{
+    const pos={lat:r.location.lat,lng:r.location.lng};
+    bounds.extend(pos);
+    const isStreet=r.location?.precision==='address';
+    new google.maps.Marker({position:pos,map:gmap,icon:{path:google.maps.SymbolPath.CIRCLE,scale:isStreet?10:8,fillColor:isStreet?'#e63e2f':'#f5a623',fillOpacity:1,strokeColor:isStreet?'#ff7878':'#f7c060',strokeWeight:1.5}});
   });
-  // Load and place pins from SMS logs
-  placeSMSPins();
+  if(geoRecords.length===1){gmap.setCenter(bounds.getCenter());gmap.setZoom(10);}
+  else{gmap.fitBounds(bounds,30);}
 }
 
-async function placeSMSPins(){
-  // Clear existing markers
-  gmarkers.forEach(m=>m.setMap(null));
-  gmarkers=[];
+// MESSAGES
+window.toggleMessages = function(){
+  msgsVisible=!msgsVisible;
+  const panel=document.getElementById('msg-panel');
+  const btn=document.getElementById('show-msgs-btn');
+  panel.classList.toggle('open',msgsVisible);
+  btn.innerHTML=msgsVisible
+    ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/></svg> Hide Messages'
+    :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Show Messages';
+  if(msgsVisible) renderMessages(allRecords);
+};
+window.openMessages = function(){ if(!msgsVisible) toggleMessages(); document.getElementById('msg-panel').scrollIntoView({behavior:'smooth'}); };
+window.applyFilters = function(){ renderMessages(allRecords); };
+window.clearFilters = function(){ document.getElementById('filter-keyword').value=''; document.getElementById('filter-date-from').value=''; document.getElementById('filter-date-to').value=''; renderMessages(allRecords); };
 
-  if(!currentPhone) return;
-
-  try{
-    let allRecords=[];
-    const emailsToQuery = activeEmail==='all'
-      ? userEmails.map(e=>decEmail(e.id))
-      : [decEmail(activeEmail)];
-
-    for(const em of emailsToQuery){
-      try{
-        const snap=await getDocs(query(recordsCol(currentPhone,em),orderBy('timestamp','desc')));
-        snap.forEach(d=>allRecords.push({...d.data(),_email:em,_id:d.id}));
-      } catch(_){}
-    }
-    if(activeEmail==='all'){
-      try{
-        const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
-        snap.forEach(d=>allRecords.push({...d.data(),_email:'',_id:d.id}));
-      } catch(_){}
-    }
-
-    // Filter records that have geocoded coordinates
-    const geoRecords = allRecords.filter(r=>r.location?.lat && r.location?.lng);
-
-    if(!geoRecords.length){
-      // No location data yet — show default view with instruction
-      showMapInstruction();
-      return;
-    }
-
-    const bounds = new google.maps.LatLngBounds();
-
-    geoRecords.forEach((r,i)=>{
-      const pos = {lat: r.location.lat, lng: r.location.lng};
-      bounds.extend(pos);
-
-      // Pin color: bright red = street address precision, orange = city level
-      const isStreet = r.location?.precision === 'address';
-      const pinColor  = isStreet ? '#e63e2f' : '#f5a623';
-      const ringColor = isStreet ? '#ff7878' : '#f7c060';
-
-      const marker = new google.maps.Marker({
-        position: pos,
-        map: gmap,
-        animation: i===0 ? google.maps.Animation.DROP : null,
-        title: r.location.formatted || 'SMS Location',
-        icon:{
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: isStreet ? 13 : 10,
-          fillColor: pinColor,
-          fillOpacity: 1,
-          strokeColor: ringColor,
-          strokeWeight: 2,
-        }
-      });
-
-      // Pulse ring
-      const pulse = new google.maps.Marker({
-        position: pos, map: gmap, clickable: false,
-        icon:{
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: isStreet ? 22 : 18,
-          fillColor: pinColor, fillOpacity:0.1,
-          strokeColor: pinColor, strokeWeight:1, strokeOpacity:0.25,
-        }
-      });
-
-      const ts = r.timestamp?.toDate ? r.timestamp.toDate() : new Date(r.timestampLocal||0);
-      const timeStr = ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
-      const precisionLabel = isStreet
-        ? `📍 <span style="color:#e63e2f;">Street level</span> — ${esc(r.location.formatted||'')}`
-        : `📍 <span style="color:#f5a623;">City level</span> — ${esc(r.location.formatted||'')} <span style="color:#6b8099;font-size:10px;">(include address in text for precision)</span>`;
-
-      const iw = new google.maps.InfoWindow({
-        content:`<div style="background:#161c21;color:#d8e4ee;font-family:-apple-system,sans-serif;padding:12px;border-radius:8px;max-width:280px;font-size:13px;line-height:1.5;">
-          <div style="font-size:11px;color:#6b8099;margin-bottom:6px;">${timeStr}</div>
-          <div style="color:#d8e4ee;margin-bottom:8px;">${esc(r.body||r.message||'')}</div>
-          <div style="font-size:11px;">${precisionLabel}</div>
-        </div>`
-      });
-
-      marker.addListener('click',()=>{
-        // Close all other info windows
-        gmarkers.forEach(m=>m._iw&&m._iw.close());
-        iw.open(gmap, marker);
-        // Also open drawer filtered to this log
-        openDrawer();
-      });
-
-      marker._iw = iw;
-      gmarkers.push(marker);
-      gmarkers.push(pulse);
-    });
-
-    // Fit map to show all pins
-    if(geoRecords.length === 1){
-      gmap.setCenter(bounds.getCenter());
-      gmap.setZoom(12);
-    } else {
-      gmap.fitBounds(bounds, 60);
-    }
-
-  } catch(e){
-    console.error('placeSMSPins:', e);
-  }
+function renderMessages(records){
+  const keyword=document.getElementById('filter-keyword').value.trim().toLowerCase();
+  const dateFrom=document.getElementById('filter-date-from').value;
+  const dateTo=document.getElementById('filter-date-to').value;
+  let filtered=[...records];
+  if(keyword) filtered=filtered.filter(r=>(r.body||r.message||'').toLowerCase().includes(keyword));
+  if(dateFrom) filtered=filtered.filter(r=>getTs(r)>=new Date(dateFrom).getTime());
+  if(dateTo) filtered=filtered.filter(r=>getTs(r)<=new Date(dateTo).getTime()+86400000);
+  document.getElementById('msg-count').textContent=filtered.length+' message'+(filtered.length!==1?'s':'')+' found';
+  if(!filtered.length){ document.getElementById('msg-list').innerHTML='<div class="empty">No messages match your filters.</div>'; return; }
+  document.getElementById('msg-list').innerHTML=filtered.map(r=>{
+    const ts=new Date(getTs(r));
+    const timeStr=ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+    let body=esc(r.body||r.message||'');
+    if(keyword){ const re=new RegExp('('+keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); body=body.replace(re,'<mark>$1</mark>'); }
+    return '<div class="msg-card"><div class="msg-meta"><span class="msg-time">'+timeStr+'</span><span class="msg-badge">SMS</span>'+(r.location?.formatted?'<span class="msg-loc">📍 '+esc(r.location.formatted)+'</span>':'')+'</div><div class="msg-body">'+body+'</div></div>';
+  }).join('');
 }
 
-function showMapInstruction(){
-  // Show a subtle overlay hint when no SMS logs with location exist yet
-  const existing = document.getElementById('map-hint');
-  if(existing) return;
-  const hint = document.createElement('div');
-  hint.id = 'map-hint';
-  hint.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(22,28,33,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 20px;font-size:13px;color:#6b8099;z-index:150;text-align:center;pointer-events:none;';
-  hint.innerHTML = 'Text <strong style="color:#1db87a;">1-888-799-LOGS</strong> from your phone — your location pins will appear here.';
-  document.body.appendChild(hint);
-}
-
-function openDrawer(){ document.getElementById('log-drawer').classList.add('open'); document.getElementById('map-backdrop').classList.add('open'); loadLogs(); }
-window.closeDrawer=()=>{ document.getElementById('log-drawer').classList.remove('open'); document.getElementById('map-backdrop').classList.remove('open'); };
-
-// ── Load logs ────────────────────────────────────────────────
-async function loadLogs(){
-  const body=document.getElementById('drawer-body');
-  const title=document.getElementById('drawer-title');
-  const ph=fmtPhone(currentPhone);
-  title.textContent = activeEmail==='all' ? `${ph} — All Logs` : `${ph} — ${userEmails.find(e=>e.id===activeEmail)?.email||''}`;
-  body.innerHTML=`<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:13px;"><div class="spinner spinner-g" style="margin:0 auto 12px;width:20px;height:20px;"></div>Loading…</div>`;
-  try{
-    let records=[];
-    const emailsToQuery = activeEmail==='all' ? userEmails.map(e=>decEmail(e.id)) : [decEmail(activeEmail)];
-
-    for(const em of emailsToQuery){
-      try{
-        const snap=await getDocs(query(recordsCol(currentPhone,em),orderBy('timestamp','desc')));
-        snap.forEach(d=>records.push({...d.data(),_email:em}));
-      } catch(_){}
-    }
-    // Also try unlinked bucket
-    if(activeEmail==='all'){
-      try{
-        const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
-        snap.forEach(d=>records.push({...d.data(),_email:''}));
-      } catch(_){}
-    }
-    records.sort((a,b)=>{
-      const ta=a.timestamp?.toDate?a.timestamp.toDate():new Date(a.timestamp||0);
-      const tb=b.timestamp?.toDate?b.timestamp.toDate():new Date(b.timestamp||0);
-      return tb-ta;
-    });
-
-    if(!records.length){
-      body.innerHTML=`<div class="logs-empty"><div class="logs-empty-icon">📭</div><div class="logs-empty-text">No logs yet.<br>Text <strong>1-888-799-LOGS</strong> from your phone to start documenting.</div></div>`;
-      return;
-    }
-    body.innerHTML=records.map(d=>{
-      const ts=d.timestamp?.toDate?d.timestamp.toDate():new Date(d.timestamp||0);
-      const t=ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
-      return `<div class="log-entry">
-        <div class="log-time">${t}<span class="log-badge">SMS</span>${d._email?`<span class="log-email-tag">${esc(d._email)}</span>`:''}</div>
-        <div class="log-body">${esc(d.body||d.message||'')}</div>
-      </div>`;
-    }).join('');
-  } catch(err){
-    body.innerHTML=`<div style="padding:24px;text-align:center;color:#ff6b4a;font-size:13px;">Could not load logs. Please try again.</div>`;
-    console.error(err);
-  }
-}
-
-// ── Utilities ────────────────────────────────────────────────
-function stepShow(id){ document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+// UTILS
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+window.stepShow = id => { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
 function showOk(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
 function clearMsg(id){ const e=document.getElementById(id); e.textContent=''; e.classList.remove('show'); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function fmtPhone(p){
-  if(!p) return '';
-  const d=p.replace(/\D/g,'');
-  if(d.length===11&&d[0]==='1') return `+1 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  return p;
-}
-function fErr(code){
-  return({'auth/user-not-found':'No account found with that phone/email.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Invalid phone/email or password.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 8 characters.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Try again later.','auth/network-request-failed':'Network error. Check your connection.'}[code]||'Something went wrong. Please try again.');
-}
+function fmtPhone(p){ if(!p) return ''; const d=p.replace(/\D/g,''); if(d.length===11&&d[0]==='1') return '+1 ('+d.slice(1,4)+') '+d.slice(4,7)+'-'+d.slice(7); return p; }
+function fErr(code){ return({'auth/user-not-found':'No account found.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Invalid phone/email or password.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 8 characters.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Try again later.'}[code]||'Something went wrong.'); }
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
 </body>

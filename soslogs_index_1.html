@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<style>html,body{background:#0a0c0e!important;}</style>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<title>SOSLogs — Document. Protect. Prove.</title>
+<meta name="description" content="SOSLogs — Personal safety documentation platform. Log incidents via SMS or web. Timestamped, secure, always yours.">
+<style>
+/* ── Variables ─────────────────────────────────────────────────────────── */
+:root{
+  --black:#0a0c0e; --dark:#111518; --card:#161c21; --card2:#1b242c;
+  --border:rgba(255,255,255,0.08);
+  --danger:#e63e2f; --danger2:#ff6b4a;
+  --safe:#1db87a; --safe2:#3dd68c; --safe-dim:rgba(29,184,122,0.12);
+  --warn:#f5a623;
+  --muted:#6b8099; --text:#d8e4ee; --white:#fff;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;}
+body{background:var(--black);color:var(--text);overflow:hidden;}
+
+/* ── Screens ───────────────────────────────────────────────────────────── */
+.screen{position:fixed;inset:0;transition:opacity 0.4s,transform 0.4s;z-index:1;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.98);}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════════════════ */
+#login-screen{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100dvh;padding:24px 16px;
+  background:var(--black);
+  overflow-y:auto;
+}
+
+/* Subtle grid background */
+#login-screen::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(29,184,122,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(29,184,122,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+.login-wrap{
+  position:relative;z-index:1;
+  width:100%;max-width:400px;
+  animation:fadeUp 0.5s cubic-bezier(.22,.68,0,1.2) both;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* Logo */
+.login-logo{
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;margin-bottom:8px;
+}
+.login-logo-text{
+  font-size:26px;font-weight:800;letter-spacing:-0.5px;
+  color:var(--white);
+}
+.login-logo-text span{color:var(--safe);}
+.login-tagline{
+  text-align:center;font-size:12px;color:var(--muted);
+  letter-spacing:0.06em;margin-bottom:36px;
+}
+
+/* Card */
+.login-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px 24px;
+  position:relative;overflow:hidden;
+}
+
+/* Corner glow */
+.login-card::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(29,184,122,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Tabs */
+.auth-tabs{
+  display:flex;gap:4px;
+  background:var(--dark);
+  border-radius:10px;padding:3px;margin-bottom:24px;
+}
+.auth-tab{
+  flex:1;padding:8px;border:none;border-radius:8px;
+  background:transparent;color:var(--muted);
+  font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.18s;
+}
+.auth-tab.active{
+  background:var(--card);color:var(--white);
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Form fields */
+.auth-field{margin-bottom:14px;}
+.auth-label{
+  display:block;font-size:11px;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+}
+.auth-input{
+  width:100%;background:var(--dark);
+  border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 14px;
+  color:var(--text);font-family:var(--font);
+  font-size:15px;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+  -webkit-text-fill-color:var(--text);
+}
+.auth-input::placeholder{color:var(--muted);}
+.auth-input:focus{
+  border-color:rgba(29,184,122,0.5);
+  box-shadow:0 0 0 3px rgba(29,184,122,0.08);
+}
+
+/* Button */
+.auth-btn{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:var(--safe);color:#000;
+  font-family:var(--font);font-size:15px;font-weight:700;
+  cursor:pointer;transition:all 0.18s;margin-top:8px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.auth-btn:hover{background:var(--safe2);transform:translateY(-1px);}
+.auth-btn:active{transform:translateY(0);}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+/* Error / status */
+.auth-status{
+  margin-top:12px;padding:10px 12px;border-radius:8px;
+  font-size:13px;display:none;text-align:center;
+}
+.auth-status.error{
+  display:block;
+  background:rgba(230,62,47,0.08);
+  border:1px solid rgba(230,62,47,0.2);
+  color:#ff6b4a;
+}
+.auth-status.success{
+  display:block;
+  background:rgba(29,184,122,0.08);
+  border:1px solid rgba(29,184,122,0.2);
+  color:var(--safe2);
+}
+
+/* Forgot password */
+.auth-forgot{
+  text-align:center;margin-top:14px;
+  font-size:12px;color:var(--muted);
+}
+.auth-forgot a{color:var(--safe);text-decoration:none;}
+.auth-forgot a:hover{text-decoration:underline;}
+
+/* Spinner */
+.spinner{
+  width:18px;height:18px;
+  border:2px solid rgba(0,0,0,0.3);
+  border-top-color:#000;border-radius:50%;
+  animation:spin 0.6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Phone number display */
+.sms-hint{
+  margin-top:20px;padding:12px 14px;
+  background:rgba(29,184,122,0.05);
+  border:1px solid rgba(29,184,122,0.12);
+  border-radius:10px;
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--muted);
+}
+.sms-hint strong{color:var(--safe);font-size:13px;}
+
+/* ══════════════════════════════════════════════════════
+   MAP / DASHBOARD SCREEN
+══════════════════════════════════════════════════════ */
+#map-screen{background:var(--black);}
+
+/* Top nav */
+.map-nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(10,12,14,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.map-nav-logo{
+  display:flex;align-items:center;gap:8px;
+  font-size:17px;font-weight:800;color:var(--white);
+}
+.map-nav-logo span{color:var(--safe);}
+.map-nav-right{display:flex;align-items:center;gap:10px;}
+.map-user-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px;
+  font-size:12px;color:var(--muted);
+}
+.map-user-pill .udot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--safe);box-shadow:0 0 6px var(--safe);
+}
+.logout-btn{
+  background:transparent;border:1px solid var(--border);
+  border-radius:8px;padding:6px 12px;
+  color:var(--muted);font-family:var(--font);
+  font-size:12px;cursor:pointer;transition:all 0.18s;
+}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Map container */
+#map{
+  position:fixed;inset:0;top:57px;
+  width:100%;height:calc(100dvh - 57px);
+}
+
+/* Location loading overlay */
+#loc-overlay{
+  position:fixed;inset:0;top:57px;z-index:150;
+  background:var(--black);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;
+}
+#loc-overlay.hide{display:none;}
+.loc-pulse{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(230,62,47,0.15);
+  display:flex;align-items:center;justify-content:center;
+  animation:locpulse 1.5s ease infinite;
+}
+@keyframes locpulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(230,62,47,0.3);}
+  50%{box-shadow:0 0 0 20px rgba(230,62,47,0);}
+}
+.loc-pulse-inner{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--danger);
+}
+.loc-text{font-size:14px;color:var(--muted);}
+
+/* Log drawer — slides up from bottom */
+#log-drawer{
+  position:fixed;bottom:-100%;left:0;right:0;z-index:300;
+  background:var(--dark);
+  border-top:1px solid var(--border);
+  border-radius:20px 20px 0 0;
+  max-height:75dvh;
+  transition:bottom 0.38s cubic-bezier(0.4,0,0.2,1);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+#log-drawer.open{bottom:0;}
+
+.drawer-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--border);margin:12px auto 0;flex-shrink:0;
+}
+.drawer-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 10px;flex-shrink:0;
+}
+.drawer-header h3{
+  font-size:15px;font-weight:700;color:var(--white);
+}
+.drawer-close{
+  width:28px;height:28px;border-radius:7px;border:none;
+  background:rgba(255,255,255,0.06);color:var(--muted);
+  font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.drawer-close:hover{background:rgba(255,255,255,0.1);color:var(--white);}
+
+.drawer-body{
+  flex:1;overflow-y:auto;padding:0 20px 32px;
+}
+
+/* Log entry card */
+.log-entry{
+  padding:14px 0;border-bottom:1px solid var(--border);
+  animation:fadeIn 0.25s ease both;
+}
+.log-entry:last-child{border-bottom:none;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.log-entry-time{
+  font-size:11px;color:var(--muted);
+  letter-spacing:0.04em;margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;
+}
+.log-source-badge{
+  background:rgba(29,184,122,0.1);
+  border:1px solid rgba(29,184,122,0.2);
+  border-radius:4px;padding:1px 6px;
+  font-size:10px;color:var(--safe);letter-spacing:0.06em;
+}
+.log-entry-body{
+  font-size:14px;color:var(--text);line-height:1.6;
+}
+
+/* Empty state */
+.logs-empty{
+  padding:48px 0;text-align:center;
+}
+.logs-empty-icon{font-size:36px;margin-bottom:12px;}
+.logs-empty-text{font-size:14px;color:var(--muted);line-height:1.6;}
+.logs-empty-text strong{color:var(--safe);}
+
+/* Map backdrop */
+#map-backdrop{
+  position:fixed;inset:0;z-index:250;
+  background:rgba(0,0,0,0);
+  display:none;transition:background 0.3s;
+}
+#map-backdrop.open{display:block;background:rgba(0,0,0,0.6);}
+
+/* Loading overlay full screen */
+#app-loading{
+  position:fixed;inset:0;z-index:999;
+  background:var(--black);
+  display:flex;align-items:center;justify-content:center;
+}
+#app-loading.hide{display:none;}
+.app-loading-logo{
+  display:flex;align-items:center;gap:10px;
+  animation:blink 1.5s ease infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.app-loading-text{
+  font-size:22px;font-weight:800;color:var(--white);
+}
+.app-loading-text span{color:var(--safe);}
+</style>
+</head>
+<body>
+
+<!-- ── App Loading ─────────────────────────────────────────────────────── -->
+<div id="app-loading">
+  <div class="app-loading-logo">
+    <!-- Red icon -->
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient>
+        <radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+      </defs>
+      <circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/>
+      <circle cx="21" cy="21" r="17" fill="none" stroke="#e63e2f" stroke-width="1" stroke-opacity="0.28"/>
+      <circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/>
+      <circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/>
+      <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/>
+    </svg>
+    <!-- Green icon -->
+    <svg width="32" height="32" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gb" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient>
+        <radialGradient id="gg" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <radialGradient id="gi" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+      </defs>
+      <circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/>
+      <circle cx="21" cy="21" r="17" fill="none" stroke="#1db87a" stroke-width="1" stroke-opacity="0.28"/>
+      <circle cx="21" cy="21" r="14.5" fill="url(#gi)"/>
+      <circle cx="21" cy="21" r="11.5" fill="url(#gb)"/>
+      <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg)"/>
+      <path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="app-loading-text">SOS<span>Logs</span></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="login-screen" class="screen hidden">
+  <div class="login-wrap">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <svg width="36" height="36" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rb3" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient>
+          <radialGradient id="rg3" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="ri3" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#e63e2f" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#ri3)"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#rb3)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg3)"/>
+      </svg>
+      <svg width="36" height="36" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gb3" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient>
+          <radialGradient id="gg3" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="gi3" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/>
+        <circle cx="21" cy="21" r="17" fill="none" stroke="#1db87a" stroke-width="1" stroke-opacity="0.28"/>
+        <circle cx="21" cy="21" r="14.5" fill="url(#gi3)"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#gb3)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg3)"/>
+        <path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="login-logo-text">SOS<span>Logs</span></span>
+    </div>
+    <p class="login-tagline">Document. Protect. Prove.</p>
+
+    <!-- Card -->
+    <div class="login-card">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="form-login">
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+        <button class="auth-btn" id="login-btn" onclick="doLogin()">
+          Sign In
+        </button>
+        <div class="auth-status" id="login-status"></div>
+        <div class="auth-forgot">
+          <a href="#" onclick="doReset(event)">Forgot password?</a>
+        </div>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="form-signup" style="display:none;">
+        <div class="auth-field">
+          <label class="auth-label">Full Name</label>
+          <input class="auth-input" id="signup-name" type="text" placeholder="Your name" autocomplete="name"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" id="signup-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" id="signup-password" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
+        </div>
+        <button class="auth-btn" id="signup-btn" onclick="doSignup()">
+          Create Account
+        </button>
+        <div class="auth-status" id="signup-status"></div>
+      </div>
+    </div>
+
+    <!-- SMS hint -->
+    <div class="sms-hint">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <div>Text your logs to <strong>1-888-799-5647</strong> (1-888-799-LOGS)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MAP / DASHBOARD SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="map-screen" class="screen hidden">
+
+  <!-- Top Nav -->
+  <nav class="map-nav">
+    <div class="map-nav-logo">
+      <svg width="22" height="22" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rb4" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient>
+          <radialGradient id="rg4" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="ri4" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+        </defs>
+        <circle cx="21" cy="21" r="14.5" fill="url(#ri4)"/>
+        <circle cx="21" cy="21" r="11.5" fill="url(#rb4)"/>
+        <ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg4)"/>
+      </svg>
+      SOS<span>Logs</span>
+    </div>
+    <div class="map-nav-right">
+      <div class="map-user-pill">
+        <div class="udot"></div>
+        <span id="nav-username">Loading…</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Location loading -->
+  <div id="loc-overlay">
+    <div class="loc-pulse"><div class="loc-pulse-inner"></div></div>
+    <div class="loc-text">Locating you…</div>
+  </div>
+
+  <!-- Google Map -->
+  <div id="map"></div>
+
+  <!-- Backdrop -->
+  <div id="map-backdrop" onclick="closeDrawer()"></div>
+
+  <!-- Log Drawer -->
+  <div id="log-drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <h3 id="drawer-title">Your SOSLogs</h3>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <div class="logs-empty">
+        <div class="logs-empty-icon">📭</div>
+        <div class="logs-empty-text">No logs yet.<br>Text <strong>1-888-799-LOGS</strong> to start documenting.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Firebase SDK ─────────────────────────────────────────────────────── -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, collection, query, where,
+  orderBy, getDocs, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ── Firebase config ──────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain: "soslog-v1.firebaseapp.com",
+  projectId: "soslog-v1",
+  storageBucket: "soslog-v1.firebasestorage.app",
+  messagingSenderId: "873518719449",
+  appId: "1:873518719449:web:6a2202cd4241a6b252b9c8"
+};
+
+const app   = initializeApp(firebaseConfig);
+const auth  = getAuth(app);
+const db    = getFirestore(app);
+
+let map, marker, currentUser;
+
+// ── Auth state listener ──────────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+  document.getElementById('app-loading').classList.add('hide');
+  if (user) {
+    currentUser = user;
+    showMapScreen(user);
+  } else {
+    showLoginScreen();
+  }
+});
+
+// ── Show / hide screens ──────────────────────────────────────────────────
+function showLoginScreen() {
+  document.getElementById('map-screen').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+
+function showMapScreen(user) {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('map-screen').classList.remove('hidden');
+
+  // Display username
+  const displayName = user.displayName || user.email.split('@')[0];
+  document.getElementById('nav-username').textContent = displayName;
+
+  // Update URL to /username (without reload)
+  const slug = displayName.toLowerCase().replace(/\s+/g, '-');
+  window.history.replaceState({}, '', `/${slug}`);
+
+  // Init map
+  initMap(user);
+}
+
+// ── Google Maps init ─────────────────────────────────────────────────────
+window.initMapCallback = function() {};
+
+function initMap(user) {
+  if (typeof google === 'undefined') {
+    // Load Google Maps API
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=mapReady`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    window.mapReady = () => createMap(user);
+  } else {
+    createMap(user);
+  }
+}
+
+function createMap(user) {
+  // Get user location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        renderMap(userLoc, user);
+      },
+      () => {
+        // Fallback to Dallas if location denied
+        renderMap({ lat: 32.7767, lng: -96.7970 }, user);
+      }
+    );
+  } else {
+    renderMap({ lat: 32.7767, lng: -96.7970 }, user);
+  }
+}
+
+function renderMap(center, user) {
+  document.getElementById('loc-overlay').classList.add('hide');
+
+  map = new google.maps.Map(document.getElementById('map'), {
+    center,
+    zoom: 14,
+    styles: DARK_MAP_STYLES,
+    disableDefaultUI: true,
+    zoomControl: true,
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM
+    }
+  });
+
+  // Red dot marker at user's location
+  marker = new google.maps.Marker({
+    position: center,
+    map,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 14,
+      fillColor: '#e63e2f',
+      fillOpacity: 1,
+      strokeColor: '#ff7878',
+      strokeWeight: 2,
+    },
+    title: 'Your location — click to view logs',
+    animation: google.maps.Animation.DROP,
+  });
+
+  // Pulse ring overlay
+  const pulseOverlay = new google.maps.Marker({
+    position: center,
+    map,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 22,
+      fillColor: '#e63e2f',
+      fillOpacity: 0.12,
+      strokeColor: '#e63e2f',
+      strokeWeight: 1,
+      strokeOpacity: 0.3,
+    },
+    clickable: false,
+  });
+
+  // Click marker to open logs
+  marker.addListener('click', () => openLogs(user));
+
+  // Also allow clicking the pulse ring area
+  map.addListener('click', (e) => {
+    const dist = google.maps.geometry
+      ? google.maps.geometry.spherical.computeDistanceBetween(
+          new google.maps.LatLng(center),
+          e.latLng
+        )
+      : 9999;
+    if (dist < 500) openLogs(user);
+  });
+}
+
+// ── Open logs drawer ─────────────────────────────────────────────────────
+async function openLogs(user) {
+  const drawer = document.getElementById('log-drawer');
+  const backdrop = document.getElementById('map-backdrop');
+  const body = document.getElementById('drawer-body');
+  const title = document.getElementById('drawer-title');
+
+  const displayName = user.displayName || user.email.split('@')[0];
+  title.textContent = `${displayName}'s SOSLogs`;
+
+  drawer.classList.add('open');
+  backdrop.classList.add('open');
+
+  body.innerHTML = `<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:13px;">
+    <div class="spinner" style="margin:0 auto 12px;border-top-color:var(--safe);border-color:rgba(29,184,122,0.2);"></div>
+    Loading your logs…
+  </div>`;
+
+  try {
+    // Query Firestore for SMS logs belonging to this user
+    // Assumes Firestore collection 'sms_logs' with field 'uid' or 'phone'
+    const logsRef = collection(db, 'sms_logs');
+    const q = query(
+      logsRef,
+      where('uid', '==', user.uid),
+      orderBy('timestamp', 'desc')
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      body.innerHTML = `
+        <div class="logs-empty">
+          <div class="logs-empty-icon">📭</div>
+          <div class="logs-empty-text">
+            No logs yet.<br>
+            Text <strong>1-888-799-LOGS</strong> from your phone<br>to start documenting.
+          </div>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    snapshot.forEach((docSnap) => {
+      const d = docSnap.data();
+      const ts = d.timestamp?.toDate ? d.timestamp.toDate() : new Date(d.timestamp);
+      const timeStr = ts.toLocaleString('en-US', {
+        month:'short', day:'numeric', year:'numeric',
+        hour:'numeric', minute:'2-digit', hour12:true
+      });
+      html += `
+        <div class="log-entry">
+          <div class="log-entry-time">
+            ${timeStr}
+            <span class="log-source-badge">SMS</span>
+          </div>
+          <div class="log-entry-body">${escHtml(d.body || d.message || '')}</div>
+        </div>`;
+    });
+
+    body.innerHTML = html;
+
+  } catch(err) {
+    body.innerHTML = `<div style="padding:24px;text-align:center;color:#ff6b4a;font-size:13px;">
+      Could not load logs. Please try again.
+    </div>`;
+    console.error('Firestore error:', err);
+  }
+}
+
+function closeDrawer() {
+  document.getElementById('log-drawer').classList.remove('open');
+  document.getElementById('map-backdrop').classList.remove('open');
+}
+window.closeDrawer = closeDrawer;
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Auth functions ───────────────────────────────────────────────────────
+window.switchTab = function(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('form-login').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+};
+
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const status= document.getElementById('login-status');
+
+  if (!email || !pw) return showStatus(status, 'error', 'Please fill in all fields.');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Signing in…';
+  status.className = 'auth-status';
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+    // onAuthStateChanged handles the rest
+  } catch(err) {
+    showStatus(status, 'error', friendlyError(err.code));
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In';
+  }
+};
+
+window.doSignup = async function() {
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw    = document.getElementById('signup-password').value;
+  const btn   = document.getElementById('signup-btn');
+  const status= document.getElementById('signup-status');
+
+  if (!name || !email || !pw) return showStatus(status, 'error', 'Please fill in all fields.');
+  if (pw.length < 6) return showStatus(status, 'error', 'Password must be at least 6 characters.');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Creating account…';
+  status.className = 'auth-status';
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await updateProfile(cred.user, { displayName: name });
+    // onAuthStateChanged handles redirect
+  } catch(err) {
+    showStatus(status, 'error', friendlyError(err.code));
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account';
+  }
+};
+
+window.doLogout = async function() {
+  await signOut(auth);
+  window.history.replaceState({}, '', '/');
+};
+
+window.doReset = async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const status = document.getElementById('login-status');
+  if (!email) return showStatus(status, 'error', 'Enter your email first, then click Forgot Password.');
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showStatus(status, 'success', 'Reset email sent — check your inbox.');
+  } catch(err) {
+    showStatus(status, 'error', friendlyError(err.code));
+  }
+};
+
+function showStatus(el, type, msg) {
+  el.className = `auth-status ${type}`;
+  el.textContent = msg;
+}
+
+function friendlyError(code) {
+  const map = {
+    'auth/user-not-found':     'No account found with that email.',
+    'auth/wrong-password':     'Incorrect password.',
+    'auth/invalid-credential': 'Invalid email or password.',
+    'auth/email-already-in-use': 'An account with that email already exists.',
+    'auth/weak-password':      'Password must be at least 6 characters.',
+    'auth/invalid-email':      'Please enter a valid email address.',
+    'auth/too-many-requests':  'Too many attempts. Please try again later.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ── Dark map style ───────────────────────────────────────────────────────
+const DARK_MAP_STYLES = [
+  {elementType:'geometry',stylers:[{color:'#0a0c0e'}]},
+  {elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},
+  {elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},
+  {featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},
+  {featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1b242c'}]},
+  {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},
+  {featureType:'road.highway',elementType:'geometry.stroke',stylers:[{color:'#232e3a'}]},
+  {featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},
+  {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#3d5a78'}]},
+  {featureType:'poi',stylers:[{visibility:'off'}]},
+  {featureType:'transit',stylers:[{visibility:'off'}]},
+];
+
+</script>
+</body>
+</html>
