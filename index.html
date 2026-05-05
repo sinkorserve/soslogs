@@ -148,7 +148,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 </div>
 
 <!-- LOGIN -->
-<div id="login-screen" class="screen">
+<div id="login-screen" class="screen active">
 <div class="login-wrap">
   <div class="login-logo">
     <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
@@ -274,8 +274,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDocs,
-         query, orderBy, serverTimestamp }
+import { getFirestore, collection, collectionGroup, doc, setDoc, getDocs,
+         query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const fbApp = initializeApp({
@@ -306,12 +306,30 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('app-loading').classList.add('hide');
   if(user){
     await user.reload();
-    currentPhone = user.displayName || user.email;
+    currentPhone = await resolvePhone(user);
     await showDashboard(user);
   } else {
     showScreen('login-screen');
   }
 });
+
+// Resolve phone from Firestore profile (handles accounts where displayName is a name not a phone)
+async function resolvePhone(user){
+  // If displayName already looks like a phone number use it
+  if(user.displayName && /^\+?\d{7,}$/.test(user.displayName.replace(/\s/g,''))){
+    return user.displayName;
+  }
+  // Look up phone from Firestore profile using uid
+  try{
+    const profileQ = query(collectionGroup(db,'profile'), where('uid','==',user.uid));
+    const snap = await getDocs(profileQ);
+    if(!snap.empty){
+      const phone = snap.docs[0].data().phone;
+      if(phone) return phone;
+    }
+  } catch(e){ console.warn('resolvePhone:',e); }
+  return user.displayName || user.email;
+}
 
 // LOGIN
 window.doLogin = async function(){
@@ -367,7 +385,9 @@ window.doLogout = async () => { await signOut(auth); window.history.replaceState
 async function showDashboard(user){
   showScreen('dashboard-screen');
   document.getElementById('nav-phone').textContent = fmtPhone(currentPhone);
-  const slug = currentPhone.replace(/\+/g,'').replace(/\s/g,'');
+  // URL uses phone digits only - never exposes name
+  const phoneDigits = currentPhone.replace(/\D/g,'');
+  const slug = phoneDigits || 'dashboard';
   window.history.replaceState({},'','/'+slug);
   allRecords = await loadAllRecords();
   renderStats(allRecords);
