@@ -455,7 +455,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         <div class="pricing-card-accent" style="background:var(--muted);"></div>
         <div class="pricing-tier">Basic</div>
         <div class="pricing-price">Free</div>
-        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <div class="pricing-desc">Text incidents to 1-888-799-LOGS immediately. No account or login required.</div>
         <ul class="pricing-features">
           <li>Unlimited SMS logging via 1-888-799-LOGS</li>
           <li>Timestamped records stored securely</li>
@@ -520,7 +520,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         <div class="pricing-card-accent" style="background:var(--muted);"></div>
         <div class="pricing-tier">Free</div>
         <div class="pricing-price">$0<span>/forever</span></div>
-        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <div class="pricing-desc">Text incidents to 1-888-799-LOGS immediately. No account or login required.</div>
         <ul class="pricing-features">
           <li>Unlimited SMS logging via 1-888-799-LOGS</li>
           <li>Timestamped records stored securely</li>
@@ -616,7 +616,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   <!-- Paywall banner -->
   <div class="paywall-banner" id="paywall-banner">
     <div class="paywall-banner-text">
-      You are on the <strong>Free tier</strong> — upgrade to unlock your full dashboard, map, credibility profile and message log.
+      You are on the <strong>Free tier</strong> — create an account and upgrade to <strong>Base</strong> to unlock your full dashboard, incident map, credibility profile and message log.
     </div>
     <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="paywall-banner-btn">
       Upgrade to Base — $9.99/mo
@@ -952,7 +952,13 @@ window.doSignup = async function(){
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pw);
     await updateProfile(cred.user,{displayName:fullPhone});
-    await setDoc(doc(db,'users',fullPhone,'profile','data'),{uid:cred.user.uid,phone:fullPhone,country,plan:'basic',status:'active',joinedAt:serverTimestamp(),joinedLocal:new Date().toISOString()});
+    // Use merge:true so existing plan field is not overwritten if already set
+    await setDoc(doc(db,'users',fullPhone,'profile','data'),{uid:cred.user.uid,phone:fullPhone,country,status:'active',joinedAt:serverTimestamp(),joinedLocal:new Date().toISOString()},{merge:true});
+    // Only set plan if not already set
+    const existingProfile = await getDocs(collection(db,'users',fullPhone,'profile'));
+    if(existingProfile.empty || !existingProfile.docs[0]?.data()?.plan){
+      await setDoc(doc(db,'users',fullPhone,'profile','data'),{plan:'free'},{merge:true});
+    }
     await setDoc(doc(emailsCol(fullPhone),encEmail(email)),{email,addedAt:serverTimestamp(),primary:true});
     showOk('signup-ok','Account created! Signing you in...');
   } catch(e){ btn.disabled=false; btn.innerHTML='Create Account &amp; Secure My Log'; showErr('signup-err',fErr(e.code)); }
@@ -1836,7 +1842,7 @@ async function checkPlanAndApplyPaywall(phone){
     }
   } catch(e){ console.warn('checkPlan error:',e); }
 
-  const isLocked = userPlan !== 'base';
+  const isLocked = userPlan !== 'base'; // free = locked, base = unlocked
   console.log('User plan:', userPlan, 'Locked:', isLocked);
 
   // Show/hide paywall banner
