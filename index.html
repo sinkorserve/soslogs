@@ -787,7 +787,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, collectionGroup, doc, setDoc, getDocs,
+import { getFirestore, collection, collectionGroup, doc, setDoc, getDoc, getDocs,
          addDoc, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -1834,11 +1834,14 @@ let userPlan = 'free'; // default until Firestore confirms
 
 async function checkPlanAndApplyPaywall(phone){
   try{
-    const profileDoc = await getDocs(
-      query(collectionGroup(db,'profile'), where('uid','==',auth.currentUser.uid))
-    );
-    if(!profileDoc.empty){
-      userPlan = profileDoc.docs[0].data().plan || 'free';
+    // Query directly by phone number — more reliable than uid match
+    const profileRef = doc(db, 'users', phone, 'profile', 'data');
+    const profileSnap = await getDoc(profileRef);
+    if(profileSnap.exists()){
+      userPlan = profileSnap.data().plan || 'free';
+      console.log('Plan loaded from Firestore:', userPlan, 'for phone:', phone);
+    } else {
+      console.warn('No profile found for phone:', phone);
     }
   } catch(e){ console.warn('checkPlan error:',e); }
 
