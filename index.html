@@ -1006,62 +1006,35 @@ function normalizeLocation(loc){
 function extractPlaces(records){
   const counts={};
 
+  // Only use explicitly stored location data — never guess from free text
+  // This prevents sentences being misidentified as addresses
   records.forEach(r=>{
-    const body = r.body || r.message || '';
-
-    // 1. Use already-geocoded extractedAddress from record (most reliable)
-    if(r.location?.extractedAddress){
+    // 1. Geocoded extractedAddress (most reliable — set during save)
+    if(r.location?.extractedAddress && r.location.extractedAddress.length > 4){
       const k = normalizeLocation(r.location.extractedAddress);
-      if(k && k.length > 3) counts[k] = (counts[k]||0) + 1;
-      return; // one location per record
+      if(k && k.length > 4) counts[k] = (counts[k]||0) + 1;
+      return;
     }
-
-    // 2. Use formatted address from Twilio/geocode
-    if(r.location?.formatted && r.location.formatted.length > 3){
+    // 2. Formatted address from geocoder
+    if(r.location?.formatted && r.location.formatted.length > 4 &&
+       r.location.formatted !== 'United States' && r.location.formatted !== 'US'){
       const k = normalizeLocation(r.location.formatted);
-      if(k) counts[k] = (counts[k]||0) + 1;
+      if(k && k.length > 4) counts[k] = (counts[k]||0) + 1;
       return;
     }
-
-    // 3. Use city from Twilio
-    if(r.location?.city && r.location.city.length > 2){
-      const k = r.location.city;
-      counts[k] = (counts[k]||0) + 1;
-      return;
+    // 3. City from Twilio (SMS only)
+    if(r.source === 'sms' && r.location?.city && r.location.city.length > 2){
+      counts[r.location.city] = (counts[r.location.city]||0) + 1;
     }
-
-    // 4. Extract from message body as last resort
-    // Match: "near/at X Ave and Y Ave" or "at 1234 Main St, City"
-    const addrPatterns = [
-      /(?:near|at|on|corner of|intersection of)\s+([\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)(?:\s+(?:and|&)\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway))?)/gi,
-      /\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)(?:[,\s]+[\w\s]+)?/gi,
-    ];
-    for(const pat of addrPatterns){
-      const matches = body.match(pat);
-      if(matches && matches.length){
-        const k = normalizeLocation(matches[0]);
-        if(k && k.length > 3){
-          counts[k] = (counts[k]||0) + 1;
-          break; // one location per record
-        }
-      }
-    }
-  });
-
-  // Generic place keywords (never count "intersection" alone)
-  const placePatterns = ['office','conference room','meeting room','headquarters','workplace','city hall','downtown','parking lot','building'];
-  const allText = records.map(r=>r.body||r.message||'').join(' ');
-  placePatterns.forEach(p=>{
-    const matches = allText.match(new RegExp('\\b'+p.replace(/\s/g,'\\s')+'\\b','gi'));
-    if(matches && matches.length > 0) counts[p] = (counts[p]||0) + matches.length;
   });
 
   return Object.entries(counts)
-    .filter(([k]) => k.length > 3 && k.toLowerCase() !== 'intersection')
+    .filter(([k]) => k.length > 3 && k.toLowerCase() !== 'intersection' && k.toLowerCase() !== 'us')
     .map(([name,count]) => ({name,count}))
     .sort((a,b) => b.count - a.count)
     .slice(0,8);
 }
+
 
 function renderFreqList(elId,items,color){
   const el=document.getElementById(elId);
@@ -1163,35 +1136,19 @@ async function initMiniMap(records){
   const needsGeo = records.filter(r=>{
     const hasCoords = r.location?.lat && r.location?.lng;
     if(hasCoords) return false;
-    // Has any address reference
-    const hasAddress = r.location?.extractedAddress ||
-      (r.location?.formatted && r.location.formatted.length > 3) ||
-      (r.location?.city && r.location.city.length > 1);
-    // Or has a body with street keywords
-    const body = r.body || r.message || '';
-    const hasStreetInBody = /(?:Ave|Avenue|Blvd|Boulevard|\bSt\b|Street|\bRd\b|Road|Drive|Lane|Way|Court|Place|Highway|Parkway)/i.test(body);
-    return hasAddress || hasStreetInBody;
+    // Only geocode if we have a stored extractedAddress or formatted address
+    // Never try to geocode from free text body — too many false positives
+    const hasStoredAddress = r.location?.extractedAddress ||
+      (r.location?.formatted && r.location.formatted.length > 4 &&
+       r.location.formatted !== 'United States');
+    return !!hasStoredAddress;
   });
   console.log('Records needing geocoding:', needsGeo.length);
 
   for(const r of needsGeo){
-    // Try extractedAddress first, then formatted, then extract from body
-    let addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
-
-    // If no address but body has street reference, extract it now
-    if(!addr && (r.body || r.message)){
-      const body = r.body || r.message || '';
-      const m1 = body.match(/(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i);
-      const m2 = body.match(/(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)[\w\s,]*?)(?:\.|$)/i);
-      const m3 = body.match(/([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way))/i);
-      const match = m1||m2||m3;
-      if(match) addr = (match[1]||match[0]).trim()
-        .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
-        .replace(/\s+and\s+/gi,' & ')
-        .trim();
-    }
-
-    if(!addr) continue;
+    // Only use stored extractedAddress or formatted — never extract from body text
+    const addr = r.location?.extractedAddress || r.location?.formatted;
+    if(!addr || addr.length < 5) continue;
     try{
       const geocoder = new google.maps.Geocoder();
       await new Promise((resolve) => {
