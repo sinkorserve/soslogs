@@ -1385,7 +1385,15 @@ async function submitLogFn(type){
       }
     } catch(geoErr){ console.warn('Geocoding error:', geoErr); }
 
-    const flatRef = collection(db, 'users', currentPhone, 'records');
+    // Get fresh phone from Auth at write time - don't rely on closure variable
+    const authUser = auth.currentUser;
+    await authUser.reload();
+    const writePhone = authUser.displayName && /^\+?\d{7,}$/.test(authUser.displayName.replace(/[\s\-()]/g,''))
+      ? authUser.displayName
+      : currentPhone;
+    console.log('submitLog: writing to users/' + writePhone + '/records');
+
+    const flatRef = collection(db, 'users', writePhone, 'records');
     await addDoc(flatRef, {
       body,
       source:    'web',
