@@ -27,7 +27,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .screen{display:none;}.screen.active{display:block;}
 
 /* LOGIN */
-#login-screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--black);overflow-y:auto;}
+#login-screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:48px 16px 0;background:var(--black);overflow-y:auto;}
 #login-screen::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,184,122,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,184,122,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 .login-wrap{position:relative;z-index:1;width:100%;max-width:420px;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
@@ -69,11 +69,18 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .login-footer a{color:var(--muted);text-decoration:none;transition:color 0.2s;}
 .login-footer a:hover{color:var(--safe);}
 /* ── Pricing cards ─────────────────────────────────────────── */
-.pricing-section{margin-top:32px;width:100%;}
+.pricing-outer{
+  width:100%;
+  max-width:1100px;
+  margin:32px auto 48px;
+  padding:0 24px;
+  position:relative;
+  z-index:1;
+}
 .pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
-.pricing-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-@media(max-width:900px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:500px){.pricing-cards{grid-template-columns:1fr;}}
+.pricing-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:960px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.pricing-cards{grid-template-columns:1fr;}}
 .pricing-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 16px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
 .pricing-card:hover{transform:translateY(-2px);}
 .pricing-card.featured{border-color:rgba(29,184,122,0.3);background:linear-gradient(135deg,var(--card) 0%,rgba(29,184,122,0.05) 100%);}
@@ -219,9 +226,8 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;"><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
   </div>
 
-  <!-- Pricing section -->
-  <div class="pricing-section">
-    <div class="pricing-title">Choose your plan</div>
+  <!-- Pricing section - moved outside login-wrap below -->
+  <div style="display:none;">
     <div class="pricing-cards">
 
       <!-- Basic - Free -->
@@ -255,7 +261,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Keyword and date filtering</li>
           <li class="no">No AI assistance</li>
         </ul>
-        <a href="https://buy.stripe.com/00w5kC0QR8yn86LeYtew802" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+        <a href="STRIPE_BASE_LINK" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
       </div>
 
       <!-- Pro - $14.99 -->
@@ -273,7 +279,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Export-ready reports</li>
           <li class="no">No real-time AI mentoring</li>
         </ul>
-        <a href="https://buy.stripe.com/3cI14m4338yn72H4jPew803" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
+        <a href="STRIPE_PRO_LINK" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
       </div>
 
       <!-- Premium - $19.99 -->
@@ -289,13 +295,89 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Priority support</li>
           <li>Early access to new features</li>
         </ul>
-        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+        <a href="STRIPE_PREMIUM_LINK" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
       </div>
 
     </div>
   </div>
 
 </div>
+</div>
+
+<!-- Pricing section - full width below login -->
+<div class="pricing-outer">
+  <div class="pricing-title">Choose your plan</div>
+  <div class="pricing-cards">
+
+      <!-- Free -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">$0<span>/forever</span></div>
+        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <ul class="pricing-features">
+          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
+          <li>Timestamped records stored securely</li>
+          <li class="no">No dashboard or message history</li>
+          <li class="no">No map or analytics</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="#" onclick="document.getElementById('login-id').focus();window.scrollTo({top:0,behavior:'smooth'});return false;" class="pricing-cta free">Start Logging Free</a>
+      </div>
+
+      <!-- Base - $4.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:#3b82f6;"></div>
+        <div class="pricing-tier">Base</div>
+        <div class="pricing-price">$4.99<span>/month</span></div>
+        <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Personal dashboard with full message history</li>
+          <li>Incident map with location pins</li>
+          <li>People and places frequency analysis</li>
+          <li>Credibility spider chart</li>
+          <li>Keyword and date filtering</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="STRIPE_BASE_LINK" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+      </div>
+
+      <!-- Pro - $14.99 -->
+      <div class="pricing-card featured">
+        <div class="pricing-card-accent" style="background:var(--safe);"></div>
+        <div class="pricing-badge">Popular</div>
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">$14.99<span>/month</span></div>
+        <div class="pricing-desc">Monthly AI analysis of your safety documentation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Base</li>
+          <li>Monthly AI pattern analysis</li>
+          <li>Automated incident summaries</li>
+          <li>Behavioral trend detection</li>
+          <li>Export-ready reports</li>
+          <li class="no">No real-time AI mentoring</li>
+        </ul>
+        <a href="STRIPE_PRO_LINK" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
+      </div>
+
+      <!-- Premium - $19.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--purple);"></div>
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-price">$19.99<span>/month</span></div>
+        <div class="pricing-desc">On-demand AI mentoring and real-time report generation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>On-demand AI up to 30 queries/month</li>
+          <li>Real-time report generation</li>
+          <li>Priority support</li>
+          <li>Early access to new features</li>
+        </ul>
+        <a href="STRIPE_PREMIUM_LINK" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+      </div>
+
+  </div>
 </div>
 
 <!-- DASHBOARD -->
