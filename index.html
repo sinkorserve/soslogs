@@ -1091,21 +1091,22 @@ async function initMiniMap(records){
 
     if(!addr) continue;
     try{
-      const res = await fetch(
-        'https://maps.googleapis.com/maps/api/geocode/json?address=' +
-        encodeURIComponent(addr) +
-        '&key=AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4'
-      );
-      const data = await res.json();
-      if(data.status === 'OK' && data.results.length){
-        const loc = data.results[0].geometry.location;
-        // Mutate the location object directly so the reference in records array updates
-        r.location.lat       = loc.lat;
-        r.location.lng       = loc.lng;
-        r.location.formatted = data.results[0].formatted_address;
-        r.location.precision = 'address';
-        console.log('Geocoded:', addr, '->', loc.lat, loc.lng, data.results[0].formatted_address);
-      }
+      const geocoder = new google.maps.Geocoder();
+      await new Promise((resolve) => {
+        geocoder.geocode({ address: addr }, (results, status) => {
+          if(status === 'OK' && results.length){
+            const loc = results[0].geometry.location;
+            r.location.lat       = loc.lat();
+            r.location.lng       = loc.lng();
+            r.location.formatted = results[0].formatted_address;
+            r.location.precision = 'address';
+            console.log('Geocoded:', addr, '->', loc.lat(), loc.lng(), results[0].formatted_address);
+          } else {
+            console.warn('Geocoder returned:', status, 'for address:', addr);
+          }
+          resolve();
+        });
+      });
     } catch(e){ console.warn('miniMap geocode error:', e); }
   }
 
@@ -1367,21 +1368,28 @@ async function submitLogFn(type){
           .trim();
         locationData.extractedAddress = extracted;
         // Geocode via Google Maps Geocoding API
-        const geoRes = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(extracted) + '&key=AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4');
-        const geoData = await geoRes.json();
-        if(geoData.status === 'OK' && geoData.results.length){
-          const loc = geoData.results[0].geometry.location;
-          const comp = geoData.results[0].address_components;
-          const city = comp.find(c=>c.types.includes('locality'))?.long_name || '';
-          const state = comp.find(c=>c.types.includes('administrative_area_level_1'))?.short_name || '';
-          locationData = {
-            lat: loc.lat, lng: loc.lng,
-            city, state, country: 'US',
-            formatted: geoData.results[0].formatted_address,
-            precision: 'address',
-            extractedAddress: extracted,
-          };
-        }
+        await new Promise((resolve) => {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ address: extracted }, (results, status) => {
+            if(status === 'OK' && results.length){
+              const loc = results[0].geometry.location;
+              const comp = results[0].address_components;
+              const city = comp.find(c=>c.types.includes('locality'))?.long_name || '';
+              const state = comp.find(c=>c.types.includes('administrative_area_level_1'))?.short_name || '';
+              locationData = {
+                lat: loc.lat(), lng: loc.lng(),
+                city, state, country: 'US',
+                formatted: results[0].formatted_address,
+                precision: 'address',
+                extractedAddress: extracted,
+              };
+              console.log('submitLog geocoded:', extracted, '->', loc.lat(), loc.lng());
+            } else {
+              console.warn('submitLog geocoder status:', status, 'for:', extracted);
+            }
+            resolve();
+          });
+        });
       }
     } catch(geoErr){ console.warn('Geocoding error:', geoErr); }
 
