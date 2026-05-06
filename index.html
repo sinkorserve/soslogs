@@ -1274,6 +1274,9 @@ window.openMessages = function(){ if(!msgsVisible) toggleMessages(); document.ge
 window.applyFilters = function(){ renderMessages(allRecords); };
 window.clearFilters = function(){ document.getElementById('filter-keyword').value=''; document.getElementById('filter-date-from').value=''; document.getElementById('filter-date-to').value=''; renderMessages(allRecords); };
 
+// Cache for rendered messages (used by amend button)
+let renderedMessages = [];
+
 function renderMessages(records){
   const keyword=document.getElementById('filter-keyword').value.trim().toLowerCase();
   const dateFrom=document.getElementById('filter-date-from').value;
@@ -1284,7 +1287,10 @@ function renderMessages(records){
   if(dateTo) filtered=filtered.filter(r=>getTs(r)<=new Date(dateTo).getTime()+86400000);
   document.getElementById('msg-count').textContent=filtered.length+' message'+(filtered.length!==1?'s':'')+' found';
   if(!filtered.length){ document.getElementById('msg-list').innerHTML='<div class="empty">No messages match your filters.</div>'; return; }
+  renderedMessages = filtered; // cache for amend lookup
+  let msgIndex = -1;
   document.getElementById('msg-list').innerHTML=filtered.map(r=>{
+    msgIndex++;
     const ts=new Date(getTs(r));
     const timeStr=ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
     let body=esc(r.body||r.message||'');
@@ -1301,7 +1307,7 @@ function renderMessages(records){
       '</div>' +
       '<div class="msg-body">'+body+'</div>' +
       '<div class="msg-card-actions">' +
-        '<button class="edit-btn" onclick="openEditModal('+JSON.stringify(r._id)+','+JSON.stringify(esc(r.body||r.message||''))+')">' +
+        '<button class="edit-btn" onclick="openEditModalByIndex('+msgIndex+')">' +
           '✏️ Amend' +
         '</button>' +
       '</div>' +
@@ -1525,6 +1531,12 @@ async function submitLogFn(type){
 // ── Edit / Amend entry ────────────────────────────────────────
 let editingRecordId = null;
 let editingOriginalText = '';
+
+window.openEditModalByIndex = function(index){
+  const r = renderedMessages[index];
+  if(!r){ console.error('Record not found at index', index); return; }
+  openEditModal(r._id, r.body || r.message || '');
+};
 
 window.openEditModal = function(recordId, originalText){
   editingRecordId = recordId;
