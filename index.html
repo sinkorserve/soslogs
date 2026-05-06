@@ -68,6 +68,34 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--muted);line-height:2;}
 .login-footer a{color:var(--muted);text-decoration:none;transition:color 0.2s;}
 .login-footer a:hover{color:var(--safe);}
+/* ── Pricing cards ─────────────────────────────────────────── */
+.pricing-section{margin-top:32px;width:100%;}
+.pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.pricing-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:900px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.pricing-cards{grid-template-columns:1fr;}}
+.pricing-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 16px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
+.pricing-card:hover{transform:translateY(-2px);}
+.pricing-card.featured{border-color:rgba(29,184,122,0.3);background:linear-gradient(135deg,var(--card) 0%,rgba(29,184,122,0.05) 100%);}
+.pricing-card-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.pricing-badge{position:absolute;top:12px;right:12px;background:var(--safe);color:#000;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.pricing-tier{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.pricing-price{font-size:28px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;}
+.pricing-price span{font-size:13px;font-weight:400;color:var(--muted);}
+.pricing-desc{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.pricing-features li{font-size:12px;color:var(--text);display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
+.pricing-features li::before{content:'✓';color:var(--safe);font-weight:700;flex-shrink:0;font-size:11px;margin-top:1px;}
+.pricing-features li.no::before{content:'✕';color:var(--muted);}
+.pricing-features li.no{color:var(--muted);}
+.pricing-cta{display:block;width:100%;padding:10px;border-radius:9px;text-align:center;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;text-decoration:none;border:none;}
+.pricing-cta.free{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.pricing-cta.free:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.pricing-cta.pro{background:var(--safe);color:#000;}
+.pricing-cta.pro:hover{background:var(--safe2);transform:translateY(-1px);}
+.pricing-cta.premium{background:linear-gradient(135deg,var(--safe),var(--blue));color:#000;}
+.pricing-cta.premium:hover{opacity:0.9;transform:translateY(-1px);}
+
 
 /* DASHBOARD */
 #dashboard-screen{min-height:100dvh;background:var(--black);position:relative;z-index:10;}
@@ -190,6 +218,83 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <div>2026 Athens Innovation and Development LLC</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;"><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
   </div>
+
+  <!-- Pricing section -->
+  <div class="pricing-section">
+    <div class="pricing-title">Choose your plan</div>
+    <div class="pricing-cards">
+
+      <!-- Basic - Free -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Basic</div>
+        <div class="pricing-price">Free</div>
+        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <ul class="pricing-features">
+          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
+          <li>Timestamped records stored securely</li>
+          <li class="no">No dashboard or message history</li>
+          <li class="no">No map or analytics</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="#" onclick="document.getElementById('login-id').focus();return false;" class="pricing-cta free">Start Logging Free</a>
+      </div>
+
+      <!-- Base - $4.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Base</div>
+        <div class="pricing-price">$4.99<span>/month</span></div>
+        <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Personal dashboard with full message history</li>
+          <li>Incident map with location pins</li>
+          <li>People and places frequency analysis</li>
+          <li>Credibility spider chart</li>
+          <li>Keyword and date filtering</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="STRIPE_BASE_LINK" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+      </div>
+
+      <!-- Pro - $14.99 -->
+      <div class="pricing-card featured">
+        <div class="pricing-card-accent" style="background:var(--safe);"></div>
+        <div class="pricing-badge">Popular</div>
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">$14.99<span>/month</span></div>
+        <div class="pricing-desc">Monthly AI analysis of your safety documentation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Base</li>
+          <li>Monthly AI pattern analysis</li>
+          <li>Automated incident summaries</li>
+          <li>Behavioral trend detection</li>
+          <li>Export-ready reports</li>
+          <li class="no">No real-time AI mentoring</li>
+        </ul>
+        <a href="STRIPE_PRO_LINK" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
+      </div>
+
+      <!-- Premium - $19.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--blue);"></div>
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-price">$19.99<span>/month</span></div>
+        <div class="pricing-desc">On-demand AI mentoring and real-time report generation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>On-demand AI up to 30 queries/month</li>
+          <li>Real-time report generation</li>
+          <li>Priority support</li>
+          <li>Early access to new features</li>
+        </ul>
+        <a href="STRIPE_PREMIUM_LINK" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -620,7 +725,7 @@ function renderSpider(records){
 }
 
 // MINI MAP
-const MAPS_API_KEY = 'AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4';
+const MAPS_API_KEY = 'PASTE_YOUR_KEY_HERE';
 
 function loadMiniMap(records){
   if(typeof google!=='undefined' && google.maps){ initMiniMap(records); return; }
