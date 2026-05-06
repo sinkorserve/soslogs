@@ -841,16 +841,22 @@ function renderStats(records){
   document.getElementById('stat-people').textContent=people.length;
   document.getElementById('stat-people-sub').textContent=people[0]?.name?'Most mentioned: '+people[0].name:'Detecting from logs...';
   const places=extractPlaces(r90);
-  // Count unique locations — normalize "X and Y" / "X, Y" as one location
+  // Count unique locations — any record with an address reference counts as 1
   const uniqueLocSet = new Set(
     r90
       .map(r => {
+        // Use extractedAddress first (web entries), then formatted (geocoded), then city (SMS)
         const raw = r.location?.extractedAddress || r.location?.formatted || r.location?.city || '';
         if(!raw || raw.length < 3) return null;
-        // Normalize: lowercase, replace "and" with &, collapse whitespace
-        return raw.toLowerCase().replace(/\s+and\s+/g,' & ').replace(/\s{2,}/g,' ').trim();
+        const normalized = raw.toLowerCase()
+          .replace(/\s+and\s+/g,' & ')
+          .replace(/^(intersection of|corner of|near|at|on)\s+/i,'')
+          .replace(/\s{2,}/g,' ')
+          .trim();
+        const excluded = ['intersection','us','united states','','unknown'];
+        return excluded.includes(normalized) ? null : normalized;
       })
-      .filter(k => k && k !== 'intersection' && k !== 'us' && k !== 'united states')
+      .filter(Boolean)
   );
   document.getElementById('stat-places').textContent = uniqueLocSet.size || 0;
   document.getElementById('stat-places-sub').textContent = places[0]?.name ? 'Most mentioned: '+places[0].name : 'Detecting from logs...';
@@ -1038,10 +1044,15 @@ async function initMiniMap(records){
   const mapEl = document.getElementById('mini-map');
 
   // Step 1: Geocode all records missing lat/lng BEFORE creating map
-  const needsGeo = records.filter(r=>
-    (!r.location?.lat || !r.location?.lng) &&
-    (r.location?.extractedAddress || r.location?.formatted || r.location?.city)
-  );
+  const needsGeo = records.filter(r=>{
+    const hasCoords = r.location?.lat && r.location?.lng &&
+      r.location.lat !== null && r.location.lng !== null;
+    const hasAddress = r.location?.extractedAddress ||
+      (r.location?.formatted && r.location.formatted.length > 3) ||
+      (r.location?.city && r.location.city.length > 1);
+    return !hasCoords && hasAddress;
+  });
+  console.log('Records needing geocoding:', needsGeo.length);
 
   for(const r of needsGeo){
     const addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
@@ -1055,30 +1066,31 @@ async function initMiniMap(records){
       const data = await res.json();
       if(data.status === 'OK' && data.results.length){
         const loc = data.results[0].geometry.location;
-        r.location = {
-          ...r.location,
-          lat: loc.lat,
-          lng: loc.lng,
-          formatted: data.results[0].formatted_address,
-          precision: 'address',
-        };
-        console.log('Geocoded:', addr, '->', loc);
+        // Mutate the location object directly so the reference in records array updates
+        r.location.lat       = loc.lat;
+        r.location.lng       = loc.lng;
+        r.location.formatted = data.results[0].formatted_address;
+        r.location.precision = 'address';
+        console.log('Geocoded:', addr, '->', loc.lat, loc.lng, data.results[0].formatted_address);
       }
     } catch(e){ console.warn('miniMap geocode error:', e); }
   }
 
-  // Step 2: Filter records with valid coordinates
-  let geoRecords = records.filter(r=>r.location?.lat && r.location?.lng);
-
-  // Step 3: Deduplicate by lat/lng
+  // Step 2: Build resolved records array including just-geocoded ones
+  // We collect all records that now have lat/lng (including ones we just geocoded)
+  const resolvedRecords = [];
   const seen = new Set();
-  geoRecords = geoRecords.filter(r=>{
-    const key = r.location.lat.toFixed(4) + ',' + r.location.lng.toFixed(4);
-    if(seen.has(key)) return false;
-    seen.add(key); return true;
-  });
 
-  console.log('Map pins to show:', geoRecords.length);
+  for(const r of records){
+    if(!r.location?.lat || !r.location?.lng) continue;
+    const key = Number(r.location.lat).toFixed(4) + ',' + Number(r.location.lng).toFixed(4);
+    if(seen.has(key)) continue;
+    seen.add(key);
+    resolvedRecords.push(r);
+  }
+
+  console.log('Map pins to show:', resolvedRecords.length, 'out of', records.length, 'records');
+  const geoRecords = resolvedRecords;
 
   // Step 4: Create map - NO styles when using mapId, NO deprecated params
   const gmap = new google.maps.Map(mapEl, {
