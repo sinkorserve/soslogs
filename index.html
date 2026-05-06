@@ -648,51 +648,64 @@ onAuthStateChanged(auth, async user => {
 
 // Resolve phone from Firestore (handles accounts where displayName is a name not a phone)
 async function resolvePhone(user){
-  // 1. If displayName looks like a phone number use it directly
+  console.log('resolvePhone: starting for uid', user.uid, 'email', user.email, 'displayName', user.displayName);
+
+  // 1. displayName set at signup stores the phone number
   if(user.displayName && /^\+?\d{7,}$/.test(user.displayName.replace(/[\s\-()]/g,''))){
+    console.log('resolvePhone: found via displayName:', user.displayName);
     return user.displayName;
   }
 
-  // 2. Look up phone via collectionGroup query on profile docs matching uid
+  // 2. Query collectionGroup on 'profile' — path: users/{phone}/profile
+  //    The actual data is in the 'data' document inside profile collection
   try{
     const profileQ = query(collectionGroup(db,'profile'), where('uid','==',user.uid));
     const snap = await getDocs(profileQ);
     if(!snap.empty){
-      const phone = snap.docs[0].data().phone;
-      if(phone){ console.log('resolvePhone via profile uid:', phone); return phone; }
+      // Each doc is the 'data' document — its parent is 'profile' collection
+      // parent.parent is the user document — its id is the phone number
+      for(const d of snap.docs){
+        const phone = d.data().phone || d.ref.parent.parent?.id;
+        if(phone && /^\+?\d{7,}$/.test(phone.replace(/\s/g,''))){
+          console.log('resolvePhone: found via profile collectionGroup:', phone);
+          return phone;
+        }
+      }
     }
-  } catch(e){ console.warn('resolvePhone profile query:',e); }
+  } catch(e){ console.warn('resolvePhone profile collectionGroup failed:',e); }
 
-  // 3. Look up phone by matching user email in emails subcollections
+  // 3. Query collectionGroup on 'emails' — path: users/{phone}/emails/{emailKey}
+  //    parent = emails collection, parent.parent = user doc (phone as id)
   try{
-    const emailKey = encEmail(user.email);
     const emailQ = query(collectionGroup(db,'emails'), where('email','==',user.email));
     const snap = await getDocs(emailQ);
     if(!snap.empty){
-      // Parent path: users/{phone}/emails/{emailKey}
-      const ref = snap.docs[0].ref;
-      const phone = ref.parent.parent.id; // users/{phone}
-      if(phone && phone.startsWith('+')){ console.log('resolvePhone via email match:', phone); return phone; }
+      const phone = snap.docs[0].ref.parent.parent?.id;
+      if(phone && /^\+?\d{7,}$/.test(phone.replace(/\s/g,''))){
+        console.log('resolvePhone: found via emails collectionGroup:', phone);
+        return phone;
+      }
     }
-  } catch(e){ console.warn('resolvePhone email query:',e); }
+  } catch(e){ console.warn('resolvePhone emails collectionGroup failed:',e); }
 
-  // 4. Hardcoded fallback for seeded data — check known phones
-  // This handles the case where seeded profile has uid:'seeded' not real uid
-  // Try to find which phone has an emails doc matching user.email
+  // 4. Scan all users docs for email match (fallback for any account)
   try{
-    const emailKey = encEmail(user.email);
-    // Direct path attempt with known email
-    const testPhones = ['+19167900975']; // Add known phones here for fallback
-    for(const phone of testPhones){
+    const usersSnap = await getDocs(collection(db,'users'));
+    for(const userDoc of usersSnap.docs){
+      const phone = userDoc.id;
+      if(!/^\+?\d{7,}$/.test(phone.replace(/\s/g,''))) continue;
       try{
-        const emailDoc = await getDocs(collection(db,'users',phone,'emails'));
-        const match = emailDoc.docs.find(d=>d.data().email===user.email);
-        if(match){ console.log('resolvePhone via direct scan:', phone); return phone; }
+        const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+        const match = emailsSnap.docs.find(d=>d.data().email===user.email);
+        if(match){
+          console.log('resolvePhone: found via full scan:', phone);
+          return phone;
+        }
       } catch(_){}
     }
-  } catch(e){ console.warn('resolvePhone direct scan:',e); }
+  } catch(e){ console.warn('resolvePhone full scan failed:',e); }
 
-  console.warn('resolvePhone: could not find phone, falling back to displayName');
+  console.warn('resolvePhone: all strategies failed, falling back to displayName/email');
   return user.displayName || user.email;
 }
 
@@ -1044,18 +1057,38 @@ async function initMiniMap(records){
   const mapEl = document.getElementById('mini-map');
 
   // Step 1: Geocode all records missing lat/lng BEFORE creating map
+  // For records missing coords, try to extract address from body text too
   const needsGeo = records.filter(r=>{
-    const hasCoords = r.location?.lat && r.location?.lng &&
-      r.location.lat !== null && r.location.lng !== null;
+    const hasCoords = r.location?.lat && r.location?.lng;
+    if(hasCoords) return false;
+    // Has any address reference
     const hasAddress = r.location?.extractedAddress ||
       (r.location?.formatted && r.location.formatted.length > 3) ||
       (r.location?.city && r.location.city.length > 1);
-    return !hasCoords && hasAddress;
+    // Or has a body with street keywords
+    const body = r.body || r.message || '';
+    const hasStreetInBody = /(?:Ave|Avenue|Blvd|Boulevard|\bSt\b|Street|\bRd\b|Road|Drive|Lane|Way|Court|Place|Highway|Parkway)/i.test(body);
+    return hasAddress || hasStreetInBody;
   });
   console.log('Records needing geocoding:', needsGeo.length);
 
   for(const r of needsGeo){
-    const addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
+    // Try extractedAddress first, then formatted, then extract from body
+    let addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
+
+    // If no address but body has street reference, extract it now
+    if(!addr && (r.body || r.message)){
+      const body = r.body || r.message || '';
+      const m1 = body.match(/(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i);
+      const m2 = body.match(/(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)[\w\s,]*?)(?:\.|$)/i);
+      const m3 = body.match(/([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way))/i);
+      const match = m1||m2||m3;
+      if(match) addr = (match[1]||match[0]).trim()
+        .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
+        .replace(/\s+and\s+/gi,' & ')
+        .trim();
+    }
+
     if(!addr) continue;
     try{
       const res = await fetch(
@@ -1317,11 +1350,21 @@ async function submitLogFn(type){
     // Extract and geocode address from message body
     let locationData = { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown', extractedAddress:null };
     try{
-      // Match full address including "X Ave and Y Ave" or "X St, City, TX"
-      const addrMatch = body.match(/(?:near|at|on|corner of|intersection of)\s+([\w\s.]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)(?:\s+(?:and|&)\s+[\w\s.]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway))?(?:[,\s]+[\w\s,]+)?)/i);
+      // Strategy 1: explicit keywords followed by address
+      let addrMatch = body.match(/(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i);
+
+      // Strategy 2: numbered street address anywhere in text
+      if(!addrMatch) addrMatch = body.match(/(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s,]*?)(?:\.|$)/i);
+
+      // Strategy 3: named intersection "X Ave and Y Ave" or "X Ave & Y Ave"
+      if(!addrMatch) addrMatch = body.match(/([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way))/i);
+
       if(addrMatch){
-        // Normalize: treat "and"-joined streets as one location
-        const extracted = addrMatch[1].trim().replace(/\.$/, '').replace(/\s+and\s+/gi,' & ');
+        const extracted = (addrMatch[1]||addrMatch[0]).trim()
+          .replace(/\.$/, '')
+          .replace(/\s+and\s+/gi,' & ')
+          .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
+          .trim();
         locationData.extractedAddress = extracted;
         // Geocode via Google Maps Geocoding API
         const geoRes = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(extracted) + '&key=AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4');
