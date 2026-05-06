@@ -233,6 +233,60 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Paywall ─────────────────────────────────────────────────── */
+.paywall-banner{
+  position:sticky;top:var(--nav-h);z-index:90;
+  display:none;
+  background:linear-gradient(135deg,rgba(29,184,122,0.12),rgba(59,130,246,0.08));
+  border-bottom:1px solid rgba(29,184,122,0.2);
+  padding:10px 20px;
+  align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.paywall-banner.show{display:flex;}
+.paywall-banner-text{font-size:13px;color:var(--text);}
+.paywall-banner-text strong{color:var(--safe);}
+.paywall-banner-btn{
+  padding:7px 16px;border-radius:8px;border:none;
+  background:var(--safe);color:#000;
+  font-family:var(--font);font-size:12px;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:all 0.18s;
+  text-decoration:none;display:inline-block;
+}
+.paywall-banner-btn:hover{background:var(--safe2);}
+
+/* Locked card overlay */
+.locked{position:relative;overflow:hidden;}
+.locked::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(8,10,12,0) 0%,rgba(8,10,12,0.85) 40%,rgba(8,10,12,0.97) 100%);
+  z-index:5;pointer-events:none;
+}
+.lock-overlay{
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:20px;text-align:center;
+  gap:8px;
+}
+.lock-icon{font-size:24px;}
+.lock-text{font-size:13px;color:var(--text);font-weight:600;}
+.lock-sub{font-size:11px;color:var(--muted);}
+.lock-btn{
+  margin-top:4px;padding:8px 18px;border-radius:8px;border:none;
+  background:var(--safe);color:#000;
+  font-family:var(--font);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all 0.18s;text-decoration:none;
+  display:inline-block;
+}
+.lock-btn:hover{background:var(--safe2);}
+
+/* Blur locked content */
+.locked-content{
+  filter:blur(4px);
+  pointer-events:none;
+  user-select:none;
+}
+
 /* ── Edit entry ──────────────────────────────────────────────── */
 .msg-card-actions{display:flex;align-items:center;justify-content:flex-end;margin-top:8px;}
 .edit-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;
@@ -549,6 +603,16 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     </div>
   </nav>
 
+  <!-- Paywall banner -->
+  <div class="paywall-banner" id="paywall-banner">
+    <div class="paywall-banner-text">
+      You are on the <strong>Free tier</strong> — upgrade to unlock your full dashboard, map, credibility profile and message log.
+    </div>
+    <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="paywall-banner-btn">
+      Upgrade to Base — $9.99/mo
+    </a>
+  </div>
+
   <div class="dash-body">
     <div class="section-hdr"><span class="section-title">Overview — Last 90 Days</span></div>
 
@@ -563,24 +627,56 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <!-- Recent + People + Places -->
     <div class="cards-row cols-3">
       <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Recent Activity</div><div id="recent-logs" class="log-list"><div class="empty">Loading...</div></div></div>
-      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">People Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="people-list" class="freq-list"><div class="empty">Loading...</div></div></div>
-      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Places Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="places-list" class="freq-list"><div class="empty">Loading...</div></div></div>
+      <div class="wide-card locked" id="people-card" style="margin-bottom:0;">
+        <div class="wide-card-title">People Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div>
+        <div id="people-list" class="freq-list locked-content"><div class="empty">Loading...</div></div>
+        <div class="lock-overlay" id="people-lock" style="display:none;">
+          <div class="lock-icon">👤</div>
+          <div class="lock-text">People Analysis Locked</div>
+          <div class="lock-sub">Upgrade to see who appears most in your logs</div>
+          <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="lock-btn">Upgrade — $9.99/mo</a>
+        </div>
+      </div>
+      <div class="wide-card locked" id="places-card" style="margin-bottom:0;">
+        <div class="wide-card-title">Places Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div>
+        <div id="places-list" class="freq-list locked-content"><div class="empty">Loading...</div></div>
+        <div class="lock-overlay" id="places-lock" style="display:none;">
+          <div class="lock-icon">📍</div>
+          <div class="lock-text">Places Analysis Locked</div>
+          <div class="lock-sub">Upgrade to see location patterns in your logs</div>
+          <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="lock-btn">Upgrade — $9.99/mo</a>
+        </div>
+      </div>
     </div>
     <div style="margin-bottom:24px;"></div>
 
     <!-- Spider + Map -->
     <div class="cards-row cols-2">
-      <div class="wide-card" style="margin-bottom:0;">
+      <div class="wide-card locked" id="spider-card" style="margin-bottom:0;">
         <div class="wide-card-title">Credibility Profile <span style="font-size:10px;color:var(--muted);font-weight:400;">Law enforcement standards</span></div>
+        <div class="locked-content">
         <div class="integrity-row">
           <div><div class="integrity-score" id="integrity-score">—</div><div class="integrity-label">Overall Score</div></div>
           <div class="integrity-desc" id="integrity-desc">Analyzing your log entries...</div>
         </div>
         <canvas id="spider-canvas" width="300" height="260" style="display:block;margin:0 auto;"></canvas>
+        </div><!-- end locked-content -->
+        <div class="lock-overlay" id="spider-lock" style="display:none;">
+          <div class="lock-icon">🕸️</div>
+          <div class="lock-text">Credibility Profile Locked</div>
+          <div class="lock-sub">Upgrade to see your credibility score</div>
+          <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="lock-btn">Upgrade — $9.99/mo</a>
+        </div>
       </div>
-      <div class="wide-card" style="margin-bottom:0;">
+      <div class="wide-card locked" id="map-card" style="margin-bottom:0;">
         <div class="wide-card-title">Incident Locations <span style="font-size:10px;color:var(--muted);font-weight:400;">City level from SMS origin</span></div>
-        <div id="mini-map"></div>
+        <div id="mini-map" class="locked-content"></div>
+        <div class="lock-overlay" id="map-lock" style="display:none;">
+          <div class="lock-icon">🗺️</div>
+          <div class="lock-text">Incident Map Locked</div>
+          <div class="lock-sub">Upgrade to see your location pins</div>
+          <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="lock-btn">Upgrade — $9.99/mo</a>
+        </div>
         <div class="map-legend">
           <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--danger);"></div>Street level</div>
           <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--warn);"></div>City level</div>
@@ -654,7 +750,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     </div>
 
     <!-- Messages -->
-    <div class="wide-card">
+    <div class="wide-card locked" id="messages-card">
       <div class="wide-card-title">
         Message Log
         <button class="show-msgs-btn" id="show-msgs-btn" onclick="toggleMessages()">
@@ -870,13 +966,20 @@ async function showDashboard(user){
   const phoneDigits = currentPhone.replace(/\D/g,'');
   const slug = phoneDigits || 'dashboard';
   window.history.replaceState({},'','/'+slug);
+  // Check plan and apply paywall before rendering
+  await checkPlanAndApplyPaywall(currentPhone);
+
   allRecords = await loadAllRecords();
   renderStats(allRecords);
   renderRecentLogs(allRecords);
-  renderPeople(allRecords);
-  renderPlaces(allRecords);
-  renderSpider(allRecords);
-  loadMiniMap(allRecords);
+
+  // Only render locked features if user has paid plan
+  if(userPlan === 'base'){
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+    loadMiniMap(allRecords);
+  }
 }
 
 async function loadAllRecords(){
@@ -1709,6 +1812,63 @@ window.saveEditEntry = async function(){
     btn.disabled = false;
   }
 };
+
+// ── Paywall ───────────────────────────────────────────────────
+let userPlan = 'free'; // default until Firestore confirms
+
+async function checkPlanAndApplyPaywall(phone){
+  try{
+    const profileDoc = await getDocs(
+      query(collectionGroup(db,'profile'), where('uid','==',auth.currentUser.uid))
+    );
+    if(!profileDoc.empty){
+      userPlan = profileDoc.docs[0].data().plan || 'free';
+    }
+  } catch(e){ console.warn('checkPlan error:',e); }
+
+  const isLocked = userPlan !== 'base';
+  console.log('User plan:', userPlan, 'Locked:', isLocked);
+
+  // Show/hide paywall banner
+  document.getElementById('paywall-banner').classList.toggle('show', isLocked);
+
+  // Show/hide lock overlays
+  ['map-lock','spider-lock','people-lock','places-lock'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = isLocked ? 'flex' : 'none';
+  });
+
+  // Apply/remove blur on locked content
+  document.querySelectorAll('.locked-content').forEach(el=>{
+    el.style.filter = isLocked ? 'blur(4px)' : 'none';
+    el.style.pointerEvents = isLocked ? 'none' : '';
+  });
+
+  // Lock/unlock message log show button
+  const showMsgsBtn = document.getElementById('show-msgs-btn');
+  if(showMsgsBtn){
+    if(isLocked){
+      showMsgsBtn.onclick = () => window.open('https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805','_blank');
+      showMsgsBtn.innerHTML = '🔒 Upgrade to View Messages';
+      showMsgsBtn.style.borderColor = 'var(--warn)';
+      showMsgsBtn.style.color = 'var(--warn)';
+    } else {
+      showMsgsBtn.onclick = toggleMessages;
+      showMsgsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Show Messages';
+      showMsgsBtn.style.borderColor = '';
+      showMsgsBtn.style.color = '';
+    }
+  }
+
+  // Lock amend buttons in message cards
+  if(isLocked){
+    document.querySelectorAll('.edit-btn').forEach(btn=>{
+      btn.style.display = 'none';
+    });
+  }
+
+  return !isLocked;
+}
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
