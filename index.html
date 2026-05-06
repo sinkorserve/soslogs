@@ -841,14 +841,17 @@ function renderStats(records){
   document.getElementById('stat-people').textContent=people.length;
   document.getElementById('stat-people-sub').textContent=people[0]?.name?'Most mentioned: '+people[0].name:'Detecting from logs...';
   const places=extractPlaces(r90);
-  // Count unique locations (from Twilio city OR extracted address)
-  const uniqueLocs = new Set(r90.filter(r=>
-    (r.location?.lat && r.location?.lng) ||
-    r.location?.extractedAddress ||
-    r.location?.city
-  ).map(r=> r.location?.extractedAddress || r.location?.formatted || r.location?.city)).size;
-  document.getElementById('stat-places').textContent=uniqueLocs||places.length;
-  document.getElementById('stat-places-sub').textContent=places[0]?.name?'Most mentioned: '+places[0].name:'Detecting from logs...';
+  // Count unique normalized locations — "X Ave and Y Ave" = 1 location
+  const uniqueLocSet = new Set(
+    r90
+      .map(r => {
+        const raw = r.location?.extractedAddress || r.location?.formatted || r.location?.city || '';
+        return normalizeLocation(raw);
+      })
+      .filter(k => k && k.length > 2 && k.toLowerCase() !== 'intersection')
+  );
+  document.getElementById('stat-places').textContent = uniqueLocSet.size || 0;
+  document.getElementById('stat-places-sub').textContent = places[0]?.name ? 'Most mentioned: '+places[0].name : 'Detecting from logs...';
 }
 
 // RECENT LOGS
@@ -882,44 +885,76 @@ function extractPeople(records){
 }
 
 // PLACES
+// Normalize a location string:
+// "Lemmon Ave and N Haskell Ave" -> "Lemmon Ave & N Haskell Ave"
+// "1100 Abrams St, Arlington, TX" -> "1100 Abrams St, Arlington, TX"
+// Treats "and"-joined and comma-joined parts as ONE location
+function normalizeLocation(loc){
+  if(!loc) return '';
+  return loc.trim()
+    .replace(/\s+and\s+/gi, ' & ')   // "X and Y" -> "X & Y" (one location)
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^(intersection of|corner of|near|at|on)\s+/i, '') // strip prefixes
+    .trim();
+}
+
 function extractPlaces(records){
   const counts={};
-  const allText=records.map(r=>r.body||r.message||'').join(' ');
 
-  // Extract street addresses from message body
-  // Pattern: number + street name + suffix (Ave, St, Blvd etc)
-  const streetPattern = /\d+\s+[A-Za-z]+(?:\s+[A-Za-z]+)?\s+(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Ln|Lane|Way|Ct|Court|Pl|Place|Hwy|Highway|Pkwy|Parkway)/gi;
-  const streetMatches = allText.match(streetPattern) || [];
-  streetMatches.forEach(m => { const k=m.trim(); counts[k]=(counts[k]||0)+1; });
-
-  // Extract named street references (e.g. "Lemmon Ave", "N Haskell Ave")
-  const namedStreet = /(?:[NSEW]\.?\s+)?[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\s+(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)/g;
-  const namedMatches = allText.match(namedStreet) || [];
-  namedMatches.forEach(m => { const k=m.trim(); counts[k]=(counts[k]||0)+1; });
-
-  // Extract city names from location field (Twilio SMS data)
   records.forEach(r=>{
-    if(r.location?.city && r.location.city.length > 2){
-      const c=r.location.city;
-      counts[c]=(counts[c]||0)+1;
+    const body = r.body || r.message || '';
+
+    // 1. Use already-geocoded extractedAddress from record (most reliable)
+    if(r.location?.extractedAddress){
+      const k = normalizeLocation(r.location.extractedAddress);
+      if(k && k.length > 3) counts[k] = (counts[k]||0) + 1;
+      return; // one location per record
     }
-    if(r.location?.formatted && r.location.formatted.length > 2){
-      const f=r.location.formatted;
-      counts[f]=(counts[f]||0)+1;
+
+    // 2. Use formatted address from Twilio/geocode
+    if(r.location?.formatted && r.location.formatted.length > 3){
+      const k = normalizeLocation(r.location.formatted);
+      if(k) counts[k] = (counts[k]||0) + 1;
+      return;
+    }
+
+    // 3. Use city from Twilio
+    if(r.location?.city && r.location.city.length > 2){
+      const k = r.location.city;
+      counts[k] = (counts[k]||0) + 1;
+      return;
+    }
+
+    // 4. Extract from message body as last resort
+    // Match: "near/at X Ave and Y Ave" or "at 1234 Main St, City"
+    const addrPatterns = [
+      /(?:near|at|on|corner of|intersection of)\s+([\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)(?:\s+(?:and|&)\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway))?)/gi,
+      /\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)(?:[,\s]+[\w\s]+)?/gi,
+    ];
+    for(const pat of addrPatterns){
+      const matches = body.match(pat);
+      if(matches && matches.length){
+        const k = normalizeLocation(matches[0]);
+        if(k && k.length > 3){
+          counts[k] = (counts[k]||0) + 1;
+          break; // one location per record
+        }
+      }
     }
   });
 
-  // Generic place keywords
-  const placePatterns=['office','conference room','meeting room','headquarters','workplace','city hall','downtown','intersection','parking lot','building'];
+  // Generic place keywords (never count "intersection" alone)
+  const placePatterns = ['office','conference room','meeting room','headquarters','workplace','city hall','downtown','parking lot','building'];
+  const allText = records.map(r=>r.body||r.message||'').join(' ');
   placePatterns.forEach(p=>{
-    const matches=allText.match(new RegExp('\\b'+p.replace(/\s/g,'\\s')+'\\b','gi'));
-    if(matches&&matches.length>0) counts[p.toLowerCase()]=matches.length;
+    const matches = allText.match(new RegExp('\\b'+p.replace(/\s/g,'\\s')+'\\b','gi'));
+    if(matches && matches.length > 0) counts[p] = (counts[p]||0) + matches.length;
   });
 
   return Object.entries(counts)
-    .filter(([k])=>k.length>3)
-    .map(([name,count])=>({name,count}))
-    .sort((a,b)=>b.count-a.count)
+    .filter(([k]) => k.length > 3 && k.toLowerCase() !== 'intersection')
+    .map(([name,count]) => ({name,count}))
+    .sort((a,b) => b.count - a.count)
     .slice(0,8);
 }
 
@@ -997,17 +1032,67 @@ function loadMiniMap(records){
   s.defer = true;
   document.head.appendChild(s);
 }
-function initMiniMap(records){
+async function initMiniMap(records){
   const mapEl = document.getElementById('mini-map');
   const gmap  = new google.maps.Map(mapEl, {
     center:{lat:32.7767,lng:-96.7970}, zoom:8,
     styles:DARK_MAP, disableDefaultUI:true,
-    mapId:'soslog_mini' // required for AdvancedMarkerElement
+    mapId:'soslog_mini'
   });
-  const geoRecords = records.filter(r=>r.location?.lat&&r.location?.lng);
-  if(!geoRecords.length) return;
+
+  // Separate records with and without coordinates
+  let geoRecords = records.filter(r=>r.location?.lat&&r.location?.lng);
+  const needsGeo = records.filter(r=>
+    (!r.location?.lat || !r.location?.lng) &&
+    (r.location?.extractedAddress || r.location?.formatted || r.location?.city)
+  );
+
+  // Geocode records missing coordinates
+  for(const r of needsGeo){
+    const addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
+    if(!addr) continue;
+    try{
+      const res = await fetch(
+        'https://maps.googleapis.com/maps/api/geocode/json?address=' +
+        encodeURIComponent(addr) +
+        '&key=AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4'
+      );
+      const data = await res.json();
+      if(data.status === 'OK' && data.results.length){
+        const loc = data.results[0].geometry.location;
+        r.location = {
+          ...r.location,
+          lat: loc.lat,
+          lng: loc.lng,
+          formatted: data.results[0].formatted_address,
+          precision: 'address',
+        };
+        geoRecords.push(r);
+      }
+    } catch(e){ console.warn('miniMap geocode error:', e); }
+  }
+
+  if(!geoRecords.length){
+    // Show hint on map
+    const hint = document.createElement('div');
+    hint.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#5a7090;text-align:center;padding:20px;';
+    hint.textContent = 'Location pins will appear here as you log incidents with addresses';
+    mapEl.style.position = 'relative';
+    mapEl.appendChild(hint);
+    return;
+  }
+
   const bounds = new google.maps.LatLngBounds();
   const { AdvancedMarkerElement } = google.maps.marker;
+
+  // Deduplicate by normalized location
+  const seen = new Set();
+  geoRecords = geoRecords.filter(r => {
+    const key = (r.location.formatted || '').toLowerCase().trim();
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
   geoRecords.forEach(r=>{
     const pos = {lat:r.location.lat, lng:r.location.lng};
@@ -1016,20 +1101,30 @@ function initMiniMap(records){
     const color    = isStreet ? '#e63e2f' : '#f5a623';
     const size     = isStreet ? 14 : 11;
 
-    // Custom SVG pin
     const pin = document.createElement('div');
-    pin.style.cssText = 'width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:2px solid '+(isStreet?'#ff7878':'#f7c060')+';box-shadow:0 0 8px '+color+'80;';
+    pin.style.cssText = 'width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+
+      ';border:2px solid '+(isStreet?'#ff7878':'#f7c060')+
+      ';box-shadow:0 0 8px '+color+'80;cursor:pointer;';
 
-    new AdvancedMarkerElement({
+    const marker = new AdvancedMarkerElement({
       position: pos,
       map: gmap,
       content: pin,
       title: r.location.formatted || 'Incident location',
     });
+
+    // Info window on click
+    const iw = new google.maps.InfoWindow({
+      content: '<div style="background:#161c21;color:#d8e4ee;font-family:-apple-system,sans-serif;padding:10px 12px;border-radius:8px;max-width:240px;font-size:12px;line-height:1.5;">' +
+        '<div style="font-size:10px;color:#6b8099;margin-bottom:4px;">' + (isStreet ? '📍 Street level' : '📍 City level') + '</div>' +
+        '<div>' + (r.location.formatted || r.location.extractedAddress || '') + '</div>' +
+        '</div>'
+    });
+    marker.addListener('click', () => iw.open(gmap, marker));
   });
 
-  if(geoRecords.length===1){ gmap.setCenter(bounds.getCenter()); gmap.setZoom(10); }
-  else{ gmap.fitBounds(bounds, 30); }
+  if(geoRecords.length===1){ gmap.setCenter(bounds.getCenter()); gmap.setZoom(14); }
+  else{ gmap.fitBounds(bounds, 40); }
 }
 
 // MESSAGES
@@ -1176,9 +1271,11 @@ async function submitLogFn(type){
     // Extract and geocode address from message body
     let locationData = { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown', extractedAddress:null };
     try{
-      const addrMatch = body.match(/(?:near|at|on|corner of|intersection of)\s+([\w\s]+(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s,]*)/i);
+      // Match full address including "X Ave and Y Ave" or "X St, City, TX"
+      const addrMatch = body.match(/(?:near|at|on|corner of|intersection of)\s+([\w\s.]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)(?:\s+(?:and|&)\s+[\w\s.]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway))?(?:[,\s]+[\w\s,]+)?)/i);
       if(addrMatch){
-        const extracted = addrMatch[1].trim().replace(/\.$/, '');
+        // Normalize: treat "and"-joined streets as one location
+        const extracted = addrMatch[1].trim().replace(/\.$/, '').replace(/\s+and\s+/gi,' & ');
         locationData.extractedAddress = extracted;
         // Geocode via Google Maps Geocoding API
         const geoRes = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(extracted) + '&key=AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4');
