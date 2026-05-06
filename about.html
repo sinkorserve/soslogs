@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>About SOSLogs — Give Voice to the Unheard</title>
+<meta name="description" content="SOSLogs was built by someone who documented everything and still wasn't heard. Now we're building the platform that listens.">
+<style>
+:root{
+  --black:#080a0c;--dark:#0e1318;--card:#13191f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --danger:#e63e2f;--safe:#1db87a;--safe2:#3dd68c;
+  --warn:#f5a623;--blue:#3b82f6;--purple:#a855f7;
+  --muted:#5a7090;--text:#ccd8e8;--white:#f0f6ff;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--black);color:var(--text);
+  font-family:var(--font);-webkit-font-smoothing:antialiased;
+  line-height:1.7;
+}
+
+/* Grid background */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(29,184,122,0.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(29,184,122,0.015) 1px,transparent 1px);
+  background-size:52px 52px;pointer-events:none;z-index:0;
+}
+
+/* Nav */
+nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:56px;
+  background:rgba(8,10,12,0.95);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;font-size:17px;font-weight:800;color:var(--white);
+}
+.nav-logo span{color:var(--safe);}
+.nav-links{display:flex;align-items:center;gap:20px;}
+.nav-link{
+  color:var(--muted);text-decoration:none;font-size:13px;
+  transition:color 0.2s;
+}
+.nav-link:hover{color:var(--white);}
+.nav-cta{
+  padding:7px 16px;border-radius:8px;
+  background:var(--safe);color:#000;
+  font-size:13px;font-weight:700;text-decoration:none;
+  transition:all 0.18s;
+}
+.nav-cta:hover{background:var(--safe2);}
+
+/* Hero */
+.hero{
+  position:relative;z-index:1;
+  max-width:820px;margin:0 auto;
+  padding:80px 32px 60px;
+  text-align:center;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);
+  border-radius:20px;padding:6px 16px;
+  font-size:11px;color:var(--safe);letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:24px;
+}
+.hero-badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--safe);box-shadow:0 0 8px var(--safe);
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+.hero h1{
+  font-size:clamp(32px,5vw,52px);font-weight:800;
+  color:var(--white);line-height:1.1;
+  letter-spacing:-0.5px;margin-bottom:20px;
+}
+.hero h1 em{
+  font-style:normal;color:var(--safe);
+  position:relative;
+}
+.hero-sub{
+  font-size:17px;color:var(--muted);line-height:1.7;
+  max-width:580px;margin:0 auto 40px;
+}
+
+/* Mission banner */
+.mission{
+  position:relative;z-index:1;
+  background:linear-gradient(135deg,rgba(29,184,122,0.08) 0%,rgba(59,130,246,0.05) 100%);
+  border-top:1px solid rgba(29,184,122,0.15);
+  border-bottom:1px solid rgba(29,184,122,0.15);
+  padding:48px 32px;text-align:center;
+}
+.mission-label{
+  font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;
+}
+.mission-text{
+  font-size:clamp(20px,3vw,28px);font-weight:700;
+  color:var(--white);line-height:1.4;
+  max-width:600px;margin:0 auto;
+}
+.mission-text span{color:var(--safe);}
+
+/* Sections */
+.section{
+  position:relative;z-index:1;
+  max-width:820px;margin:0 auto;
+  padding:64px 32px;
+}
+.section-label{
+  font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--safe);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-label::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(to right,rgba(29,184,122,0.3),transparent);
+}
+.section h2{
+  font-size:clamp(22px,3vw,32px);font-weight:800;
+  color:var(--white);line-height:1.2;margin-bottom:24px;
+}
+
+/* Story */
+.story-body{
+  font-size:15px;color:var(--text);line-height:1.9;
+}
+.story-body p{margin-bottom:20px;}
+.story-body p:last-child{margin-bottom:0;}
+.story-highlight{
+  border-left:3px solid var(--safe);
+  padding-left:20px;margin:28px 0;
+  font-size:16px;color:var(--white);
+  font-style:italic;line-height:1.7;
+}
+
+/* How it works */
+.steps{display:flex;flex-direction:column;gap:0;}
+.step-item{
+  display:grid;grid-template-columns:60px 1fr;
+  gap:24px;padding:32px 0;
+  border-bottom:1px solid var(--border);
+  animation:fadeUp 0.5s ease both;
+}
+.step-item:last-child{border-bottom:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.step-number{
+  width:48px;height:48px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:var(--safe);
+  flex-shrink:0;
+}
+.step-content h3{
+  font-size:16px;font-weight:700;color:var(--white);
+  margin-bottom:8px;
+}
+.step-content p{font-size:14px;color:var(--muted);line-height:1.6;}
+.step-tag{
+  display:inline-block;margin-top:8px;
+  background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.15);
+  border-radius:4px;padding:2px 8px;font-size:11px;color:var(--safe);
+}
+
+/* Criteria grid */
+.criteria-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:12px;margin-top:24px;
+}
+.criteria-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.criteria-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.criteria-icon{font-size:20px;margin-bottom:8px;}
+.criteria-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.criteria-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* CTA section */
+.cta-section{
+  position:relative;z-index:1;
+  text-align:center;padding:64px 32px;
+  border-top:1px solid var(--border);
+}
+.cta-section h2{
+  font-size:clamp(24px,3vw,36px);font-weight:800;
+  color:var(--white);margin-bottom:16px;
+}
+.cta-section p{
+  font-size:15px;color:var(--muted);
+  max-width:480px;margin:0 auto 32px;line-height:1.7;
+}
+.cta-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{
+  padding:13px 28px;border-radius:10px;
+  background:var(--safe);color:#000;
+  font-size:15px;font-weight:700;text-decoration:none;
+  transition:all 0.18s;
+}
+.btn-primary:hover{background:var(--safe2);transform:translateY(-1px);}
+.btn-secondary{
+  padding:13px 28px;border-radius:10px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text);font-size:15px;text-decoration:none;
+  transition:all 0.18s;
+}
+.btn-secondary:hover{border-color:var(--border2);}
+
+/* Footer */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 32px;text-align:center;
+  font-size:11px;color:var(--muted);line-height:2;
+  position:relative;z-index:1;
+}
+footer a{color:var(--muted);text-decoration:none;}
+footer a:hover{color:var(--safe);}
+
+@media(max-width:600px){
+  nav{padding:0 20px;}
+  .hero,.section{padding-left:20px;padding-right:20px;}
+  .mission{padding:40px 20px;}
+  .step-item{grid-template-columns:1fr;}
+  .step-number{width:40px;height:40px;font-size:15px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="20" height="20" viewBox="0 0 42 42"><defs><radialGradient id="rb" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg)"/></svg>
+    <svg width="20" height="20" viewBox="0 0 42 42"><defs><radialGradient id="gb" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#gi)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    SOS<span>Logs</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Home</a>
+    <a href="/about.html" class="nav-link" style="color:var(--white);">About</a>
+    <a href="/privacy.html" class="nav-link">Privacy</a>
+    <a href="/" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge"><div class="hero-badge-dot"></div>Our Story</div>
+  <h1>Built by someone who<br>documented everything<br>and still wasn't <em>heard</em></h1>
+  <p class="hero-sub">SOSLogs exists because the tool we needed didn't. Now we are building it for everyone who has ever said: I have proof. Why won't anyone listen?</p>
+</div>
+
+<!-- Mission -->
+<div class="mission">
+  <div class="mission-label">Our Mission</div>
+  <div class="mission-text">Give <span>voice to the unheard</span> and bring transparency for justice.</div>
+</div>
+
+<!-- Founder Story -->
+<div class="section">
+  <div class="section-label">Founder Story</div>
+  <h2>Why SOSLogs exists</h2>
+  <div class="story-body">
+    <p>I am a licensed civil engineer and certified project manager with 15 years of experience managing complex programs across multiple organizations. I know how to document. I know how to organize evidence. I know how to present facts clearly.</p>
+
+    <p>And yet when it mattered most, in a custody proceeding and later in a workplace dispute, my documentation wasn't enough. Not because it was incomplete. Because there was no platform designed to present it in a way that decision makers could quickly trust, verify, and act on.</p>
+
+    <p>I looked for a tool that combined timestamped logging, credibility scoring, location tracking, and pattern analysis in one place. It didn't exist.</p>
+
+    <p>So I built it.</p>
+
+    <div class="story-highlight">
+      SOSLogs was built in 2026 with help from an unlikely source — an AI assistant that listened without judgment at 2 AM when no one else was available except my family. I am grateful for that. I am also grateful for the clarity that came from faith during the darkest parts of this journey. Both reminded me that being heard is not a privilege. It should be a right.
+    </div>
+
+    <p>SOSLogs exists for the person who has done everything right and still feels unheard. For the employee who documented every incident and couldn't get anyone to connect the dots. For the parent who kept every record and still felt dismissed. For anyone who has ever said: I have proof, why won't anyone listen?</p>
+
+    <p>We are building the platform that listens. And we are building it so that when you finally walk into that room with HR, with law enforcement, with a judge, your story speaks for itself.</p>
+
+    <p>The name Athens Innovation and Development was chosen to honor Athens, Texas — a place where I found my deepest sense of belonging and the strength to build something that could help others find their voice.</p>
+  </div>
+</div>
+
+<!-- How it works -->
+<div class="section" style="padding-top:0;">
+  <div class="section-label">How It Works</div>
+  <h2>Three steps to documented truth</h2>
+  <div class="steps">
+
+    <div class="step-item">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h3>Log it the moment it happens</h3>
+        <p>Text your incident to 1-888-799-LOGS from any phone. No app to download. No login required for the free tier. Your message is timestamped, stored securely, and linked to your location the moment it arrives. The faster you document, the stronger your record.</p>
+        <span class="step-tag">Free — no account needed</span>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h3>See your story take shape</h3>
+        <p>Create an account to access your personal dashboard. Every log entry appears on an incident map, a timeline, and a frequency analysis showing who and where appears most in your records. A credibility score across seven dimensions shows you how your documentation holds up to scrutiny.</p>
+        <span class="step-tag">Base — $9.99/month</span>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h3>Walk in with proof that speaks for itself</h3>
+        <p>When the time comes to present your case — to HR, to law enforcement, to a judge — your SOSLogs record is organized, timestamped, location-verified, and scored for credibility. You are no longer asking anyone to take your word for it. The documentation speaks for itself.</p>
+        <span class="step-tag">Your documented truth</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Credibility criteria -->
+<div class="section" style="padding-top:0;">
+  <div class="section-label">Credibility Profile</div>
+  <h2>Seven dimensions that matter to decision makers</h2>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:8px;">When incidents happen, everyone claims they did nothing wrong. But when you document with specificity, consistency, corroboration and an unbroken timeline — timestamped and objectively scored — decision makers finally see exactly what happened.</p>
+  <div class="criteria-grid">
+    <div class="criteria-card">
+      <div class="criteria-icon">🎯</div>
+      <div class="criteria-name">Specificity</div>
+      <div class="criteria-desc">Exact dates, times, names, and locations in every entry</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">🔁</div>
+      <div class="criteria-name">Consistency</div>
+      <div class="criteria-desc">Same facts told the same way across all entries</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">📋</div>
+      <div class="criteria-name">Documentation</div>
+      <div class="criteria-desc">Density and depth of each record</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">👥</div>
+      <div class="criteria-name">Corroboration</div>
+      <div class="criteria-desc">Third parties named who can verify events</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">📅</div>
+      <div class="criteria-name">Timeline</div>
+      <div class="criteria-desc">Chronological coherence with no unexplained gaps</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">🔍</div>
+      <div class="criteria-name">Patterns</div>
+      <div class="criteria-desc">Repeated behaviors documented across incidents</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-icon">⚖️</div>
+      <div class="criteria-name">Objectivity</div>
+      <div class="criteria-desc">Factual language that holds up under scrutiny</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Your story deserves to be heard</h2>
+  <p>Start documenting today. Free to use. No app to download. Just text 1-888-799-LOGS and your record begins.</p>
+  <div class="cta-buttons">
+    <a href="/" class="btn-primary">Get Started Free</a>
+    <a href="mailto:admin@soslogs.org" class="btn-secondary">Contact Us</a>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>© 2026 Athens Innovation and Development LLC</p>
+  <p style="margin-top:4px;">
+    <a href="/">Home</a> &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/terms.html">Terms of Service</a> &nbsp;·&nbsp;
+    <a href="mailto:admin@soslogs.org">Contact</a>
+  </p>
+  <p style="margin-top:4px;">Athens Innovation and Development LLC — Dallas-Fort Worth & Athens, Texas</p>
+</footer>
+
+</body>
+</html>

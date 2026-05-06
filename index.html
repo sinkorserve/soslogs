@@ -118,7 +118,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 }
 .pricing-outer{display:none;}
 .pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
-.pricing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.pricing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 
 @media(max-width:760px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:420px){.pricing-cards{grid-template-columns:1fr;}}
@@ -302,6 +302,53 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <span class="login-logo-text">SOS<span>Logs</span></span>
   </div>
   <p class="login-tagline">Document · Protect · Prove</p>
+
+  <!-- Hero statement -->
+  <div style="margin-bottom:16px;padding:14px 16px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:12px;">
+    <p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+      When incidents happen, everyone claims they did nothing wrong.
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Specificity</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Consistency</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Documentation</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Corroboration</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Timeline</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Patterns</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Objectivity</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">
+      Timestamped incident logs scored across all seven dimensions — your documented truth, ready when it matters.
+    </p>
+  </div>
+
+  <!-- SVG illustration: document with pen -->
+  <div style="display:flex;justify-content:center;margin-bottom:14px;">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Document -->
+      <rect x="12" y="8" width="44" height="56" rx="4" fill="#161c21" stroke="rgba(29,184,122,0.3)" stroke-width="1.5"/>
+      <!-- Lines on document -->
+      <line x1="20" y1="22" x2="48" y2="22" stroke="rgba(29,184,122,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="30" x2="48" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="38" x2="42" y2="38" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="46" x2="45" y2="46" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="54" x2="38" y2="54" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Timestamp badge -->
+      <rect x="30" y="58" width="36" height="16" rx="8" fill="#0e1318" stroke="rgba(29,184,122,0.4)" stroke-width="1"/>
+      <circle cx="39" cy="66" r="3" fill="var(--safe)" opacity="0.8"/>
+      <line x1="44" y1="64" x2="58" y2="64" stroke="rgba(29,184,122,0.5)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="44" y1="68" x2="54" y2="68" stroke="rgba(29,184,122,0.3)" stroke-width="1" stroke-linecap="round"/>
+      <!-- Pen writing -->
+      <g transform="rotate(-35 60 40)">
+        <rect x="54" y="28" width="6" height="20" rx="2" fill="#1db87a" opacity="0.9"/>
+        <polygon points="54,48 60,48 57,54" fill="#0d7a50"/>
+        <rect x="54" y="28" width="6" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
+      </g>
+      <!-- Writing glow -->
+      <circle cx="57" cy="52" r="3" fill="rgba(29,184,122,0.3)" opacity="0.6"/>
+    </svg>
+  </div>
+
   <div class="login-card">
     <div id="step-login" class="step active">
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Access your records</div>
@@ -334,7 +381,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   <div class="sms-hint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div>Text your logs to <strong>1-888-799-LOGS</strong></div></div>
   <div class="login-footer">
     <div>2026 Athens Innovation and Development LLC</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;"><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;flex-wrap:wrap;"><a href="/about.html">About</a><span>·</span><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
   </div>
 
   <!-- Pricing section - moved outside login-wrap below -->
@@ -441,6 +488,43 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         </ul>
         <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="pricing-cta pro">Get Base — $9.99/mo</a>
       </div>
+
+      <!-- Enterprise HR -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--blue);"></div>
+        <div class="pricing-tier">Enterprise HR</div>
+        <div class="pricing-price">$299<span>/month</span></div>
+        <div class="pricing-desc">For HR departments managing workplace documentation at scale.</div>
+        <ul class="pricing-features">
+          <li>Everything in Base</li>
+          <li>Multi-user org access</li>
+          <li>Bulk case management</li>
+          <li>PDF report generation per case</li>
+          <li>Dedicated account manager</li>
+          <li>Priority support with SLA</li>
+          <li>Custom data retention policies</li>
+        </ul>
+        <a href="mailto:admin@soslogs.org?subject=Enterprise HR Inquiry" class="pricing-cta pro" style="background:var(--blue);">Contact Us</a>
+      </div>
+
+      <!-- Enterprise LE -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--purple);"></div>
+        <div class="pricing-tier">Enterprise LE</div>
+        <div class="pricing-price">$799<span>/month</span></div>
+        <div class="pricing-desc">For law enforcement agencies requiring verified incident documentation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Enterprise HR</li>
+          <li>Direct API access for case management</li>
+          <li>Verified chain of custody reports</li>
+          <li>Court-ready documentation export</li>
+          <li>Compliance and audit logging</li>
+          <li>Custom SLA agreement</li>
+          <li>Dedicated support team</li>
+        </ul>
+        <a href="mailto:admin@soslogs.org?subject=Enterprise LE Inquiry" class="pricing-cta premium" style="background:var(--purple);">Contact Us</a>
+      </div>
+
 
 
 
