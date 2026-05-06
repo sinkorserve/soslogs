@@ -1074,10 +1074,14 @@ function renderPeople(r){
   const places = extractPlaces(r90);
   const placeNames = new Set(places.map(p=>p.name.toLowerCase()));
   // Filter out anything that's already a place or in stop words
-  const people = extractPeople(r90).filter(p=>
-    !placeNames.has(p.name.toLowerCase()) &&
-    !STOP_WORDS.has(p.name)
-  );
+  const people = extractPeople(r90).filter(p=>{
+    if(placeNames.has(p.name.toLowerCase())) return false;
+    if(STOP_WORDS.has(p.name)) return false;
+    // Full names (containing space) show with count >= 1
+    // Single words need count >= 2 to reduce noise
+    if(!p.name.includes(' ') && p.count < 2) return false;
+    return true;
+  });
   renderFreqList('people-list', people, 'var(--warn)');
   document.getElementById('stat-people').textContent = people.length;
   document.getElementById('stat-people-sub').textContent = people[0]?.name ? 'Most mentioned: '+people[0].name : 'Detecting from logs...';
