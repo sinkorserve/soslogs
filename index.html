@@ -994,15 +994,20 @@ window.doLogout = async () => { await signOut(auth); window.history.replaceState
 
 // DASHBOARD
 async function showDashboard(user){
+  // Hide dash body until paywall check complete — prevents flash of content
+  const dashBody = document.querySelector('.dash-body');
+  if(dashBody) dashBody.style.visibility = 'hidden';
+
   showScreen('dashboard-screen');
   document.getElementById('nav-phone').textContent = fmtPhone(currentPhone);
-  // URL uses phone digits only - never exposes name
   const phoneDigits = currentPhone.replace(/\D/g,'');
   const slug = phoneDigits || 'dashboard';
   window.history.replaceState({},'','/'+slug);
-  // Check plan and apply paywall before rendering
+
+  // Check plan FIRST before rendering anything
   await checkPlanAndApplyPaywall(currentPhone);
 
+  // Now load and render data
   allRecords = await loadAllRecords();
   renderStats(allRecords);
   renderRecentLogs(allRecords);
@@ -1014,6 +1019,9 @@ async function showDashboard(user){
     renderSpider(allRecords);
     loadMiniMap(allRecords);
   }
+
+  // Reveal dashboard now that everything is ready
+  if(dashBody) dashBody.style.visibility = 'visible';
 }
 
 async function loadAllRecords(){
