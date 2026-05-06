@@ -1,11 +1,34 @@
 {
   "rewrites": [
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/terms", "destination": "/terms.html" }
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    }
   ],
   "routes": [
-    { "src": "/privacy.html", "dest": "/privacy.html" },
-    { "src": "/terms.html", "dest": "/terms.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/about.html",
+      "dest": "/about.html"
+    },
+    {
+      "src": "/privacy.html",
+      "dest": "/privacy.html"
+    },
+    {
+      "src": "/terms.html",
+      "dest": "/terms.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
