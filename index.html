@@ -620,6 +620,7 @@ const normPhone  = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
 let currentPhone = null;
 let allRecords   = [];
 let msgsVisible  = false;
+let resolvedLocationCount = 0; // updated after map geocoding completes
 
 const STOP_WORDS = new Set([
   'The','This','That','Then','When','With','From','Have','Been','They','Also','Were','Your','Their',
@@ -1125,6 +1126,11 @@ async function initMiniMap(records){
 
   console.log('Map pins to show:', resolvedRecords.length, 'out of', records.length, 'records');
   const geoRecords = resolvedRecords;
+
+  // Update locations logged stat with actual geocoded count
+  resolvedLocationCount = geoRecords.length;
+  const statEl = document.getElementById('stat-places');
+  if(statEl) statEl.textContent = resolvedLocationCount;
 
   // Step 4: Create map - NO styles when using mapId, NO deprecated params
   const gmap = new google.maps.Map(mapEl, {
