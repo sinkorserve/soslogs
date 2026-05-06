@@ -841,14 +841,16 @@ function renderStats(records){
   document.getElementById('stat-people').textContent=people.length;
   document.getElementById('stat-people-sub').textContent=people[0]?.name?'Most mentioned: '+people[0].name:'Detecting from logs...';
   const places=extractPlaces(r90);
-  // Count unique normalized locations — "X Ave and Y Ave" = 1 location
+  // Count unique locations — normalize "X and Y" / "X, Y" as one location
   const uniqueLocSet = new Set(
     r90
       .map(r => {
         const raw = r.location?.extractedAddress || r.location?.formatted || r.location?.city || '';
-        return normalizeLocation(raw);
+        if(!raw || raw.length < 3) return null;
+        // Normalize: lowercase, replace "and" with &, collapse whitespace
+        return raw.toLowerCase().replace(/\s+and\s+/g,' & ').replace(/\s{2,}/g,' ').trim();
       })
-      .filter(k => k && k.length > 2 && k.toLowerCase() !== 'intersection')
+      .filter(k => k && k !== 'intersection' && k !== 'us' && k !== 'united states')
   );
   document.getElementById('stat-places').textContent = uniqueLocSet.size || 0;
   document.getElementById('stat-places-sub').textContent = places[0]?.name ? 'Most mentioned: '+places[0].name : 'Detecting from logs...';
@@ -1034,20 +1036,13 @@ function loadMiniMap(records){
 }
 async function initMiniMap(records){
   const mapEl = document.getElementById('mini-map');
-  const gmap  = new google.maps.Map(mapEl, {
-    center:{lat:32.7767,lng:-96.7970}, zoom:8,
-    styles:DARK_MAP, disableDefaultUI:true,
-    mapId:'soslog_mini'
-  });
 
-  // Separate records with and without coordinates
-  let geoRecords = records.filter(r=>r.location?.lat&&r.location?.lng);
+  // Step 1: Geocode all records missing lat/lng BEFORE creating map
   const needsGeo = records.filter(r=>
     (!r.location?.lat || !r.location?.lng) &&
     (r.location?.extractedAddress || r.location?.formatted || r.location?.city)
   );
 
-  // Geocode records missing coordinates
   for(const r of needsGeo){
     const addr = r.location?.extractedAddress || r.location?.formatted || r.location?.city;
     if(!addr) continue;
@@ -1067,64 +1062,103 @@ async function initMiniMap(records){
           formatted: data.results[0].formatted_address,
           precision: 'address',
         };
-        geoRecords.push(r);
+        console.log('Geocoded:', addr, '->', loc);
       }
     } catch(e){ console.warn('miniMap geocode error:', e); }
   }
 
+  // Step 2: Filter records with valid coordinates
+  let geoRecords = records.filter(r=>r.location?.lat && r.location?.lng);
+
+  // Step 3: Deduplicate by lat/lng
+  const seen = new Set();
+  geoRecords = geoRecords.filter(r=>{
+    const key = r.location.lat.toFixed(4) + ',' + r.location.lng.toFixed(4);
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+
+  console.log('Map pins to show:', geoRecords.length);
+
+  // Step 4: Create map - NO styles when using mapId, NO deprecated params
+  const gmap = new google.maps.Map(mapEl, {
+    center: geoRecords.length
+      ? {lat: geoRecords[0].location.lat, lng: geoRecords[0].location.lng}
+      : {lat:32.7767, lng:-96.7970},
+    zoom: 12,
+    mapId: 'DEMO_MAP_ID',  // Use DEMO_MAP_ID for dark theme without cloud config
+    disableDefaultUI: true,
+    zoomControl: true,
+  });
+
   if(!geoRecords.length){
-    // Show hint on map
+    // Show styled hint overlay
     const hint = document.createElement('div');
-    hint.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#5a7090;text-align:center;padding:20px;';
-    hint.textContent = 'Location pins will appear here as you log incidents with addresses';
+    hint.style.cssText = [
+      'position:absolute','bottom:16px','left:50%','transform:translateX(-50%)',
+      'background:rgba(22,28,33,0.9)','border:1px solid rgba(255,255,255,0.08)',
+      'border-radius:10px','padding:10px 16px','font-size:12px','color:#5a7090',
+      'text-align:center','pointer-events:none','white-space:nowrap','z-index:10'
+    ].join(';');
+    hint.textContent = 'Include an address in your log — pins appear here';
     mapEl.style.position = 'relative';
     mapEl.appendChild(hint);
     return;
   }
 
+  // Step 5: Add markers using legacy Marker (more reliable, not deprecated yet)
   const bounds = new google.maps.LatLngBounds();
-  const { AdvancedMarkerElement } = google.maps.marker;
-
-  // Deduplicate by normalized location
-  const seen = new Set();
-  geoRecords = geoRecords.filter(r => {
-    const key = (r.location.formatted || '').toLowerCase().trim();
-    if(seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
 
   geoRecords.forEach(r=>{
-    const pos = {lat:r.location.lat, lng:r.location.lng};
+    const pos = {lat: r.location.lat, lng: r.location.lng};
     bounds.extend(pos);
-    const isStreet = r.location?.precision==='address';
-    const color    = isStreet ? '#e63e2f' : '#f5a623';
-    const size     = isStreet ? 14 : 11;
+    const isStreet = r.location?.precision === 'address';
+    const color = isStreet ? '#e63e2f' : '#f5a623';
+    const ring  = isStreet ? '#ff7878' : '#f7c060';
 
-    const pin = document.createElement('div');
-    pin.style.cssText = 'width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+
-      ';border:2px solid '+(isStreet?'#ff7878':'#f7c060')+
-      ';box-shadow:0 0 8px '+color+'80;cursor:pointer;';
-
-    const marker = new AdvancedMarkerElement({
+    const marker = new google.maps.Marker({
       position: pos,
       map: gmap,
-      content: pin,
-      title: r.location.formatted || 'Incident location',
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: isStreet ? 12 : 9,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: ring,
+        strokeWeight: 2,
+      },
+      title: r.location.formatted || r.location.extractedAddress || 'Incident',
     });
 
-    // Info window on click
+    // Pulse ring
+    new google.maps.Marker({
+      position: pos, map: gmap, clickable: false,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: isStreet ? 20 : 16,
+        fillColor: color, fillOpacity: 0.12,
+        strokeColor: color, strokeWeight: 1, strokeOpacity: 0.3,
+      }
+    });
+
     const iw = new google.maps.InfoWindow({
-      content: '<div style="background:#161c21;color:#d8e4ee;font-family:-apple-system,sans-serif;padding:10px 12px;border-radius:8px;max-width:240px;font-size:12px;line-height:1.5;">' +
-        '<div style="font-size:10px;color:#6b8099;margin-bottom:4px;">' + (isStreet ? '📍 Street level' : '📍 City level') + '</div>' +
+      content: '<div style="background:#161c21;color:#d8e4ee;font-family:-apple-system,sans-serif;' +
+        'padding:10px 12px;border-radius:8px;max-width:220px;font-size:12px;line-height:1.5;">' +
+        '<div style="font-size:10px;color:' + color + ';margin-bottom:4px;">' +
+        (isStreet ? '📍 Street level' : '📍 City level') + '</div>' +
         '<div>' + (r.location.formatted || r.location.extractedAddress || '') + '</div>' +
         '</div>'
     });
-    marker.addListener('click', () => iw.open(gmap, marker));
+    marker.addListener('click', ()=>iw.open(gmap, marker));
   });
 
-  if(geoRecords.length===1){ gmap.setCenter(bounds.getCenter()); gmap.setZoom(14); }
-  else{ gmap.fitBounds(bounds, 40); }
+  // Step 6: Fit bounds
+  if(geoRecords.length === 1){
+    gmap.setCenter(bounds.getCenter());
+    gmap.setZoom(14);
+  } else {
+    gmap.fitBounds(bounds, 50);
+  }
 }
 
 // MESSAGES
