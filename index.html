@@ -85,6 +85,14 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .f-input{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-text-fill-color:var(--text);}
 .f-input::placeholder{color:var(--muted);}
 .f-input:focus{border-color:rgba(29,184,122,0.45);box-shadow:0 0 0 3px rgba(29,184,122,0.07);}
+.f-input:-webkit-autofill,
+.f-input:-webkit-autofill:hover,
+.f-input:-webkit-autofill:focus{
+  -webkit-box-shadow:0 0 0 1000px var(--dark) inset !important;
+  -webkit-text-fill-color:var(--text) !important;
+  border-color:var(--border) !important;
+  caret-color:var(--text);
+}
 .field-wrap{margin-bottom:8px;}
 .grid-cc{display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:8px;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
@@ -424,7 +432,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Your phone number is your primary identity.</div>
       <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
-      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
+      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country" autocomplete="country-name"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
       <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
       <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
       <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
