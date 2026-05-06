@@ -949,45 +949,45 @@ function renderRecentLogs(records){
 // PEOPLE
 function extractPeople(records){
   const counts={};
-  const allText = records.map(r=>r.body||r.message||'').join(' ');
+  const allText = records.map(r=>(r.body||r.message||'')
+    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+  ).join(' ');
 
-  // Strategy 1: Full names — "John Doe", "Jane Smith" (Title Case two-word combos)
-  // Excludes known place words and stop words
-  const fullNamePattern = /([A-Z][a-z]{1,})\s+([A-Z][a-z]{1,})/g;
-  let m;
-  while((m = fullNamePattern.exec(allText)) !== null){
-    const first = m[1], last = m[2];
-    // Skip if either word is a stop word or street suffix
-    if(STOP_WORDS.has(first) || STOP_WORDS.has(last)) continue;
-    // Skip common two-word phrases that aren't names
-    const skipPhrases = new Set([
-      'Law Enforcement','Direct Report','Personal Device','Toll Free',
-      'United States','New York','Fort Worth','San Antonio','Los Angeles',
-      'Public Safety','Safety Documentation','Personal Safety',
-    ]);
-    const fullName = first + ' ' + last;
-    if(skipPhrases.has(fullName)) continue;
-    counts[fullName] = (counts[fullName]||0) + 1;
+  const SKIP_PHRASES = new Set([
+    'Law Enforcement','Direct Report','Personal Device','Toll Free',
+    'United States','New York','Fort Worth','San Antonio','Los Angeles',
+    'Public Safety','Safety Documentation','Personal Safety',
+    'Border St','Abrams St','Lemmon Ave','Haskell Ave',
+  ]);
+
+  // Strategy 1: word-by-word scan for First Last name pairs
+  const words = allText.split(/\s+/);
+  for(let i=0;i<words.length-1;i++){
+    const w1=words[i].replace(/[^A-Za-z]/g,'');
+    const w2=words[i+1].replace(/[^A-Za-z]/g,'');
+    if(!w1||!w2) continue;
+    if(!/^[A-Z][a-z]{1,}$/.test(w1)) continue;
+    if(!/^[A-Z][a-z]{1,}$/.test(w2)) continue;
+    if(STOP_WORDS.has(w1)||STOP_WORDS.has(w2)) continue;
+    const fn=w1+' '+w2;
+    if(SKIP_PHRASES.has(fn)) continue;
+    counts[fn]=(counts[fn]||0)+1;
   }
 
-  // Strategy 2: Single capitalized words appearing 2+ times
-  // (catches names mentioned repeatedly without last name)
-  const capWords = allText.match(/[A-Z][a-z]{2,}/g) || [];
-  const capCounts = {};
-  capWords.forEach(w => { capCounts[w] = (capCounts[w]||0)+1; });
-  Object.entries(capCounts).forEach(([w,c]) => {
-    if(c >= 2 && !STOP_WORDS.has(w) && !counts[w]){
-      // Only add if not already captured as part of a full name
-      const alreadyCaptured = Object.keys(counts).some(k => k.includes(w));
-      if(!alreadyCaptured) counts[w] = c;
+  // Strategy 2: single capitalized words appearing 2+ times
+  const capWords=allText.match(/[A-Z][a-z]{2,}/g)||[];
+  const capCounts={};
+  capWords.forEach(w=>{capCounts[w]=(capCounts[w]||0)+1;});
+  Object.entries(capCounts).forEach(([w,c])=>{
+    if(c>=2&&!STOP_WORDS.has(w)){
+      const captured=Object.keys(counts).some(k=>k.includes(w));
+      if(!captured) counts[w]=c;
     }
   });
 
-  return Object.entries(counts)
-    .map(([name,count]) => ({name,count}))
-    .sort((a,b) => b.count - a.count)
-    .slice(0,8);
+  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,8);
 }
+
 
 // PLACES
 // Normalize a location string:
