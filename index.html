@@ -1659,5 +1659,27 @@ window.saveEditEntry = async function(){
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
+
+<!-- Edit entry modal - placed at body level so always accessible -->
+<div class="edit-modal-backdrop" id="edit-modal" style="display:none;" onclick="if(event.target===this)closeEditModal()">
+  <div class="edit-modal">
+    <div class="edit-modal-title">✏️ Amend Log Entry</div>
+    <div class="edit-modal-sub">Your original entry is preserved unchanged. A new timestamped entry will be created with your changes.</div>
+    <div class="edit-original">
+      <strong>Original entry</strong>
+      <span id="edit-original-text"></span>
+    </div>
+    <textarea class="edit-ta" id="edit-new-text" placeholder="Enter your updated log entry..."></textarea>
+    <div class="edit-note"><strong>Note:</strong> The original entry remains unchanged. This creates a new entry marked as an amendment.</div>
+    <div class="edit-modal-actions">
+      <button class="edit-cancel-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save-btn" id="edit-save-btn" onclick="saveEditEntry()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save as New Entry
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
