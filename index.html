@@ -264,7 +264,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 /* Locked card overlay */
 .locked{position:relative;overflow:hidden;}
-.locked::after{
+.locked.is-locked::after{
   content:'';
   position:absolute;inset:0;
   background:linear-gradient(to bottom,rgba(8,10,12,0) 0%,rgba(8,10,12,0.85) 40%,rgba(8,10,12,0.97) 100%);
@@ -908,6 +908,24 @@ async function resolvePhone(user){
       } catch(_){}
     }
   } catch(e){ console.warn('resolvePhone full scan failed:',e); }
+
+  // Final fallback: scan all users and match by email in emails subcollection
+  // This handles seeded accounts where uid doesn't match real Firebase Auth uid
+  try{
+    const usersSnap = await getDocs(collection(db,'users'));
+    for(const userDoc of usersSnap.docs){
+      const phone = userDoc.id;
+      if(!/^\+?\d{7,}$/.test(phone.replace(/\s/g,''))) continue;
+      try{
+        const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+        const match = emailsSnap.docs.find(d=>d.data().email===user.email);
+        if(match){
+          console.log('resolvePhone: found via email scan:', phone);
+          return phone;
+        }
+      } catch(_){}
+    }
+  } catch(e){ console.warn('resolvePhone email scan failed:',e); }
 
   console.warn('resolvePhone: all strategies failed, falling back to displayName/email');
   return user.displayName || user.email;
@@ -1850,6 +1868,11 @@ async function checkPlanAndApplyPaywall(phone){
 
   // Show/hide paywall banner
   document.getElementById('paywall-banner').classList.toggle('show', isLocked);
+
+  // Add/remove is-locked class for gradient overlay
+  document.querySelectorAll('.locked').forEach(el=>{
+    el.classList.toggle('is-locked', isLocked);
+  });
 
   // Show/hide lock overlays
   ['map-lock','spider-lock','people-lock','places-lock'].forEach(id=>{
