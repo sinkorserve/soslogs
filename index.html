@@ -209,6 +209,28 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .msg-body{font-size:14px;color:var(--text);line-height:1.7;}
 .msg-body mark{background:rgba(245,166,35,0.2);color:var(--warn);border-radius:2px;padding:0 2px;}
 .empty{padding:24px 0;text-align:center;color:var(--muted);font-size:13px;}
+/* ── Log entry widget ─────────────────────────────────────────── */
+.log-widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.log-widget-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.log-boxes{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.log-boxes{grid-template-columns:1fr;}}
+.log-box{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.log-box-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.log-box-label-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.log-ta{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;resize:none;outline:none;min-height:80px;-webkit-text-fill-color:var(--text);}
+.log-ta::placeholder{color:var(--muted);}
+.log-actions-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.log-action-btns{display:flex;gap:8px;}
+.log-action-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;position:relative;}
+.log-action-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.log-action-btn.recording{border-color:var(--danger);color:var(--danger);animation:pulse-red 1s ease infinite;}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(230,62,47,0.3);}50%{box-shadow:0 0 0 6px rgba(230,62,47,0);}}
+.log-send-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.18s;}
+.log-send-btn:hover{background:var(--safe2);}
+.log-char-count{font-size:10px;color:var(--muted);}
+.log-success{font-size:12px;color:var(--safe);display:none;animation:fadeIn 0.2s ease;}
+.log-success.show{display:block;}
+
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 </style>
@@ -304,7 +326,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Keyword and date filtering</li>
           <li class="no">No AI assistance</li>
         </ul>
-        <a href="https://buy.stripe.com/00w5kC0QR8yn86LeYtew802" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+        <a href="STRIPE_BASE_LINK" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
       </div>
 
       <!-- Pro - $14.99 -->
@@ -322,7 +344,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Export-ready reports</li>
           <li class="no">No real-time AI mentoring</li>
         </ul>
-        <a href="https://buy.stripe.com/3cI14m4338yn72H4jPew803" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
+        <a href="STRIPE_PRO_LINK" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
       </div>
 
       <!-- Premium - $19.99 -->
@@ -338,7 +360,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Priority support</li>
           <li>Early access to new features</li>
         </ul>
-        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+        <a href="STRIPE_PREMIUM_LINK" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
       </div>
 
     </div>
@@ -384,7 +406,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Keyword and date filtering</li>
           <li class="no">No AI assistance</li>
         </ul>
-        <a href="https://buy.stripe.com/00w5kC0QR8yn86LeYtew802" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+        <a href="STRIPE_BASE_LINK" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
       </div>
 
       <!-- Pro - $14.99 -->
@@ -402,7 +424,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Export-ready reports</li>
           <li class="no">No real-time AI mentoring</li>
         </ul>
-        <a href="https://buy.stripe.com/3cI14m4338yn72H4jPew803" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
+        <a href="STRIPE_PRO_LINK" target="_blank" class="pricing-cta pro">Get Pro — $14.99/mo</a>
       </div>
 
       <!-- Premium - $19.99 -->
@@ -418,7 +440,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>Priority support</li>
           <li>Early access to new features</li>
         </ul>
-        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+        <a href="STRIPE_PREMIUM_LINK" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
       </div>
 
   </div><!-- end pricing-cards -->
@@ -479,6 +501,70 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       </div>
     </div>
     <div style="margin-bottom:24px;"></div>
+
+    <!-- ── Log entry widget ── -->
+    <div class="log-widget">
+      <div class="log-widget-title">📝 Add a New Log Entry</div>
+      <div class="log-boxes">
+
+        <!-- Law Enforcement box -->
+        <div class="log-box">
+          <div class="log-box-label">
+            <div class="log-box-label-dot" style="background:#3b82f6;"></div>
+            Law Enforcement Log
+          </div>
+          <textarea class="log-ta" id="le-ta" placeholder="Describe the incident — include date, time, location, and names of anyone involved..." rows="4" oninput="updateCharCount('le-ta','le-count')"></textarea>
+          <div class="log-actions-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="log-action-btns">
+                <button class="log-action-btn" id="le-mic-btn" onclick="toggleVoice('le-ta','le-mic-btn')" title="Voice input">🎤</button>
+                <label class="log-action-btn" title="Attach file">
+                  📎
+                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'le')">
+                </label>
+              </div>
+              <span class="log-char-count" id="le-count">0 / 500</span>
+            </div>
+            <div>
+              <span class="log-success" id="le-success">✅ Saved!</span>
+              <button class="log-send-btn" onclick="submitLog('le')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Log It
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HR / Workplace box -->
+        <div class="log-box">
+          <div class="log-box-label">
+            <div class="log-box-label-dot" style="background:var(--warn);"></div>
+            Workplace / HR Log
+          </div>
+          <textarea class="log-ta" id="hr-ta" placeholder="Describe the workplace incident — include who was present, what was said, and any witnesses..." rows="4" oninput="updateCharCount('hr-ta','hr-count')"></textarea>
+          <div class="log-actions-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="log-action-btns">
+                <button class="log-action-btn" id="hr-mic-btn" onclick="toggleVoice('hr-ta','hr-mic-btn')" title="Voice input">🎤</button>
+                <label class="log-action-btn" title="Attach file">
+                  📎
+                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'hr')">
+                </label>
+              </div>
+              <span class="log-char-count" id="hr-count">0 / 500</span>
+            </div>
+            <div>
+              <span class="log-success" id="hr-success">✅ Saved!</span>
+              <button class="log-send-btn" onclick="submitLog('hr')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Log It
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- Messages -->
     <div class="wide-card">
@@ -742,10 +828,10 @@ function renderStats(records){
   document.getElementById('stat-days').textContent=days;
   const people=extractPeople(r90);
   document.getElementById('stat-people').textContent=people.length;
-  document.getElementById('stat-people-sub').textContent=people[0]?.name?'Top: '+people[0].name:'None found';
+  document.getElementById('stat-people-sub').textContent=people[0]?.name?'Most mentioned: '+people[0].name:'Detecting from logs...';
   const places=extractPlaces(r90);
   document.getElementById('stat-places').textContent=places.length;
-  document.getElementById('stat-places-sub').textContent=places[0]?.name?'Top: '+places[0].name:'None found';
+  document.getElementById('stat-places-sub').textContent=places[0]?.name?'Most mentioned: '+places[0].name:'Detecting from logs...';
 }
 
 // RECENT LOGS
@@ -764,7 +850,7 @@ function renderRecentLogs(records){
 
 // PEOPLE
 function extractPeople(records){
-  const namePatterns=['Robert','Morgan','Mike','Brad','Alex','Robbie','Dylan','River','Dana','Lori','Gabriel','Brendan','Jennifer','Thanaa','Naveen','Vin'];
+  const namePatterns=[]; // Names detected automatically from capitalized words in messages
   const counts={};
   const allText=records.map(r=>r.body||r.message||'').join(' ');
   namePatterns.forEach(name=>{
@@ -780,7 +866,7 @@ function extractPeople(records){
 
 // PLACES
 function extractPlaces(records){
-  const placePatterns=['Arlington','Fort Worth','Dallas','Texas','TX','office','conference room','meeting room','Arlington Water Utility','City of Arlington'];
+  const placePatterns=['office','conference room','meeting room','building','headquarters','facility','workplace','department','city hall','downtown'];
   const counts={};
   const allText=records.map(r=>r.body||r.message||'').join(' ');
   placePatterns.forEach(p=>{
@@ -854,7 +940,7 @@ function renderSpider(records){
 }
 
 // MINI MAP
-const MAPS_API_KEY = 'AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4';
+const MAPS_API_KEY = 'PASTE_YOUR_KEY_HERE';
 
 function loadMiniMap(records){
   if(typeof google!=='undefined' && google.maps){ initMiniMap(records); return; }
@@ -952,6 +1038,116 @@ function clearMsg(id){ const e=document.getElementById(id); e.textContent=''; e.
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmtPhone(p){ if(!p) return ''; const d=p.replace(/\D/g,''); if(d.length===11&&d[0]==='1') return '+1 ('+d.slice(1,4)+') '+d.slice(4,7)+'-'+d.slice(7); return p; }
 function fErr(code){ return({'auth/user-not-found':'No account found.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Invalid phone/email or password.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 8 characters.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Try again later.'}[code]||'Something went wrong.'); }
+
+// ── Log entry widget ─────────────────────────────────────────────
+let activeRecognition = null;
+
+function updateCharCount(taId, countId){
+  const ta = document.getElementById(taId);
+  const count = document.getElementById(countId);
+  const len = ta.value.length;
+  count.textContent = len + ' / 500';
+  count.style.color = len > 450 ? 'var(--warn)' : 'var(--muted)';
+  if(len > 500) ta.value = ta.value.slice(0, 500);
+}
+
+function toggleVoice(taId, btnId){
+  const btn = document.getElementById(btnId);
+  if(activeRecognition){
+    activeRecognition.stop();
+    activeRecognition = null;
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    return;
+  }
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    alert('Voice input is not supported in this browser. Please use Chrome.');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  const ta = document.getElementById(taId);
+  let finalTranscript = ta.value;
+  recognition.onresult = e => {
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      if(e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    ta.value = finalTranscript + interim;
+    updateCharCount(taId, taId === 'le-ta' ? 'le-count' : 'hr-count');
+  };
+  recognition.onend = () => {
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    activeRecognition = null;
+  };
+  recognition.start();
+  activeRecognition = recognition;
+  btn.classList.add('recording');
+  btn.textContent = '⏹';
+}
+
+function handleAttach(event, type){
+  const files = event.target.files;
+  if(!files.length) return;
+  const names = Array.from(files).map(f => f.name).join(', ');
+  const taId = type === 'le' ? 'le-ta' : 'hr-ta';
+  const ta = document.getElementById(taId);
+  ta.value += (ta.value ? '\n' : '') + '[Attached: ' + names + ']';
+  updateCharCount(taId, type + '-count');
+}
+
+async function submitLog(type){
+  const taId = type === 'le' ? 'le-ta' : 'hr-ta';
+  const successId = type + '-success';
+  const ta = document.getElementById(taId);
+  const body = ta.value.trim();
+  if(!body){ ta.focus(); return; }
+  if(!currentPhone){ alert('Please log in to save entries.'); return; }
+
+  try{
+    const { collection: col, addDoc: add, serverTimestamp: sts } =
+      await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+    // Write to flat records collection
+    const flatRef = col(db, 'users', currentPhone, 'records');
+    await add(flatRef, {
+      body,
+      source: 'web',
+      category: type === 'le' ? 'law_enforcement' : 'workplace_hr',
+      timestamp: sts(),
+      timestampLocal: new Date().toISOString(),
+      from: currentPhone,
+      location: { city: '', state: '', country: 'US', lat: null, lng: null, formatted: '', precision: 'unknown' },
+      hasMedia: false,
+      mediaUrls: [],
+    });
+
+    // Show success
+    ta.value = '';
+    updateCharCount(taId, type + '-count');
+    const success = document.getElementById(successId);
+    success.classList.add('show');
+    setTimeout(() => success.classList.remove('show'), 3000);
+
+    // Refresh dashboard data
+    allRecords = await loadAllRecords();
+    renderStats(allRecords);
+    renderRecentLogs(allRecords);
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+
+  } catch(e){
+    console.error('submitLog error:', e);
+    alert('Could not save. Please try again.');
+  }
+}
+
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
 </body>
