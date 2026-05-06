@@ -527,7 +527,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
             </div>
             <div>
               <span class="log-success" id="le-success">✅ Saved!</span>
-              <button class="log-send-btn" onclick="submitLog('le')">
+              <button class="log-send-btn" data-type="le" onclick="submitLog('le')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Log It
               </button>
@@ -555,7 +555,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
             </div>
             <div>
               <span class="log-success" id="hr-success">✅ Saved!</span>
-              <button class="log-send-btn" onclick="submitLog('hr')">
+              <button class="log-send-btn" data-type="hr" onclick="submitLog('hr')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Log It
               </button>
@@ -595,7 +595,7 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, collectionGroup, doc, setDoc, getDocs,
-         query, where, orderBy, serverTimestamp }
+         addDoc, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const fbApp = initializeApp({
@@ -1042,7 +1042,13 @@ function fErr(code){ return({'auth/user-not-found':'No account found.','auth/wro
 // ── Log entry widget ─────────────────────────────────────────────
 let activeRecognition = null;
 
-function updateCharCount(taId, countId){
+// Expose to window scope since called from onclick HTML attributes
+window.submitLog = async function(type){ return submitLogFn(type); };
+window.toggleVoice = function(taId, btnId){ return toggleVoiceFn(taId, btnId); };
+window.updateCharCount = function(taId, countId){ return updateCharCountFn(taId, countId); };
+window.handleAttach = function(event, type){ return handleAttachFn(event, type); };
+
+function updateCharCountFn(taId, countId){
   const ta = document.getElementById(taId);
   const count = document.getElementById(countId);
   const len = ta.value.length;
@@ -1051,7 +1057,7 @@ function updateCharCount(taId, countId){
   if(len > 500) ta.value = ta.value.slice(0, 500);
 }
 
-function toggleVoice(taId, btnId){
+function toggleVoiceFn(taId, btnId){
   const btn = document.getElementById(btnId);
   if(activeRecognition){
     activeRecognition.stop();
@@ -1091,50 +1097,63 @@ function toggleVoice(taId, btnId){
   btn.textContent = '⏹';
 }
 
-function handleAttach(event, type){
+function handleAttachFn(event, type){
   const files = event.target.files;
   if(!files.length) return;
   const names = Array.from(files).map(f => f.name).join(', ');
   const taId = type === 'le' ? 'le-ta' : 'hr-ta';
   const ta = document.getElementById(taId);
   ta.value += (ta.value ? '\n' : '') + '[Attached: ' + names + ']';
-  updateCharCount(taId, type + '-count');
+  updateCharCountFn(taId, type + '-count');
 }
 
-async function submitLog(type){
-  const taId = type === 'le' ? 'le-ta' : 'hr-ta';
+async function submitLogFn(type){
+  const taId      = type === 'le' ? 'le-ta' : 'hr-ta';
+  const countId   = type + '-count';
   const successId = type + '-success';
-  const ta = document.getElementById(taId);
-  const body = ta.value.trim();
+  const ta        = document.getElementById(taId);
+  const body      = ta.value.trim();
+  const btn       = type === 'le'
+    ? document.querySelector('.log-send-btn[data-type="le"]')
+    : document.querySelector('.log-send-btn[data-type="hr"]');
+
   if(!body){ ta.focus(); return; }
   if(!currentPhone){ alert('Please log in to save entries.'); return; }
 
-  try{
-    const { collection: col, addDoc: add, serverTimestamp: sts } =
-      await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  // Show loading state on button
+  const origHTML = btn.innerHTML;
+  btn.innerHTML  = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div>';
+  btn.disabled   = true;
 
-    // Write to flat records collection
-    const flatRef = col(db, 'users', currentPhone, 'records');
-    await add(flatRef, {
+  try{
+    // Use already-imported Firestore functions (addDoc imported at top of module)
+    const flatRef = collection(db, 'users', currentPhone, 'records');
+    await addDoc(flatRef, {
       body,
-      source: 'web',
-      category: type === 'le' ? 'law_enforcement' : 'workplace_hr',
-      timestamp: sts(),
+      source:    'web',
+      category:  type === 'le' ? 'law_enforcement' : 'workplace_hr',
+      timestamp: serverTimestamp(),
       timestampLocal: new Date().toISOString(),
-      from: currentPhone,
-      location: { city: '', state: '', country: 'US', lat: null, lng: null, formatted: '', precision: 'unknown' },
-      hasMedia: false,
+      from:      currentPhone,
+      location:  { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown' },
+      hasMedia:  false,
       mediaUrls: [],
     });
 
-    // Show success
+    // Clear textarea
     ta.value = '';
-    updateCharCount(taId, type + '-count');
+    updateCharCountFn(taId, countId);
+
+    // Show success confirmation
     const success = document.getElementById(successId);
     success.classList.add('show');
     setTimeout(() => success.classList.remove('show'), 3000);
 
-    // Refresh dashboard data
+    // Restore button
+    btn.innerHTML = origHTML;
+    btn.disabled  = false;
+
+    // Reload all records and refresh every dashboard section
     allRecords = await loadAllRecords();
     renderStats(allRecords);
     renderRecentLogs(allRecords);
@@ -1142,9 +1161,22 @@ async function submitLog(type){
     renderPlaces(allRecords);
     renderSpider(allRecords);
 
+    // Refresh map pins with new record
+    if(typeof google !== 'undefined' && google.maps){
+      initMiniMap(allRecords);
+    }
+
+    // Scroll recent activity into view so user sees the update
+    const recentEl = document.getElementById('recent-logs');
+    if(recentEl){
+      recentEl.closest('.wide-card').scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+
   } catch(e){
     console.error('submitLog error:', e);
-    alert('Could not save. Please try again.');
+    btn.innerHTML = origHTML;
+    btn.disabled  = false;
+    alert('Could not save. Please try again. Error: ' + e.message);
   }
 }
 
