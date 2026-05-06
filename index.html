@@ -233,6 +233,52 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Edit entry ──────────────────────────────────────────────── */
+.msg-card-actions{display:flex;align-items:center;justify-content:flex-end;margin-top:8px;}
+.edit-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  font-family:var(--font);font-size:11px;cursor:pointer;transition:all 0.18s;}
+.edit-btn:hover{border-color:var(--safe);color:var(--safe);}
+
+/* Edit modal */
+.edit-modal-backdrop{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn 0.2s ease;
+}
+.edit-modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px;width:100%;max-width:520px;
+  animation:fadeUp 0.25s cubic-bezier(.22,.68,0,1.2);
+}
+.edit-modal-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.edit-modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.edit-original{
+  background:var(--dark);border:1px solid var(--border);border-radius:10px;
+  padding:12px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.6;
+  max-height:100px;overflow-y:auto;
+}
+.edit-original strong{color:var(--text);display:block;margin-bottom:4px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;}
+.edit-ta{
+  width:100%;background:var(--dark);border:1.5px solid var(--border);
+  border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);
+  font-size:14px;line-height:1.6;outline:none;resize:vertical;min-height:100px;
+  transition:border-color 0.2s;-webkit-text-fill-color:var(--text);
+}
+.edit-ta:focus{border-color:rgba(29,184,122,0.45);}
+.edit-modal-actions{display:flex;gap:10px;margin-top:14px;justify-content:flex-end;}
+.edit-cancel-btn{padding:9px 16px;border-radius:9px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
+.edit-cancel-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.edit-save-btn{padding:9px 18px;border-radius:9px;border:none;background:var(--safe);
+  color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;
+  display:flex;align-items:center;gap:6px;}
+.edit-save-btn:hover{background:var(--safe2);}
+.edit-save-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.edit-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
+.edit-note strong{color:var(--warn);}
+
 </style>
 </head>
 <body>
@@ -1243,7 +1289,23 @@ function renderMessages(records){
     const timeStr=ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
     let body=esc(r.body||r.message||'');
     if(keyword){ const re=new RegExp('('+keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); body=body.replace(re,'<mark>$1</mark>'); }
-    return '<div class="msg-card"><div class="msg-meta"><span class="msg-time">'+timeStr+'</span><span class="msg-badge">SMS</span>'+(r.location?.formatted?'<span class="msg-loc">📍 '+esc(r.location.formatted)+'</span>':'')+'</div><div class="msg-body">'+body+'</div></div>';
+    const category = r.category === 'law_enforcement' ? '🔵 LE' : r.category === 'workplace_hr' ? '🟡 HR' : '';
+    const isAmended = r.amendedFrom ? '<span style="font-size:10px;color:var(--warn);margin-left:4px;">amended</span>' : '';
+    return '<div class="msg-card">' +
+      '<div class="msg-meta">' +
+        '<span class="msg-time">'+timeStr+'</span>' +
+        '<span class="msg-badge">'+(r.source==='web'?'WEB':'SMS')+'</span>' +
+        (category?'<span style="font-size:10px;color:var(--muted);">'+category+'</span>':'') +
+        (r.location?.formatted?'<span class="msg-loc">📍 '+esc(r.location.formatted)+'</span>':'') +
+        isAmended +
+      '</div>' +
+      '<div class="msg-body">'+body+'</div>' +
+      '<div class="msg-card-actions">' +
+        '<button class="edit-btn" onclick="openEditModal('+JSON.stringify(r._id)+','+JSON.stringify(esc(r.body||r.message||''))+')">' +
+          '✏️ Amend' +
+        '</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 
@@ -1459,6 +1521,129 @@ async function submitLogFn(type){
     alert('Could not save. Please try again. Error: ' + e.message);
   }
 }
+
+// ── Edit / Amend entry ────────────────────────────────────────
+let editingRecordId = null;
+let editingOriginalText = '';
+
+window.openEditModal = function(recordId, originalText){
+  editingRecordId = recordId;
+  editingOriginalText = originalText;
+  document.getElementById('edit-original-text').textContent = originalText;
+  document.getElementById('edit-new-text').value = originalText;
+  document.getElementById('edit-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('edit-new-text').focus(), 100);
+};
+
+window.closeEditModal = function(event){
+  if(event && event.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').style.display = 'none';
+  editingRecordId = null;
+  editingOriginalText = '';
+};
+
+window.saveEditEntry = async function(){
+  const newText = document.getElementById('edit-new-text').value.trim();
+  const btn = document.getElementById('edit-save-btn');
+  if(!newText){ document.getElementById('edit-new-text').focus(); return; }
+  if(newText === editingOriginalText){
+    alert('No changes detected. Please modify the entry before saving.');
+    return;
+  }
+  if(!currentPhone){ alert('Please log in to save entries.'); return; }
+
+  btn.innerHTML = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div> Saving...';
+  btn.disabled = true;
+
+  try{
+    // Geocode new text for location
+    let locationData = { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown', extractedAddress:null };
+
+    const addrPatterns = [
+      /(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i,
+      /(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)[\w\s,]*?)(?:\.|$)/i,
+      /([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way))/i,
+    ];
+
+    for(const pat of addrPatterns){
+      const m = newText.match(pat);
+      if(m){
+        const extracted = (m[1]||m[0]).trim()
+          .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
+          .replace(/\s+and\s+/gi,' & ')
+          .trim();
+        if(extracted.length > 5){
+          locationData.extractedAddress = extracted;
+          // Geocode using Maps API
+          await new Promise(resolve => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: extracted }, (results, status) => {
+              if(status === 'OK' && results.length){
+                const loc = results[0].geometry.location;
+                const comp = results[0].address_components;
+                locationData = {
+                  lat: loc.lat(), lng: loc.lng(),
+                  city: comp.find(c=>c.types.includes('locality'))?.long_name || '',
+                  state: comp.find(c=>c.types.includes('administrative_area_level_1'))?.short_name || '',
+                  country: 'US',
+                  formatted: results[0].formatted_address,
+                  precision: 'address',
+                  extractedAddress: extracted,
+                };
+              }
+              resolve();
+            });
+          });
+          break;
+        }
+      }
+    }
+
+    // Get fresh phone
+    const authUser = auth.currentUser;
+    const writePhone = authUser.displayName && /^\+?\d{7,}$/.test(authUser.displayName.replace(/[\s\-()]/g,''))
+      ? authUser.displayName : currentPhone;
+
+    // Create NEW record — never modify original
+    await addDoc(collection(db, 'users', writePhone, 'records'), {
+      body:          newText,
+      source:        'web',
+      category:      'amendment',
+      amendedFrom:   editingRecordId,  // reference to original
+      timestamp:     serverTimestamp(),
+      timestampLocal: new Date().toISOString(),
+      from:          writePhone,
+      location:      locationData,
+      hasMedia:      false,
+      mediaUrls:     [],
+    });
+
+    // Close modal
+    document.getElementById('edit-modal').style.display = 'none';
+    editingRecordId = null;
+
+    // Refresh everything
+    allRecords = await loadAllRecords();
+    renderStats(allRecords);
+    renderRecentLogs(allRecords);
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+    if(typeof google !== 'undefined' && google.maps) initMiniMap(allRecords);
+    if(msgsVisible) renderMessages(allRecords);
+
+    // Show success in message log area
+    const countEl = document.getElementById('msg-count');
+    if(countEl) countEl.textContent = '✅ Amendment saved as new entry';
+    setTimeout(() => { if(msgsVisible) renderMessages(allRecords); }, 2000);
+
+  } catch(e){
+    console.error('saveEditEntry error:', e);
+    alert('Could not save amendment. Please try again.');
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Save as New Entry';
+    btn.disabled = false;
+  }
+};
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
