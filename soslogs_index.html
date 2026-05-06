@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>SOSLogs — Dashboard</title>
+<style>
+:root{
+  --black:#080a0c;--dark:#0e1318;--card:#13191f;--card2:#192028;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --danger:#e63e2f;--safe:#1db87a;--safe2:#3dd68c;--safe-dim:rgba(29,184,122,0.1);
+  --warn:#f5a623;--blue:#3b82f6;--purple:#a855f7;
+  --muted:#5a7090;--text:#ccd8e8;--white:#f0f6ff;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  --nav-h:54px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--font);background:var(--black);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+#app-loading{position:fixed;inset:0;z-index:999;background:var(--black);display:flex;align-items:center;justify-content:center;}
+#app-loading.hide{display:none;}
+.loading-logo{display:flex;align-items:center;gap:10px;animation:blink 1.4s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.loading-text{font-size:22px;font-weight:800;color:var(--white);}
+.loading-text span{color:var(--safe);}
+
+.screen{display:none;}.screen.active{display:block;}
+
+/* LOGIN */
+#login-screen{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  background:var(--black);
+  overflow-y:auto;
+}
+#login-screen::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,184,122,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,184,122,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+/* Two column layout */
+.login-body{
+  display:grid;
+  grid-template-columns:400px 1fr;
+  min-height:100dvh;
+  position:relative;
+  z-index:1;
+}
+@media(max-width:760px){
+  .login-body{grid-template-columns:1fr;min-height:auto;}
+}
+
+/* Left panel */
+.login-left{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:32px 28px;
+  border-right:1px solid var(--border);
+  background:rgba(0,0,0,0.2);
+}
+@media(max-width:760px){
+  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:32px 20px;}
+}
+
+/* Right panel - pricing */
+.login-right{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:32px 28px;
+  overflow-y:auto;
+}
+@media(max-width:760px){
+  .login-right{padding:24px 20px;}
+}
+
+.login-wrap{position:relative;z-index:1;width:100%;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
+.login-logo-text{font-size:26px;font-weight:800;color:var(--white);}
+.login-logo-text span{color:var(--safe);}
+.login-tagline{text-align:center;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;}
+.login-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(29,184,122,0.05) 0%,transparent 70%);pointer-events:none;}
+.f-label{display:block;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.f-input{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-text-fill-color:var(--text);}
+.f-input::placeholder{color:var(--muted);}
+.f-input:focus{border-color:rgba(29,184,122,0.45);box-shadow:0 0 0 3px rgba(29,184,122,0.07);}
+.field-wrap{margin-bottom:8px;}
+.grid-cc{display:grid;grid-template-columns:80px 1fr;gap:8px;margin-bottom:8px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.pw-row{display:flex;gap:8px;margin-top:5px;}
+.btn-safe{width:100%;padding:12px;border:none;border-radius:10px;background:var(--safe);color:#000;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-safe:hover:not(:disabled){background:var(--safe2);transform:translateY(-1px);}
+.btn-safe:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.btn-icon{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:none;background:var(--safe);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+.btn-icon:hover{background:var(--safe2);}
+.btn-ghost{flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.2);}
+.btn-warn{border-color:rgba(245,166,35,0.3)!important;color:var(--warn)!important;}
+.err-box{display:none;padding:9px 12px;border-radius:8px;font-size:13px;margin:8px 0;background:rgba(230,62,47,0.08);border:1px solid rgba(230,62,47,0.18);color:#ff6b4a;}
+.err-box.show{display:block;}
+.ok-box{display:none;padding:9px 12px;border-radius:8px;font-size:13px;margin:8px 0;background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.18);color:var(--safe2);}
+.ok-box.show{display:block;}
+.toggle-link{font-size:12px;color:var(--safe);cursor:pointer;text-decoration:none;display:inline-block;margin-top:10px;}
+.muted-link{color:var(--muted)!important;}
+.step{display:none;}.step.active{display:block;}
+.spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;}
+.spinner-g{border-color:rgba(29,184,122,0.2);border-top-color:var(--safe);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sms-hint{margin-top:10px;padding:8px 12px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:10px;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);}
+.sms-hint strong{color:var(--safe);}
+.login-footer{text-align:center;margin-top:10px;font-size:11px;color:var(--muted);line-height:1.8;}
+.login-footer a{color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.login-footer a:hover{color:var(--safe);}
+/* ── Pricing cards ─────────────────────────────────────────── */
+.pricing-inner{
+  width:100%;
+}
+.pricing-outer{display:none;}
+.pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.pricing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+
+@media(max-width:760px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:420px){.pricing-cards{grid-template-columns:1fr;}}
+.pricing-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
+.pricing-card:hover{transform:translateY(-2px);}
+.pricing-card.featured{border-color:rgba(29,184,122,0.3);background:linear-gradient(135deg,var(--card) 0%,rgba(29,184,122,0.05) 100%);}
+.pricing-card-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.pricing-badge{position:absolute;top:12px;right:12px;background:var(--safe);color:#000;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.pricing-tier{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.pricing-price{font-size:22px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;}
+.pricing-price span{font-size:13px;font-weight:400;color:var(--muted);}
+.pricing-desc{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.pricing-features li{font-size:11px;color:var(--text);display:flex;align-items:flex-start;gap:6px;line-height:1.3;}
+.pricing-features li::before{content:'✓';color:var(--safe);font-weight:700;flex-shrink:0;font-size:11px;margin-top:1px;}
+.pricing-features li.no::before{content:'✕';color:var(--muted);}
+.pricing-features li.no{color:var(--muted);}
+.pricing-cta{display:block;width:100%;padding:10px;border-radius:9px;text-align:center;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;text-decoration:none;border:none;}
+.pricing-cta.free{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.pricing-cta.free:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.pricing-cta.pro{background:var(--safe);color:#000;}
+.pricing-cta.pro:hover{background:var(--safe2);transform:translateY(-1px);}
+.pricing-cta.premium{background:linear-gradient(135deg,var(--safe),var(--blue));color:#000;}
+.pricing-cta.premium:hover{opacity:0.9;transform:translateY(-1px);}
+
+
+/* DASHBOARD */
+#dashboard-screen{min-height:100dvh;background:var(--black);position:relative;z-index:10;}
+.dash-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:var(--nav-h);background:rgba(8,10,12,0.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.dash-nav-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--white);}
+.dash-nav-logo span{color:var(--safe);}
+.dash-nav-right{display:flex;align-items:center;gap:10px;}
+.phone-chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text);font-weight:600;}
+.udot{width:7px;height:7px;border-radius:50%;background:var(--safe);box-shadow:0 0 6px var(--safe);}
+.nav-btn{background:transparent;border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.18s;}
+.nav-btn:hover{border-color:var(--danger);color:var(--danger);}
+.dash-body{padding:24px 20px 60px;max-width:1200px;margin:0 auto;}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.cards-row{display:grid;gap:14px;margin-bottom:24px;}
+.cols-4{grid-template-columns:repeat(4,1fr);}
+.cols-3{grid-template-columns:repeat(3,1fr);}
+.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.cols-4,.cols-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.cols-4,.cols-3,.cols-2{grid-template-columns:1fr;}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-size:32px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;}
+.stat-sub{font-size:12px;color:var(--muted);}
+.stat-icon{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.35;}
+.wide-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.wide-card-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.log-list{display:flex;flex-direction:column;gap:8px;}
+.log-item{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--dark);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color 0.18s;}
+.log-item:hover{border-color:var(--border2);}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.log-date{font-size:11px;color:var(--muted);flex-shrink:0;min-width:90px;}
+.log-body{font-size:13px;color:var(--text);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.freq-list{display:flex;flex-direction:column;gap:8px;}
+.freq-item{display:flex;align-items:center;gap:10px;}
+.freq-name{font-size:13px;color:var(--text);min-width:90px;flex-shrink:0;}
+.freq-bar-wrap{flex:1;background:var(--dark);border-radius:4px;height:6px;overflow:hidden;}
+.freq-bar{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.freq-count{font-size:11px;color:var(--muted);min-width:24px;text-align:right;}
+#mini-map{width:100%;height:220px;border-radius:10px;overflow:hidden;background:var(--dark);}
+.integrity-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.integrity-score{font-size:48px;font-weight:800;color:var(--safe);line-height:1;}
+.integrity-label{font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px;}
+.integrity-desc{font-size:13px;color:var(--text);line-height:1.6;flex:1;min-width:180px;}
+.show-msgs-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;border:1px solid var(--safe);background:transparent;color:var(--safe);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+.show-msgs-btn:hover{background:var(--safe-dim);}
+.msg-panel{display:none;margin-top:4px;}
+.msg-panel.open{display:block;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.filter-input{flex:1;min-width:130px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color 0.2s;}
+.filter-input:focus{border-color:rgba(29,184,122,0.4);}
+.filter-select{background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
+.filter-btn{padding:8px 14px;border-radius:10px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;}
+.msg-count{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.msg-card{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;animation:fadeIn 0.2s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.msg-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.msg-time{font-size:11px;color:var(--muted);}
+.msg-badge{background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:1px 7px;font-size:10px;color:var(--safe);letter-spacing:0.05em;}
+.msg-loc{font-size:10px;color:var(--muted);}
+.msg-body{font-size:14px;color:var(--text);line-height:1.7;}
+.msg-body mark{background:rgba(245,166,35,0.2);color:var(--warn);border-radius:2px;padding:0 2px;}
+.empty{padding:24px 0;text-align:center;color:var(--muted);font-size:13px;}
+/* ── Log entry widget ─────────────────────────────────────────── */
+.log-widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.log-widget-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.log-boxes{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.log-boxes{grid-template-columns:1fr;}}
+.log-box{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.log-box-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.log-box-label-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.log-ta{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;resize:none;outline:none;min-height:80px;-webkit-text-fill-color:var(--text);}
+.log-ta::placeholder{color:var(--muted);}
+.log-actions-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.log-action-btns{display:flex;gap:8px;}
+.log-action-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;position:relative;}
+.log-action-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.log-action-btn.recording{border-color:var(--danger);color:var(--danger);animation:pulse-red 1s ease infinite;}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(230,62,47,0.3);}50%{box-shadow:0 0 0 6px rgba(230,62,47,0);}}
+.log-send-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.18s;}
+.log-send-btn:hover{background:var(--safe2);}
+.log-char-count{font-size:10px;color:var(--muted);}
+.log-success{font-size:12px;color:var(--safe);display:none;animation:fadeIn 0.2s ease;}
+.log-success.show{display:block;}
+
+.map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
+.map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Edit entry ──────────────────────────────────────────────── */
+.msg-card-actions{display:flex;align-items:center;justify-content:flex-end;margin-top:8px;}
+.edit-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  font-family:var(--font);font-size:11px;cursor:pointer;transition:all 0.18s;}
+.edit-btn:hover{border-color:var(--safe);color:var(--safe);}
+
+/* Edit modal */
+.edit-modal-backdrop{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn 0.2s ease;
+}
+.edit-modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px;width:100%;max-width:520px;
+  animation:fadeUp 0.25s cubic-bezier(.22,.68,0,1.2);
+}
+.edit-modal-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.edit-modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.edit-original{
+  background:var(--dark);border:1px solid var(--border);border-radius:10px;
+  padding:12px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.6;
+  max-height:100px;overflow-y:auto;
+}
+.edit-original strong{color:var(--text);display:block;margin-bottom:4px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;}
+.edit-ta{
+  width:100%;background:var(--dark);border:1.5px solid var(--border);
+  border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);
+  font-size:14px;line-height:1.6;outline:none;resize:vertical;min-height:100px;
+  transition:border-color 0.2s;-webkit-text-fill-color:var(--text);
+}
+.edit-ta:focus{border-color:rgba(29,184,122,0.45);}
+.edit-modal-actions{display:flex;gap:10px;margin-top:14px;justify-content:flex-end;}
+.edit-cancel-btn{padding:9px 16px;border-radius:9px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
+.edit-cancel-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.edit-save-btn{padding:9px 18px;border-radius:9px;border:none;background:var(--safe);
+  color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;
+  display:flex;align-items:center;gap:6px;}
+.edit-save-btn:hover{background:var(--safe2);}
+.edit-save-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.edit-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
+.edit-note strong{color:var(--warn);}
+
+</style>
+</head>
+<body>
+
+<div id="app-loading">
+  <div class="loading-logo">
+    <svg width="28" height="28" viewBox="0 0 42 42"><defs><radialGradient id="rb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri0)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg0)"/></svg>
+    <svg width="28" height="28" viewBox="0 0 42 42"><defs><radialGradient id="gb0" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg0" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi0" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#gi0)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb0)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg0)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="loading-text">SOS<span>Logs</span></span>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen active">
+<div class="login-body">
+<div class="login-left">
+<div class="login-wrap">
+  <div class="login-logo">
+    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
+    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="login-logo-text">SOS<span>Logs</span></span>
+  </div>
+  <p class="login-tagline">Document · Protect · Prove</p>
+
+  <!-- Hero statement -->
+  <div style="margin-bottom:16px;padding:14px 16px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:12px;">
+    <p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:8px;">
+      When incidents happen, everyone claims they did nothing wrong.
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Specificity</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Consistency</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Documentation</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Corroboration</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Timeline</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Patterns</span>
+      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Objectivity</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">
+      Timestamped incident logs scored across all seven dimensions — your documented truth, ready when it matters.
+    </p>
+  </div>
+
+  <!-- SVG illustration: document with pen -->
+  <div style="display:flex;justify-content:center;margin-bottom:14px;">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Document -->
+      <rect x="12" y="8" width="44" height="56" rx="4" fill="#161c21" stroke="rgba(29,184,122,0.3)" stroke-width="1.5"/>
+      <!-- Lines on document -->
+      <line x1="20" y1="22" x2="48" y2="22" stroke="rgba(29,184,122,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="30" x2="48" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="38" x2="42" y2="38" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="46" x2="45" y2="46" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="54" x2="38" y2="54" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Timestamp badge -->
+      <rect x="30" y="58" width="36" height="16" rx="8" fill="#0e1318" stroke="rgba(29,184,122,0.4)" stroke-width="1"/>
+      <circle cx="39" cy="66" r="3" fill="var(--safe)" opacity="0.8"/>
+      <line x1="44" y1="64" x2="58" y2="64" stroke="rgba(29,184,122,0.5)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="44" y1="68" x2="54" y2="68" stroke="rgba(29,184,122,0.3)" stroke-width="1" stroke-linecap="round"/>
+      <!-- Pen writing -->
+      <g transform="rotate(-35 60 40)">
+        <rect x="54" y="28" width="6" height="20" rx="2" fill="#1db87a" opacity="0.9"/>
+        <polygon points="54,48 60,48 57,54" fill="#0d7a50"/>
+        <rect x="54" y="28" width="6" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
+      </g>
+      <!-- Writing glow -->
+      <circle cx="57" cy="52" r="3" fill="rgba(29,184,122,0.3)" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <div class="login-card">
+    <div id="step-login" class="step active">
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Access your records</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Enter your phone or email and password.</div>
+      <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Phone number or email address" autocomplete="off"></div>
+      <div class="field-wrap"><label class="f-label">Password</label>
+        <div class="pw-row">
+          <input class="f-input" id="login-pw" type="password" placeholder="Your password" style="flex:1;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="btn-icon" onclick="doLogin()" id="login-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn-ghost" onclick="doForgotPw()">Reset Password</button>
+        <button class="btn-ghost btn-warn" onclick="stepShow('step-signup')">Create Account</button>
+      </div>
+    </div>
+    <div id="step-signup" class="step">
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Your phone number is your primary identity.</div>
+      <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
+      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
+      <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
+      <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
+      <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
+      <div style="text-align:center;margin-top:10px;"><a class="toggle-link muted-link" onclick="stepShow('step-login')">Already have an account? Sign in</a></div>
+    </div>
+  </div>
+  <div class="sms-hint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div>Text your logs to <strong>1-888-799-LOGS</strong></div></div>
+  <div class="login-footer">
+    <div>2026 Athens Innovation and Development LLC</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;flex-wrap:wrap;"><a href="/about.html">About</a><span>·</span><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
+  </div>
+
+  <!-- Pricing section - moved outside login-wrap below -->
+  <div style="display:none;">
+    <div class="pricing-cards">
+
+      <!-- Basic - Free -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Basic</div>
+        <div class="pricing-price">Free</div>
+        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <ul class="pricing-features">
+          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
+          <li>Timestamped records stored securely</li>
+          <li class="no">No dashboard or message history</li>
+          <li class="no">No map or analytics</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="#" onclick="document.getElementById('login-id').focus();return false;" class="pricing-cta free">Start Logging Free</a>
+      </div>
+
+      <!-- Base - $4.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Base</div>
+        <div class="pricing-price">$9.99<span>/month</span></div>
+        <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Personal dashboard with full message history</li>
+          <li>Incident map with geocoded location pins</li>
+          <li>People and places frequency analysis</li>
+          <li>Credibility spider chart</li>
+          <li>Keyword and date filtering</li>
+          <li>Web log entry with voice input</li>
+          <li>Amend entries with full audit trail</li>
+        </ul>
+        <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="pricing-cta pro">Get Base — $9.99/mo</a>
+      </div>
+
+
+
+      <!-- Premium - $19.99 -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--blue);"></div>
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-price">$19.99<span>/month</span></div>
+        <div class="pricing-desc">On-demand AI mentoring and real-time report generation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>On-demand AI up to 30 queries/month</li>
+          <li>Real-time report generation</li>
+          <li>Priority support</li>
+          <li>Early access to new features</li>
+        </ul>
+        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Right column - pricing (inside login-body) -->
+<div class="login-right">
+<div class="pricing-inner">
+  <div class="pricing-title">Choose your plan</div>
+  <div class="pricing-cards">
+
+      <!-- Free -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--muted);"></div>
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">$0<span>/forever</span></div>
+        <div class="pricing-desc">Start logging immediately. No account required.</div>
+        <ul class="pricing-features">
+          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
+          <li>Timestamped records stored securely</li>
+          <li class="no">No dashboard or message history</li>
+          <li class="no">No map or analytics</li>
+          <li class="no">No AI assistance</li>
+        </ul>
+        <a href="#" onclick="document.getElementById('login-id').focus();window.scrollTo({top:0,behavior:'smooth'});return false;" class="pricing-cta free">Start Logging Free</a>
+      </div>
+
+      <!-- Base - $9.99 -->
+      <div class="pricing-card featured">
+        <div class="pricing-card-accent" style="background:var(--safe);"></div>
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-tier">Base</div>
+        <div class="pricing-price">$9.99<span>/month</span></div>
+        <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Personal dashboard with full message history</li>
+          <li>Incident map with geocoded location pins</li>
+          <li>People and places frequency analysis</li>
+          <li>Credibility spider chart</li>
+          <li>Keyword and date filtering</li>
+          <li>Web log entry with voice input</li>
+          <li>Amend entries with full audit trail</li>
+        </ul>
+        <a href="https://buy.stripe.com/6oUbJ01UV15V0Ej9E9ew805" target="_blank" class="pricing-cta pro">Get Base — $9.99/mo</a>
+      </div>
+
+      <!-- Enterprise HR -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--blue);"></div>
+        <div class="pricing-tier">Enterprise HR</div>
+        <div class="pricing-price">$299<span>/month</span></div>
+        <div class="pricing-desc">For HR departments managing workplace documentation at scale.</div>
+        <ul class="pricing-features">
+          <li>Everything in Base</li>
+          <li>Multi-user org access</li>
+          <li>Bulk case management</li>
+          <li>PDF report generation per case</li>
+          <li>Dedicated account manager</li>
+          <li>Priority support with SLA</li>
+          <li>Custom data retention policies</li>
+        </ul>
+        <a href="mailto:admin@soslogs.org?subject=Enterprise HR Inquiry" class="pricing-cta pro" style="background:var(--blue);">Contact Us</a>
+      </div>
+
+      <!-- Enterprise LE -->
+      <div class="pricing-card">
+        <div class="pricing-card-accent" style="background:var(--purple);"></div>
+        <div class="pricing-tier">Enterprise LE</div>
+        <div class="pricing-price">$799<span>/month</span></div>
+        <div class="pricing-desc">For law enforcement agencies requiring verified incident documentation.</div>
+        <ul class="pricing-features">
+          <li>Everything in Enterprise HR</li>
+          <li>Direct API access for case management</li>
+          <li>Verified chain of custody reports</li>
+          <li>Court-ready documentation export</li>
+          <li>Compliance and audit logging</li>
+          <li>Custom SLA agreement</li>
+          <li>Dedicated support team</li>
+        </ul>
+        <a href="mailto:admin@soslogs.org?subject=Enterprise LE Inquiry" class="pricing-cta premium" style="background:var(--purple);">Contact Us</a>
+      </div>
+
+
+
+
+
+
+  </div><!-- end pricing-cards -->
+</div><!-- end pricing-inner -->
+</div><!-- end login-right -->
+</div><!-- end login-body -->
+</div><!-- end login-screen -->
+
+<!-- DASHBOARD -->
+<div id="dashboard-screen" class="screen">
+  <nav class="dash-nav">
+    <div class="dash-nav-logo">
+      <svg width="20" height="20" viewBox="0 0 42 42"><defs><radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient><radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/></svg>
+      SOS<span>Logs</span>
+    </div>
+    <div class="dash-nav-right">
+      <div class="phone-chip"><div class="udot"></div><span id="nav-phone">...</span></div>
+      <button class="nav-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <div class="section-hdr"><span class="section-title">Overview — Last 90 Days</span></div>
+
+    <!-- Stat cards -->
+    <div class="cards-row cols-4">
+      <div class="stat-card"><div class="stat-accent" style="background:var(--safe);"></div><div class="stat-icon">📋</div><div class="stat-label">Total Logs</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub" id="stat-total-sub">Loading...</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--blue);"></div><div class="stat-icon">📅</div><div class="stat-label">Active Days</div><div class="stat-value" id="stat-days">—</div><div class="stat-sub">Days with logs</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--warn);"></div><div class="stat-icon">👤</div><div class="stat-label">People Mentioned</div><div class="stat-value" id="stat-people">—</div><div class="stat-sub" id="stat-people-sub">Unique names</div></div>
+      <div class="stat-card"><div class="stat-accent" style="background:var(--purple);"></div><div class="stat-icon">📍</div><div class="stat-label">Locations Logged</div><div class="stat-value" id="stat-places">—</div><div class="stat-sub" id="stat-places-sub">Unique places</div></div>
+    </div>
+
+    <!-- Recent + People + Places -->
+    <div class="cards-row cols-3">
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Recent Activity</div><div id="recent-logs" class="log-list"><div class="empty">Loading...</div></div></div>
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">People Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="people-list" class="freq-list"><div class="empty">Loading...</div></div></div>
+      <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Places Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div><div id="places-list" class="freq-list"><div class="empty">Loading...</div></div></div>
+    </div>
+    <div style="margin-bottom:24px;"></div>
+
+    <!-- Spider + Map -->
+    <div class="cards-row cols-2">
+      <div class="wide-card" style="margin-bottom:0;">
+        <div class="wide-card-title">Credibility Profile <span style="font-size:10px;color:var(--muted);font-weight:400;">Law enforcement standards</span></div>
+        <div class="integrity-row">
+          <div><div class="integrity-score" id="integrity-score">—</div><div class="integrity-label">Overall Score</div></div>
+          <div class="integrity-desc" id="integrity-desc">Analyzing your log entries...</div>
+        </div>
+        <canvas id="spider-canvas" width="300" height="260" style="display:block;margin:0 auto;"></canvas>
+      </div>
+      <div class="wide-card" style="margin-bottom:0;">
+        <div class="wide-card-title">Incident Locations <span style="font-size:10px;color:var(--muted);font-weight:400;">City level from SMS origin</span></div>
+        <div id="mini-map"></div>
+        <div class="map-legend">
+          <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--danger);"></div>Street level</div>
+          <div style="display:flex;align-items:center;gap:5px;"><div class="map-legend-dot" style="background:var(--warn);"></div>City level</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:24px;"></div>
+
+    <!-- ── Log entry widget ── -->
+    <div class="log-widget">
+      <div class="log-widget-title">📝 Add a New Log Entry</div>
+      <div class="log-boxes">
+
+        <!-- Law Enforcement box -->
+        <div class="log-box">
+          <div class="log-box-label">
+            <div class="log-box-label-dot" style="background:#3b82f6;"></div>
+            Law Enforcement Log
+          </div>
+          <textarea class="log-ta" id="le-ta" placeholder="Describe the incident — include date, time, location, and names of anyone involved..." rows="4" oninput="updateCharCount('le-ta','le-count')"></textarea>
+          <div class="log-actions-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="log-action-btns">
+                <button class="log-action-btn" id="le-mic-btn" onclick="toggleVoice('le-ta','le-mic-btn')" title="Voice input">🎤</button>
+                <label class="log-action-btn" title="Attach file">
+                  📎
+                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'le')">
+                </label>
+              </div>
+              <span class="log-char-count" id="le-count">0 / 500</span>
+            </div>
+            <div>
+              <span class="log-success" id="le-success">✅ Saved!</span>
+              <button class="log-send-btn" data-type="le" onclick="submitLog('le')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Log It
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HR / Workplace box -->
+        <div class="log-box">
+          <div class="log-box-label">
+            <div class="log-box-label-dot" style="background:var(--warn);"></div>
+            Workplace / HR Log
+          </div>
+          <textarea class="log-ta" id="hr-ta" placeholder="Describe the workplace incident — include who was present, what was said, and any witnesses..." rows="4" oninput="updateCharCount('hr-ta','hr-count')"></textarea>
+          <div class="log-actions-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="log-action-btns">
+                <button class="log-action-btn" id="hr-mic-btn" onclick="toggleVoice('hr-ta','hr-mic-btn')" title="Voice input">🎤</button>
+                <label class="log-action-btn" title="Attach file">
+                  📎
+                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'hr')">
+                </label>
+              </div>
+              <span class="log-char-count" id="hr-count">0 / 500</span>
+            </div>
+            <div>
+              <span class="log-success" id="hr-success">✅ Saved!</span>
+              <button class="log-send-btn" data-type="hr" onclick="submitLog('hr')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Log It
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="wide-card">
+      <div class="wide-card-title">
+        Message Log
+        <button class="show-msgs-btn" id="show-msgs-btn" onclick="toggleMessages()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Show Messages
+        </button>
+      </div>
+      <div class="msg-panel" id="msg-panel">
+        <div class="filter-bar">
+          <input class="filter-input" id="filter-keyword" type="text" placeholder="Search keyword e.g. Robert, Arlington..." oninput="applyFilters()">
+          <input class="filter-input" id="filter-date-from" type="date" onchange="applyFilters()" style="max-width:150px;">
+          <input class="filter-input" id="filter-date-to" type="date" onchange="applyFilters()" style="max-width:150px;">
+          <button class="filter-btn" onclick="clearFilters()">Clear</button>
+        </div>
+        <div class="msg-count" id="msg-count"></div>
+        <div id="msg-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+         signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, collectionGroup, doc, setDoc, getDocs,
+         addDoc, query, where, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const fbApp = initializeApp({
+  apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain:"soslog-v1.firebaseapp.com",
+  projectId:"soslog-v1",
+  storageBucket:"soslog-v1.firebasestorage.app",
+  messagingSenderId:"873518719449",
+  appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
+});
+const auth = getAuth(fbApp);
+const db   = getFirestore(fbApp);
+
+const encEmail = e => e.replace(/\./g,'_dot_').replace(/@/g,'_at_');
+const decEmail = e => e.replace(/_dot_/g,'.').replace(/_at_/g,'@');
+const emailsCol   = p => collection(db,'users',p,'emails');
+const recordsCol  = (p,e) => collection(db,'users',p,'emails',e,'records');
+const flatRecords = p => collection(db,'users',p,'records');
+// flatRecords: direct path users/{phone}/records for seeded/SMS logs
+const normPhone  = (cc,ph) => '+'+cc.replace(/\D/g,'')+ph.replace(/\D/g,'');
+
+let currentPhone = null;
+let allRecords   = [];
+let msgsVisible  = false;
+let resolvedLocationCount = 0; // updated after map geocoding completes
+
+const STOP_WORDS = new Set([
+  'The','This','That','Then','When','With','From','Have','Been','They','Also','Were','Your','Their',
+  'After','Before','During','About','Which','Would','Could','Should','Reply','Stop','Help','Message',
+  'Record','Saved','Incident','Meeting','March','April','January','February','October','November',
+  'December','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Direct','Please',
+  'Texas','United','States','Note','Also','However','Currently','Today','Yesterday',
+  // Street suffixes
+  'Ave','Blvd','Dr','St','Rd','Ln','Way','Ct','Pl','Hwy','Pkwy','Loop','Fwy',
+  'Street','Avenue','Boulevard','Drive','Road','Lane','Court','Place','Highway','Parkway',
+  // Common words that get capitalized mid-sentence
+  'Log','Logs','Entry','Entries','Notes','Report','Reports','Case','File',
+  // Test/generic words
+  'Testing','Test','Sample','Example','Demo','Update','New','Old','Original',
+  // US States and major cities that are not people
+  'Arlington','Dallas','Houston','Austin','Texas','California','Florida','NewYork',
+  'Fort','Worth','Tarrant','County','City','Street','Block','District','Area',
+  // Action words often capitalized
+  'Incident','Location','Address','Subject','Witness','Officer','Department',
+  'Intersection','Corner','Near','Vicinity','Area','Zone','Sector',
+  // Directional prefixes
+  'North','South','East','West','Northeast','Northwest','Southeast','Southwest',
+]);
+
+// AUTH STATE
+onAuthStateChanged(auth, async user => {
+  document.getElementById('app-loading').classList.add('hide');
+  if(user){
+    await user.reload();
+    currentPhone = await resolvePhone(user);
+    await showDashboard(user);
+  } else {
+    showScreen('login-screen');
+  }
+});
+
+// Resolve phone from Firestore (handles accounts where displayName is a name not a phone)
+async function resolvePhone(user){
+  console.log('resolvePhone: starting for uid', user.uid, 'email', user.email, 'displayName', user.displayName);
+
+  // 1. displayName set at signup stores the phone number
+  if(user.displayName && /^\+?\d{7,}$/.test(user.displayName.replace(/[\s\-()]/g,''))){
+    console.log('resolvePhone: found via displayName:', user.displayName);
+    return user.displayName;
+  }
+
+  // 2. Query collectionGroup on 'profile' — path: users/{phone}/profile
+  //    The actual data is in the 'data' document inside profile collection
+  try{
+    const profileQ = query(collectionGroup(db,'profile'), where('uid','==',user.uid));
+    const snap = await getDocs(profileQ);
+    if(!snap.empty){
+      // Each doc is the 'data' document — its parent is 'profile' collection
+      // parent.parent is the user document — its id is the phone number
+      for(const d of snap.docs){
+        const phone = d.data().phone || d.ref.parent.parent?.id;
+        if(phone && /^\+?\d{7,}$/.test(phone.replace(/\s/g,''))){
+          console.log('resolvePhone: found via profile collectionGroup:', phone);
+          return phone;
+        }
+      }
+    }
+  } catch(e){ console.warn('resolvePhone profile collectionGroup failed:',e); }
+
+  // 3. Query collectionGroup on 'emails' — path: users/{phone}/emails/{emailKey}
+  //    parent = emails collection, parent.parent = user doc (phone as id)
+  try{
+    const emailQ = query(collectionGroup(db,'emails'), where('email','==',user.email));
+    const snap = await getDocs(emailQ);
+    if(!snap.empty){
+      const phone = snap.docs[0].ref.parent.parent?.id;
+      if(phone && /^\+?\d{7,}$/.test(phone.replace(/\s/g,''))){
+        console.log('resolvePhone: found via emails collectionGroup:', phone);
+        return phone;
+      }
+    }
+  } catch(e){ console.warn('resolvePhone emails collectionGroup failed:',e); }
+
+  // 4. Scan all users docs for email match (fallback for any account)
+  try{
+    const usersSnap = await getDocs(collection(db,'users'));
+    for(const userDoc of usersSnap.docs){
+      const phone = userDoc.id;
+      if(!/^\+?\d{7,}$/.test(phone.replace(/\s/g,''))) continue;
+      try{
+        const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+        const match = emailsSnap.docs.find(d=>d.data().email===user.email);
+        if(match){
+          console.log('resolvePhone: found via full scan:', phone);
+          return phone;
+        }
+      } catch(_){}
+    }
+  } catch(e){ console.warn('resolvePhone full scan failed:',e); }
+
+  console.warn('resolvePhone: all strategies failed, falling back to displayName/email');
+  return user.displayName || user.email;
+}
+
+// LOGIN
+window.doLogin = async function(){
+  const id=document.getElementById('login-id').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  const btn=document.getElementById('login-btn');
+  clearMsg('login-err'); clearMsg('login-ok');
+  if(!id||!pw){ showErr('login-err','Please enter your phone/email and password.'); return; }
+  btn.innerHTML='<div class="spinner"></div>'; btn.disabled=true;
+  const loginEmail = id.includes('@') ? id : id.replace(/\D/g,'')+'@soslog.phone';
+  try{
+    await signInWithEmailAndPassword(auth,loginEmail,pw);
+    // onAuthStateChanged handles redirect - reset button just in case
+    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    btn.disabled=false;
+  }
+  catch(e){
+    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    btn.disabled=false; showErr('login-err',fErr(e.code));
+  }
+};
+
+// SIGNUP
+window.doSignup = async function(){
+  const cc=document.getElementById('su-cc').value.trim()||'+1';
+  const phone=document.getElementById('su-phone').value.trim();
+  const country=document.getElementById('su-country').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pw=document.getElementById('su-pw').value;
+  const pw2=document.getElementById('su-pw2').value;
+  const btn=document.getElementById('signup-btn');
+  clearMsg('signup-err'); clearMsg('signup-ok');
+  if(!phone||!email||!country){ showErr('signup-err','Please fill in all fields.'); return; }
+  if(pw.length<8){ showErr('signup-err','Password must be at least 8 characters.'); return; }
+  if(pw!==pw2){ showErr('signup-err','Passwords do not match.'); return; }
+  const fullPhone=normPhone(cc,phone);
+  btn.disabled=true; btn.innerHTML='<div class="spinner spinner-g"></div> Creating...';
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pw);
+    await updateProfile(cred.user,{displayName:fullPhone});
+    await setDoc(doc(db,'users',fullPhone,'profile','data'),{uid:cred.user.uid,phone:fullPhone,country,plan:'basic',status:'active',joinedAt:serverTimestamp(),joinedLocal:new Date().toISOString()});
+    await setDoc(doc(emailsCol(fullPhone),encEmail(email)),{email,addedAt:serverTimestamp(),primary:true});
+    showOk('signup-ok','Account created! Signing you in...');
+  } catch(e){ btn.disabled=false; btn.innerHTML='Create Account &amp; Secure My Log'; showErr('signup-err',fErr(e.code)); }
+};
+
+window.doForgotPw = async function(){
+  const id=document.getElementById('login-id').value.trim();
+  clearMsg('login-err');
+  if(!id||!id.includes('@')){ showErr('login-err','Enter your email address first.'); return; }
+  try{ await sendPasswordResetEmail(auth,id); showOk('login-ok','Reset email sent.'); }
+  catch(e){ showErr('login-err',fErr(e.code)); }
+};
+
+window.doLogout = async () => { await signOut(auth); window.history.replaceState({},'','/'); };
+
+// DASHBOARD
+async function showDashboard(user){
+  showScreen('dashboard-screen');
+  document.getElementById('nav-phone').textContent = fmtPhone(currentPhone);
+  // URL uses phone digits only - never exposes name
+  const phoneDigits = currentPhone.replace(/\D/g,'');
+  const slug = phoneDigits || 'dashboard';
+  window.history.replaceState({},'','/'+slug);
+  allRecords = await loadAllRecords();
+  renderStats(allRecords);
+  renderRecentLogs(allRecords);
+  renderPeople(allRecords);
+  renderPlaces(allRecords);
+  renderSpider(allRecords);
+  loadMiniMap(allRecords);
+}
+
+async function loadAllRecords(){
+  const records=[];
+  if(!currentPhone){ console.warn('loadAllRecords: no currentPhone'); return records; }
+  console.log('Loading records for phone:', currentPhone);
+
+  try{
+    // Strategy 1: flat records at users/{phone}/records (seeded data + SMS logs)
+    try{
+      const flatSnap=await getDocs(query(flatRecords(currentPhone),orderBy('timestamp','desc')));
+      flatSnap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id,_source:'flat'}));
+      console.log('Flat records found:', flatSnap.size);
+    } catch(e){ console.warn('flat records error:',e); }
+
+    // Strategy 2: nested emails/{email}/records
+    try{
+      const emailSnap=await getDocs(emailsCol(currentPhone));
+      const emailIds=[];
+      emailSnap.forEach(d=>emailIds.push({id:d.id,email:d.data().email||decEmail(d.id)}));
+      console.log('Email subcollections found:', emailIds.length);
+
+      for(const e of emailIds){
+        try{
+          const snap=await getDocs(query(recordsCol(currentPhone,e.id),orderBy('timestamp','desc')));
+          snap.forEach(d=>records.push({...d.data(),_email:e.email,_id:d.id,_source:'email'}));
+          console.log('Records in',e.id,':', snap.size);
+        } catch(err){ console.warn('email records error:',err); }
+      }
+
+      // Also try unlinked bucket
+      try{
+        const snap=await getDocs(query(recordsCol(currentPhone,'unlinked'),orderBy('timestamp','desc')));
+        snap.forEach(d=>records.push({...d.data(),_email:'',_id:d.id,_source:'unlinked'}));
+      } catch(_){}
+    } catch(e){ console.warn('email subcollection error:',e); }
+
+    // Deduplicate by messageSid or _id
+    const seen=new Set();
+    const unique=records.filter(r=>{
+      const key=r.messageSid||r._id;
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+
+    unique.sort((a,b)=>getTs(b)-getTs(a));
+    console.log('Total unique records:', unique.length);
+    return unique;
+
+  } catch(e){ console.error('loadAllRecords fatal:',e); }
+  return records;
+}
+
+function getTs(r){
+  if(r.timestamp?.toDate) return r.timestamp.toDate().getTime();
+  if(r.timestampLocal) return new Date(r.timestampLocal).getTime();
+  return 0;
+}
+
+function last90(records){
+  const cutoff=Date.now()-90*24*60*60*1000;
+  return records.filter(r=>getTs(r)>cutoff);
+}
+
+// STATS
+function renderStats(records){
+  const r90=last90(records);
+  document.getElementById('stat-total').textContent=r90.length;
+  document.getElementById('stat-total-sub').textContent=records.length+' total all time';
+  const days=new Set(r90.map(r=>new Date(getTs(r)).toDateString())).size;
+  document.getElementById('stat-days').textContent=days;
+  const people=extractPeople(r90);
+  document.getElementById('stat-people').textContent=people.length;
+  document.getElementById('stat-people-sub').textContent=people[0]?.name?'Most mentioned: '+people[0].name:'Detecting from logs...';
+  const places=extractPlaces(r90);
+  // Count unique locations — any record with an address reference counts as 1
+  const uniqueLocSet = new Set(
+    r90
+      .map(r => {
+        // Use extractedAddress first (web entries), then formatted (geocoded), then city (SMS)
+        const raw = r.location?.extractedAddress || r.location?.formatted || r.location?.city || '';
+        if(!raw || raw.length < 3) return null;
+        const normalized = raw.toLowerCase()
+          .replace(/\s+and\s+/g,' & ')
+          .replace(/^(intersection of|corner of|near|at|on)\s+/i,'')
+          .replace(/\s{2,}/g,' ')
+          .trim();
+        const excluded = ['intersection','us','united states','','unknown'];
+        return excluded.includes(normalized) ? null : normalized;
+      })
+      .filter(Boolean)
+  );
+  document.getElementById('stat-places').textContent = uniqueLocSet.size || 0;
+  document.getElementById('stat-places-sub').textContent = places[0]?.name ? 'Most mentioned: '+places[0].name : 'Detecting from logs...';
+}
+
+// RECENT LOGS
+function renderRecentLogs(records){
+  const el=document.getElementById('recent-logs');
+  const recent=last90(records).slice(0,8);
+  if(!recent.length){ el.innerHTML='<div class="empty">No logs in last 90 days.</div>'; return; }
+  el.innerHTML=recent.map(r=>{
+    const ts=new Date(getTs(r));
+    const dateStr=ts.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const timeStr=ts.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    const dotColor=r.location?.precision==='address'?'var(--danger)':'var(--warn)';
+    return '<div class="log-item" onclick="openMessages()"><div class="log-dot" style="background:'+dotColor+';"></div><div style="flex:1;min-width:0;"><div class="log-date">'+dateStr+' '+timeStr+'</div><div class="log-body">'+esc((r.body||r.message||'').slice(0,100))+'</div></div></div>';
+  }).join('');
+}
+
+// PEOPLE
+function extractPeople(records){
+  const counts={};
+  const allText = records.map(r=>(r.body||r.message||'')
+    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+  ).join(' ');
+
+  const SKIP_PHRASES = new Set([
+    'Law Enforcement','Direct Report','Personal Device','Toll Free',
+    'United States','New York','Fort Worth','San Antonio','Los Angeles',
+    'Public Safety','Safety Documentation','Personal Safety',
+    'Border St','Abrams St','Lemmon Ave','Haskell Ave',
+  ]);
+
+  // Strategy 1: word-by-word scan for First Last name pairs
+  const words = allText.split(/\s+/);
+  for(let i=0;i<words.length-1;i++){
+    const w1=words[i].replace(/[^A-Za-z]/g,'');
+    const w2=words[i+1].replace(/[^A-Za-z]/g,'');
+    if(!w1||!w2) continue;
+    if(!/^[A-Z][a-z]{1,}$/.test(w1)) continue;
+    if(!/^[A-Z][a-z]{1,}$/.test(w2)) continue;
+    if(STOP_WORDS.has(w1)||STOP_WORDS.has(w2)) continue;
+    const fn=w1+' '+w2;
+    if(SKIP_PHRASES.has(fn)) continue;
+    counts[fn]=(counts[fn]||0)+1;
+  }
+
+  // Strategy 2: single capitalized words appearing 2+ times
+  const capWords=allText.match(/[A-Z][a-z]{2,}/g)||[];
+  const capCounts={};
+  capWords.forEach(w=>{capCounts[w]=(capCounts[w]||0)+1;});
+  Object.entries(capCounts).forEach(([w,c])=>{
+    if(c>=2&&!STOP_WORDS.has(w)){
+      const captured=Object.keys(counts).some(k=>k.includes(w));
+      if(!captured) counts[w]=c;
+    }
+  });
+
+  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,8);
+}
+
+
+// PLACES
+// Normalize a location string:
+// "Lemmon Ave and N Haskell Ave" -> "Lemmon Ave & N Haskell Ave"
+// "1100 Abrams St, Arlington, TX" -> "1100 Abrams St, Arlington, TX"
+// Treats "and"-joined and comma-joined parts as ONE location
+function normalizeLocation(loc){
+  if(!loc) return '';
+  return loc.trim()
+    .replace(/\s+and\s+/gi, ' & ')   // "X and Y" -> "X & Y" (one location)
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^(intersection of|corner of|near|at|on)\s+/i, '') // strip prefixes
+    .trim();
+}
+
+function extractPlaces(records){
+  const counts={};
+
+  // Only use explicitly stored location data — never guess from free text
+  // This prevents sentences being misidentified as addresses
+  records.forEach(r=>{
+    // 1. Geocoded extractedAddress (most reliable — set during save)
+    if(r.location?.extractedAddress && r.location.extractedAddress.length > 4){
+      const k = normalizeLocation(r.location.extractedAddress);
+      if(k && k.length > 4) counts[k] = (counts[k]||0) + 1;
+      return;
+    }
+    // 2. Formatted address from geocoder
+    if(r.location?.formatted && r.location.formatted.length > 4 &&
+       r.location.formatted !== 'United States' && r.location.formatted !== 'US'){
+      const k = normalizeLocation(r.location.formatted);
+      if(k && k.length > 4) counts[k] = (counts[k]||0) + 1;
+      return;
+    }
+    // 3. City from Twilio (SMS only)
+    if(r.source === 'sms' && r.location?.city && r.location.city.length > 2){
+      counts[r.location.city] = (counts[r.location.city]||0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .filter(([k]) => k.length > 3 && k.toLowerCase() !== 'intersection' && k.toLowerCase() !== 'us')
+    .map(([name,count]) => ({name,count}))
+    .sort((a,b) => b.count - a.count)
+    .slice(0,8);
+}
+
+
+function renderFreqList(elId,items,color){
+  const el=document.getElementById(elId);
+  if(!items.length){ el.innerHTML='<div class="empty">None found</div>'; return; }
+  const max=items[0].count;
+  el.innerHTML=items.map(item=>'<div class="freq-item"><div class="freq-name">'+esc(item.name)+'</div><div class="freq-bar-wrap"><div class="freq-bar" style="width:'+Math.round(item.count/max*100)+'%;background:'+color+';"></div></div><div class="freq-count">'+item.count+'</div></div>').join('');
+}
+function renderPeople(r){
+  const r90 = last90(r);
+  const places = extractPlaces(r90);
+  const placeNames = new Set(places.map(p=>p.name.toLowerCase()));
+  // Filter out anything that's already a place or in stop words
+  const rawPeople = extractPeople(r90);
+  console.log('extractPeople raw:', JSON.stringify(rawPeople));
+  console.log('allText:', r90.map(r=>r.body||'').join(' ').slice(0,300));
+  const people = rawPeople.filter(p=>{
+    if(placeNames.has(p.name.toLowerCase())) return false;
+    if(STOP_WORDS.has(p.name)) return false;
+    if(!p.name.includes(' ') && p.count < 2) return false;
+    return true;
+  });
+  console.log('people after filter:', JSON.stringify(people));
+  renderFreqList('people-list', people, 'var(--warn)');
+  document.getElementById('stat-people').textContent = people.length;
+  document.getElementById('stat-people-sub').textContent = people[0]?.name ? 'Most mentioned: '+people[0].name : 'Detecting from logs...';
+}
+function renderPlaces(r){ renderFreqList('places-list',extractPlaces(last90(r)),'var(--purple)'); }
+
+// SPIDER
+function scoreCredibility(records){
+  const r90=last90(records);
+  if(!r90.length) return {scores:{},overall:0,desc:''};
+  const allText=r90.map(r=>r.body||r.message||'').join(' ');
+  const avgLen=allText.length/Math.max(r90.length,1);
+  const dateMatches=(allText.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|\d{1,2}\/\d{1,2}|\d{1,2}:\d{2}|am|pm)\b/gi)||[]).length;
+  const specificity=Math.min(100,Math.round(dateMatches/r90.length*20));
+  const keyTermCounts={};
+  r90.forEach(r=>{ const words=(r.body||'').match(/\b[A-Z][a-z]{2,}\b/g)||[]; words.forEach(w=>{keyTermCounts[w]=(keyTermCounts[w]||0)+1;}); });
+  const repeatedTerms=Object.values(keyTermCounts).filter(c=>c>2).length;
+  const consistency=Math.min(100,Math.round(repeatedTerms*8));
+  const density=Math.min(100,Math.round(avgLen/3));
+  const people=extractPeople(r90);
+  const corroboration=Math.min(100,people.length*14);
+  const days=new Set(r90.map(r=>new Date(getTs(r)).toDateString())).size;
+  const timeline=Math.min(100,Math.round(days/90*400));
+  const patternScore=Math.min(100,repeatedTerms*6+people.length*5);
+  const emotionalWords=(allText.match(/\b(hate|angry|furious|unfair|terrible|horrible|worst|awful|racist|discrimination)\b/gi)||[]).length;
+  const factualWords=(allText.match(/\b(meeting|email|date|time|sent|received|confirmed|documented|recorded|witnessed)\b/gi)||[]).length;
+  const objectivity=Math.min(100,Math.max(0,50+factualWords*3-emotionalWords*5));
+  const scores={Specificity:specificity,Consistency:consistency,'Doc Density':density,Corroboration:corroboration,Timeline:timeline,Patterns:patternScore,Objectivity:objectivity};
+  const overall=Math.round(Object.values(scores).reduce((a,b)=>a+b,0)/Object.keys(scores).length);
+  const desc=overall>=80?'Strong credibility profile. Your documentation shows high specificity, consistency, and factual objectivity — characteristics that hold up under scrutiny.':overall>=60?'Good credibility profile. Continue documenting with specific dates, times, and witness names to strengthen your record.':'Building credibility profile. Include more specific details — dates, times, locations, and names — in each log entry.';
+  return {scores,overall,desc};
+}
+
+function renderSpider(records){
+  const {scores,overall,desc}=scoreCredibility(records);
+  document.getElementById('integrity-score').textContent=overall||'—';
+  document.getElementById('integrity-desc').textContent=desc||'Add more logs to generate your profile.';
+  const canvas=document.getElementById('spider-canvas');
+  const ctx=canvas.getContext('2d');
+  const keys=Object.keys(scores);
+  const vals=Object.values(scores);
+  const n=keys.length;
+  if(!n) return;
+  const W=300,H=260,cx=W/2,cy=H/2,R=90;
+  ctx.clearRect(0,0,W,H);
+  [20,40,60,80,100].forEach(pct=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(pct/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.closePath(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+  });
+  keys.forEach((_,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(angle),cy+R*Math.sin(angle)); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke(); });
+  ctx.beginPath();
+  vals.forEach((v,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(v/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.closePath(); ctx.fillStyle='rgba(29,184,122,0.15)'; ctx.strokeStyle='rgba(29,184,122,0.8)'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  vals.forEach((v,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R*(v/100); const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle='#1db87a'; ctx.fill(); });
+  ctx.fillStyle='rgba(204,216,232,0.8)'; ctx.font='11px -apple-system,sans-serif'; ctx.textAlign='center';
+  keys.forEach((k,i)=>{ const angle=(i/n)*Math.PI*2-Math.PI/2; const r=R+22; const x=cx+r*Math.cos(angle),y=cy+r*Math.sin(angle)+4; ctx.fillText(k,x,y); });
+}
+
+// MINI MAP
+const MAPS_API_KEY = 'AIzaSyC8GDl5em6tzE4Kf2nomqLGycWMIAlPf_4';
+
+function loadMiniMap(records){
+  if(typeof google!=='undefined' && google.maps){ initMiniMap(records); return; }
+  window.miniMapReady = () => initMiniMap(records);
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_API_KEY + '&callback=miniMapReady&loading=async&v=beta&libraries=marker';
+  s.async = true;
+  s.defer = true;
+  document.head.appendChild(s);
+}
+async function initMiniMap(records){
+  const mapEl = document.getElementById('mini-map');
+
+  // Step 1: Geocode all records missing lat/lng BEFORE creating map
+  // For records missing coords, try to extract address from body text too
+  const needsGeo = records.filter(r=>{
+    const hasCoords = r.location?.lat && r.location?.lng;
+    if(hasCoords) return false;
+    // Only geocode if we have a stored extractedAddress or formatted address
+    // Never try to geocode from free text body — too many false positives
+    const hasStoredAddress = r.location?.extractedAddress ||
+      (r.location?.formatted && r.location.formatted.length > 4 &&
+       r.location.formatted !== 'United States');
+    return !!hasStoredAddress;
+  });
+  console.log('Records needing geocoding:', needsGeo.length);
+
+  for(const r of needsGeo){
+    // Only use stored extractedAddress or formatted — never extract from body text
+    const addr = r.location?.extractedAddress || r.location?.formatted;
+    if(!addr || addr.length < 5) continue;
+    try{
+      const geocoder = new google.maps.Geocoder();
+      await new Promise((resolve) => {
+        geocoder.geocode({ address: addr }, (results, status) => {
+          if(status === 'OK' && results.length){
+            const loc = results[0].geometry.location;
+            r.location.lat       = loc.lat();
+            r.location.lng       = loc.lng();
+            r.location.formatted = results[0].formatted_address;
+            r.location.precision = 'address';
+            console.log('Geocoded:', addr, '->', loc.lat(), loc.lng(), results[0].formatted_address);
+          } else {
+            console.warn('Geocoder returned:', status, 'for address:', addr);
+          }
+          resolve();
+        });
+      });
+    } catch(e){ console.warn('miniMap geocode error:', e); }
+  }
+
+  // Step 2: Build resolved records array including just-geocoded ones
+  // We collect all records that now have lat/lng (including ones we just geocoded)
+  const resolvedRecords = [];
+  const seen = new Set();
+
+  for(const r of records){
+    if(!r.location?.lat || !r.location?.lng) continue;
+    const key = Number(r.location.lat).toFixed(4) + ',' + Number(r.location.lng).toFixed(4);
+    if(seen.has(key)) continue;
+    seen.add(key);
+    resolvedRecords.push(r);
+  }
+
+  console.log('Map pins to show:', resolvedRecords.length, 'out of', records.length, 'records');
+  const geoRecords = resolvedRecords;
+
+  // Update locations logged stat with actual geocoded count
+  resolvedLocationCount = geoRecords.length;
+  const statEl = document.getElementById('stat-places');
+  if(statEl) statEl.textContent = resolvedLocationCount;
+
+  // Step 4: Create map - NO styles when using mapId, NO deprecated params
+  const gmap = new google.maps.Map(mapEl, {
+    center: geoRecords.length
+      ? {lat: geoRecords[0].location.lat, lng: geoRecords[0].location.lng}
+      : {lat:32.7767, lng:-96.7970},
+    zoom: 12,
+    mapId: 'DEMO_MAP_ID',  // Use DEMO_MAP_ID for dark theme without cloud config
+    disableDefaultUI: true,
+    zoomControl: true,
+  });
+
+  if(!geoRecords.length){
+    // Show styled hint overlay
+    const hint = document.createElement('div');
+    hint.style.cssText = [
+      'position:absolute','bottom:16px','left:50%','transform:translateX(-50%)',
+      'background:rgba(22,28,33,0.9)','border:1px solid rgba(255,255,255,0.08)',
+      'border-radius:10px','padding:10px 16px','font-size:12px','color:#5a7090',
+      'text-align:center','pointer-events:none','white-space:nowrap','z-index:10'
+    ].join(';');
+    hint.textContent = 'Include an address in your log — pins appear here';
+    mapEl.style.position = 'relative';
+    mapEl.appendChild(hint);
+    return;
+  }
+
+  // Step 5: Add markers using legacy Marker (more reliable, not deprecated yet)
+  const bounds = new google.maps.LatLngBounds();
+
+  geoRecords.forEach(r=>{
+    const pos = {lat: r.location.lat, lng: r.location.lng};
+    bounds.extend(pos);
+    const isStreet = r.location?.precision === 'address';
+    const color = isStreet ? '#e63e2f' : '#f5a623';
+    const ring  = isStreet ? '#ff7878' : '#f7c060';
+
+    const marker = new google.maps.Marker({
+      position: pos,
+      map: gmap,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: isStreet ? 12 : 9,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: ring,
+        strokeWeight: 2,
+      },
+      title: r.location.formatted || r.location.extractedAddress || 'Incident',
+    });
+
+    // Pulse ring
+    new google.maps.Marker({
+      position: pos, map: gmap, clickable: false,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: isStreet ? 20 : 16,
+        fillColor: color, fillOpacity: 0.12,
+        strokeColor: color, strokeWeight: 1, strokeOpacity: 0.3,
+      }
+    });
+
+    const iw = new google.maps.InfoWindow({
+      content: '<div style="background:#161c21;color:#d8e4ee;font-family:-apple-system,sans-serif;' +
+        'padding:10px 12px;border-radius:8px;max-width:220px;font-size:12px;line-height:1.5;">' +
+        '<div style="font-size:10px;color:' + color + ';margin-bottom:4px;">' +
+        (isStreet ? '📍 Street level' : '📍 City level') + '</div>' +
+        '<div>' + (r.location.formatted || r.location.extractedAddress || '') + '</div>' +
+        '</div>'
+    });
+    marker.addListener('click', ()=>iw.open(gmap, marker));
+  });
+
+  // Step 6: Fit bounds
+  if(geoRecords.length === 1){
+    gmap.setCenter(bounds.getCenter());
+    gmap.setZoom(14);
+  } else {
+    gmap.fitBounds(bounds, 50);
+  }
+}
+
+// MESSAGES
+window.toggleMessages = function(){
+  msgsVisible=!msgsVisible;
+  const panel=document.getElementById('msg-panel');
+  const btn=document.getElementById('show-msgs-btn');
+  panel.classList.toggle('open',msgsVisible);
+  btn.innerHTML=msgsVisible
+    ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/></svg> Hide Messages'
+    :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Show Messages';
+  if(msgsVisible) renderMessages(allRecords);
+};
+window.openMessages = function(){ if(!msgsVisible) toggleMessages(); document.getElementById('msg-panel').scrollIntoView({behavior:'smooth'}); };
+window.applyFilters = function(){ renderMessages(allRecords); };
+window.clearFilters = function(){ document.getElementById('filter-keyword').value=''; document.getElementById('filter-date-from').value=''; document.getElementById('filter-date-to').value=''; renderMessages(allRecords); };
+
+// Cache for rendered messages (used by amend button)
+let renderedMessages = [];
+
+function renderMessages(records){
+  const keyword=document.getElementById('filter-keyword').value.trim().toLowerCase();
+  const dateFrom=document.getElementById('filter-date-from').value;
+  const dateTo=document.getElementById('filter-date-to').value;
+  let filtered=[...records];
+  if(keyword) filtered=filtered.filter(r=>(r.body||r.message||'').toLowerCase().includes(keyword));
+  if(dateFrom) filtered=filtered.filter(r=>getTs(r)>=new Date(dateFrom).getTime());
+  if(dateTo) filtered=filtered.filter(r=>getTs(r)<=new Date(dateTo).getTime()+86400000);
+  document.getElementById('msg-count').textContent=filtered.length+' message'+(filtered.length!==1?'s':'')+' found';
+  if(!filtered.length){ document.getElementById('msg-list').innerHTML='<div class="empty">No messages match your filters.</div>'; return; }
+  renderedMessages = filtered; // cache for amend lookup
+  let msgIndex = -1;
+  document.getElementById('msg-list').innerHTML=filtered.map(r=>{
+    msgIndex++;
+    const ts=new Date(getTs(r));
+    const timeStr=ts.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+    let body=esc(r.body||r.message||'');
+    if(keyword){ const re=new RegExp('('+keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); body=body.replace(re,'<mark>$1</mark>'); }
+    const category = r.category === 'law_enforcement' ? '🔵 LE' : r.category === 'workplace_hr' ? '🟡 HR' : '';
+    const isAmended = r.amendedFrom ? '<span style="font-size:10px;color:var(--warn);margin-left:4px;">amended</span>' : '';
+    return '<div class="msg-card">' +
+      '<div class="msg-meta">' +
+        '<span class="msg-time">'+timeStr+'</span>' +
+        '<span class="msg-badge">'+(r.source==='web'?'WEB':'SMS')+'</span>' +
+        (category?'<span style="font-size:10px;color:var(--muted);">'+category+'</span>':'') +
+        (r.location?.formatted?'<span class="msg-loc">📍 '+esc(r.location.formatted)+'</span>':'') +
+        isAmended +
+      '</div>' +
+      '<div class="msg-body">'+body+'</div>' +
+      '<div class="msg-card-actions">' +
+        '<button class="edit-btn" onclick="openEditModalByIndex('+msgIndex+')">' +
+          '✏️ Amend' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// UTILS
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active');
+    s.style.display='none';
+  });
+  const el=document.getElementById(id);
+  el.classList.add('active');
+  // login-screen uses flex, dashboard uses block
+  el.style.display = id==='login-screen' ? 'flex' : 'block';
+}
+window.stepShow = id => { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
+function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
+function showOk(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
+function clearMsg(id){ const e=document.getElementById(id); e.textContent=''; e.classList.remove('show'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtPhone(p){ if(!p) return ''; const d=p.replace(/\D/g,''); if(d.length===11&&d[0]==='1') return '+1 ('+d.slice(1,4)+') '+d.slice(4,7)+'-'+d.slice(7); return p; }
+function fErr(code){ return({'auth/user-not-found':'No account found.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Invalid phone/email or password.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 8 characters.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Try again later.'}[code]||'Something went wrong.'); }
+
+// ── Log entry widget ─────────────────────────────────────────────
+let activeRecognition = null;
+
+// Expose to window scope since called from onclick HTML attributes
+window.submitLog = async function(type){ return submitLogFn(type); };
+window.toggleVoice = function(taId, btnId){ return toggleVoiceFn(taId, btnId); };
+window.updateCharCount = function(taId, countId){ return updateCharCountFn(taId, countId); };
+window.handleAttach = function(event, type){ return handleAttachFn(event, type); };
+
+function updateCharCountFn(taId, countId){
+  const ta = document.getElementById(taId);
+  const count = document.getElementById(countId);
+  const len = ta.value.length;
+  count.textContent = len + ' / 500';
+  count.style.color = len > 450 ? 'var(--warn)' : 'var(--muted)';
+  if(len > 500) ta.value = ta.value.slice(0, 500);
+}
+
+function toggleVoiceFn(taId, btnId){
+  const btn = document.getElementById(btnId);
+  if(activeRecognition){
+    activeRecognition.stop();
+    activeRecognition = null;
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    return;
+  }
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    alert('Voice input is not supported in this browser. Please use Chrome.');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  const ta = document.getElementById(taId);
+  let finalTranscript = ta.value;
+  recognition.onresult = e => {
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      if(e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    ta.value = finalTranscript + interim;
+    updateCharCount(taId, taId === 'le-ta' ? 'le-count' : 'hr-count');
+  };
+  recognition.onend = () => {
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    activeRecognition = null;
+  };
+  recognition.start();
+  activeRecognition = recognition;
+  btn.classList.add('recording');
+  btn.textContent = '⏹';
+}
+
+function handleAttachFn(event, type){
+  const files = event.target.files;
+  if(!files.length) return;
+  const names = Array.from(files).map(f => f.name).join(', ');
+  const taId = type === 'le' ? 'le-ta' : 'hr-ta';
+  const ta = document.getElementById(taId);
+  ta.value += (ta.value ? '\n' : '') + '[Attached: ' + names + ']';
+  updateCharCountFn(taId, type + '-count');
+}
+
+async function submitLogFn(type){
+  const taId      = type === 'le' ? 'le-ta' : 'hr-ta';
+  const countId   = type + '-count';
+  const successId = type + '-success';
+  const ta        = document.getElementById(taId);
+  const body      = ta.value.trim();
+  const btn       = type === 'le'
+    ? document.querySelector('.log-send-btn[data-type="le"]')
+    : document.querySelector('.log-send-btn[data-type="hr"]');
+
+  if(!body){ ta.focus(); return; }
+  if(!currentPhone){ alert('Please log in to save entries.'); return; }
+
+  // Show loading state on button
+  const origHTML = btn.innerHTML;
+  btn.innerHTML  = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div>';
+  btn.disabled   = true;
+
+  try{
+    // Use already-imported Firestore functions (addDoc imported at top of module)
+    // Extract and geocode address from message body
+    let locationData = { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown', extractedAddress:null };
+    try{
+      // Strategy 1: explicit keywords followed by address
+      let addrMatch = body.match(/(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i);
+
+      // Strategy 2: numbered street address anywhere in text
+      if(!addrMatch) addrMatch = body.match(/(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s,]*?)(?:\.|$)/i);
+
+      // Strategy 3: named intersection "X Ave and Y Ave" or "X Ave & Y Ave"
+      if(!addrMatch) addrMatch = body.match(/([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way))/i);
+
+      if(addrMatch){
+        const extracted = (addrMatch[1]||addrMatch[0]).trim()
+          .replace(/\.$/, '')
+          .replace(/\s+and\s+/gi,' & ')
+          .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
+          .trim();
+        locationData.extractedAddress = extracted;
+        // Geocode via Google Maps Geocoding API
+        await new Promise((resolve) => {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ address: extracted }, (results, status) => {
+            if(status === 'OK' && results.length){
+              const loc = results[0].geometry.location;
+              const comp = results[0].address_components;
+              const city = comp.find(c=>c.types.includes('locality'))?.long_name || '';
+              const state = comp.find(c=>c.types.includes('administrative_area_level_1'))?.short_name || '';
+              locationData = {
+                lat: loc.lat(), lng: loc.lng(),
+                city, state, country: 'US',
+                formatted: results[0].formatted_address,
+                precision: 'address',
+                extractedAddress: extracted,
+              };
+              console.log('submitLog geocoded:', extracted, '->', loc.lat(), loc.lng());
+            } else {
+              console.warn('submitLog geocoder status:', status, 'for:', extracted);
+            }
+            resolve();
+          });
+        });
+      }
+    } catch(geoErr){ console.warn('Geocoding error:', geoErr); }
+
+    // Get fresh phone from Auth at write time - don't rely on closure variable
+    const authUser = auth.currentUser;
+    await authUser.reload();
+    const writePhone = authUser.displayName && /^\+?\d{7,}$/.test(authUser.displayName.replace(/[\s\-()]/g,''))
+      ? authUser.displayName
+      : currentPhone;
+    console.log('submitLog: writing to users/' + writePhone + '/records');
+
+    const flatRef = collection(db, 'users', writePhone, 'records');
+    await addDoc(flatRef, {
+      body,
+      source:    'web',
+      category:  type === 'le' ? 'law_enforcement' : 'workplace_hr',
+      timestamp: serverTimestamp(),
+      timestampLocal: new Date().toISOString(),
+      from:      currentPhone,
+      location:  locationData,
+      hasMedia:  false,
+      mediaUrls: [],
+    });
+
+    // Clear textarea
+    ta.value = '';
+    updateCharCountFn(taId, countId);
+
+    // Show success confirmation
+    const success = document.getElementById(successId);
+    success.classList.add('show');
+    setTimeout(() => success.classList.remove('show'), 3000);
+
+    // Restore button
+    btn.innerHTML = origHTML;
+    btn.disabled  = false;
+
+    // Reload all records and refresh every dashboard section
+    allRecords = await loadAllRecords();
+    renderStats(allRecords);
+    renderRecentLogs(allRecords);
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+
+    // Refresh map pins with new record
+    if(typeof google !== 'undefined' && google.maps){
+      initMiniMap(allRecords);
+    }
+
+    // Scroll recent activity into view so user sees the update
+    const recentEl = document.getElementById('recent-logs');
+    if(recentEl){
+      recentEl.closest('.wide-card').scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+
+  } catch(e){
+    console.error('submitLog error:', e);
+    btn.innerHTML = origHTML;
+    btn.disabled  = false;
+    alert('Could not save. Please try again. Error: ' + e.message);
+  }
+}
+
+// ── Edit / Amend entry ────────────────────────────────────────
+let editingRecordId = null;
+let editingOriginalText = '';
+
+window.openEditModalByIndex = function(index){
+  const r = renderedMessages[index];
+  if(!r){ console.error('Record not found at index', index); return; }
+  openEditModal(r._id, r.body || r.message || '');
+};
+
+window.openEditModal = function(recordId, originalText){
+  editingRecordId = recordId;
+  editingOriginalText = originalText;
+  document.getElementById('edit-original-text').textContent = originalText;
+  document.getElementById('edit-new-text').value = originalText;
+  document.getElementById('edit-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('edit-new-text').focus(), 100);
+};
+
+window.closeEditModal = function(event){
+  if(event && event.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').style.display = 'none';
+  editingRecordId = null;
+  editingOriginalText = '';
+};
+
+window.saveEditEntry = async function(){
+  const newText = document.getElementById('edit-new-text').value.trim();
+  const btn = document.getElementById('edit-save-btn');
+  if(!newText){ document.getElementById('edit-new-text').focus(); return; }
+  if(newText === editingOriginalText){
+    alert('No changes detected. Please modify the entry before saving.');
+    return;
+  }
+  if(!currentPhone){ alert('Please log in to save entries.'); return; }
+
+  btn.innerHTML = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div> Saving...';
+  btn.disabled = true;
+
+  try{
+    // Geocode new text for location
+    let locationData = { city:'', state:'', country:'US', lat:null, lng:null, formatted:'', precision:'unknown', extractedAddress:null };
+
+    const addrPatterns = [
+      /(?:near|at|on|corner of|intersection of)(?:\s+the)?(?:\s+intersection\s+of)?\s+([\w\s.N\-]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way|Court|Place|Highway|Parkway)[\w\s.N\-,]*?)(?:\.|,\s*[A-Z]{2}|$)/i,
+      /(\d+\s+[\w\s]+?(?:Ave|Avenue|Blvd|Boulevard|St|Street|Rd|Road|Dr|Drive|Lane|Way)[\w\s,]*?)(?:\.|$)/i,
+      /([A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way)\s+(?:and|&)\s+[A-Z][\w\s]+?(?:Ave|Avenue|Blvd|St|Street|Rd|Road|Drive|Lane|Way))/i,
+    ];
+
+    for(const pat of addrPatterns){
+      const m = newText.match(pat);
+      if(m){
+        const extracted = (m[1]||m[0]).trim()
+          .replace(/^(near|at|on|the|intersection of|corner of)\s+/gi,'')
+          .replace(/\s+and\s+/gi,' & ')
+          .trim();
+        if(extracted.length > 5){
+          locationData.extractedAddress = extracted;
+          // Geocode using Maps API
+          await new Promise(resolve => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: extracted }, (results, status) => {
+              if(status === 'OK' && results.length){
+                const loc = results[0].geometry.location;
+                const comp = results[0].address_components;
+                locationData = {
+                  lat: loc.lat(), lng: loc.lng(),
+                  city: comp.find(c=>c.types.includes('locality'))?.long_name || '',
+                  state: comp.find(c=>c.types.includes('administrative_area_level_1'))?.short_name || '',
+                  country: 'US',
+                  formatted: results[0].formatted_address,
+                  precision: 'address',
+                  extractedAddress: extracted,
+                };
+              }
+              resolve();
+            });
+          });
+          break;
+        }
+      }
+    }
+
+    // Get fresh phone
+    const authUser = auth.currentUser;
+    const writePhone = authUser.displayName && /^\+?\d{7,}$/.test(authUser.displayName.replace(/[\s\-()]/g,''))
+      ? authUser.displayName : currentPhone;
+
+    // Create NEW record — never modify original
+    await addDoc(collection(db, 'users', writePhone, 'records'), {
+      body:          newText,
+      source:        'web',
+      category:      'amendment',
+      amendedFrom:   editingRecordId,  // reference to original
+      timestamp:     serverTimestamp(),
+      timestampLocal: new Date().toISOString(),
+      from:          writePhone,
+      location:      locationData,
+      hasMedia:      false,
+      mediaUrls:     [],
+    });
+
+    // Close modal
+    document.getElementById('edit-modal').style.display = 'none';
+    editingRecordId = null;
+
+    // Refresh everything
+    allRecords = await loadAllRecords();
+    renderStats(allRecords);
+    renderRecentLogs(allRecords);
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+    if(typeof google !== 'undefined' && google.maps) initMiniMap(allRecords);
+    if(msgsVisible) renderMessages(allRecords);
+
+    // Show success in message log area
+    const countEl = document.getElementById('msg-count');
+    if(countEl) countEl.textContent = '✅ Amendment saved as new entry';
+    setTimeout(() => { if(msgsVisible) renderMessages(allRecords); }, 2000);
+
+  } catch(e){
+    console.error('saveEditEntry error:', e);
+    alert('Could not save amendment. Please try again.');
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Save as New Entry';
+    btn.disabled = false;
+  }
+};
+
+const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
+</script>
+
+<!-- Edit entry modal - placed at body level so always accessible -->
+<div class="edit-modal-backdrop" id="edit-modal" style="display:none;" onclick="if(event.target===this)closeEditModal()">
+  <div class="edit-modal">
+    <div class="edit-modal-title">✏️ Amend Log Entry</div>
+    <div class="edit-modal-sub">Your original entry is preserved unchanged. A new timestamped entry will be created with your changes.</div>
+    <div class="edit-original">
+      <strong>Original entry</strong>
+      <span id="edit-original-text"></span>
+    </div>
+    <textarea class="edit-ta" id="edit-new-text" placeholder="Enter your updated log entry..."></textarea>
+    <div class="edit-note"><strong>Note:</strong> The original entry remains unchanged. This creates a new entry marked as an amendment.</div>
+    <div class="edit-modal-actions">
+      <button class="edit-cancel-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save-btn" id="edit-save-btn" onclick="saveEditEntry()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save as New Entry
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
