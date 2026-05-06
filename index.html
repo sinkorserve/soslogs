@@ -673,12 +673,22 @@ const STOP_WORDS = new Set([
   'After','Before','During','About','Which','Would','Could','Should','Reply','Stop','Help','Message',
   'Record','Saved','Incident','Meeting','March','April','January','February','October','November',
   'December','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Direct','Please',
-  'Texas','United','States','Please','Note','Also','However','Currently','Today','Yesterday',
+  'Texas','United','States','Note','Also','However','Currently','Today','Yesterday',
   // Street suffixes
-  'Ave','Blvd','Blvd','Dr','St','Rd','Ln','Way','Ct','Pl','Hwy','Pkwy','Loop','Fwy',
+  'Ave','Blvd','Dr','St','Rd','Ln','Way','Ct','Pl','Hwy','Pkwy','Loop','Fwy',
   'Street','Avenue','Boulevard','Drive','Road','Lane','Court','Place','Highway','Parkway',
   // Common words that get capitalized mid-sentence
-  'Log','Logs','Entry','Entries','Note','Notes','Report','Reports','Case','File'
+  'Log','Logs','Entry','Entries','Notes','Report','Reports','Case','File',
+  // Test/generic words
+  'Testing','Test','Sample','Example','Demo','Update','New','Old','Original',
+  // US States and major cities that are not people
+  'Arlington','Dallas','Houston','Austin','Texas','California','Florida','NewYork',
+  'Fort','Worth','Tarrant','County','City','Street','Block','District','Area',
+  // Action words often capitalized
+  'Incident','Location','Address','Subject','Witness','Officer','Department',
+  'Intersection','Corner','Near','Vicinity','Area','Zone','Sector',
+  // Directional prefixes
+  'North','South','East','West','Northeast','Northwest','Southeast','Southwest',
 ]);
 
 // AUTH STATE
@@ -1032,7 +1042,19 @@ function renderFreqList(elId,items,color){
   const max=items[0].count;
   el.innerHTML=items.map(item=>'<div class="freq-item"><div class="freq-name">'+esc(item.name)+'</div><div class="freq-bar-wrap"><div class="freq-bar" style="width:'+Math.round(item.count/max*100)+'%;background:'+color+';"></div></div><div class="freq-count">'+item.count+'</div></div>').join('');
 }
-function renderPeople(r){ renderFreqList('people-list',extractPeople(last90(r)),'var(--warn)'); }
+function renderPeople(r){
+  const r90 = last90(r);
+  const places = extractPlaces(r90);
+  const placeNames = new Set(places.map(p=>p.name.toLowerCase()));
+  // Filter out anything that's already a place or in stop words
+  const people = extractPeople(r90).filter(p=>
+    !placeNames.has(p.name.toLowerCase()) &&
+    !STOP_WORDS.has(p.name)
+  );
+  renderFreqList('people-list', people, 'var(--warn)');
+  document.getElementById('stat-people').textContent = people.length;
+  document.getElementById('stat-people-sub').textContent = people[0]?.name ? 'Most mentioned: '+people[0].name : 'Detecting from logs...';
+}
 function renderPlaces(r){ renderFreqList('places-list',extractPlaces(last90(r)),'var(--purple)'); }
 
 // SPIDER
