@@ -948,18 +948,45 @@ function renderRecentLogs(records){
 
 // PEOPLE
 function extractPeople(records){
-  const namePatterns=[]; // Names detected automatically from capitalized words in messages
   const counts={};
-  const allText=records.map(r=>r.body||r.message||'').join(' ');
-  namePatterns.forEach(name=>{
-    const matches=allText.match(new RegExp('\\b'+name+'\\b','gi'));
-    if(matches&&matches.length>0) counts[name]=matches.length;
+  const allText = records.map(r=>r.body||r.message||'').join(' ');
+
+  // Strategy 1: Full names — "John Doe", "Jane Smith" (Title Case two-word combos)
+  // Excludes known place words and stop words
+  const fullNamePattern = /([A-Z][a-z]{1,})\s+([A-Z][a-z]{1,})/g;
+  let m;
+  while((m = fullNamePattern.exec(allText)) !== null){
+    const first = m[1], last = m[2];
+    // Skip if either word is a stop word or street suffix
+    if(STOP_WORDS.has(first) || STOP_WORDS.has(last)) continue;
+    // Skip common two-word phrases that aren't names
+    const skipPhrases = new Set([
+      'Law Enforcement','Direct Report','Personal Device','Toll Free',
+      'United States','New York','Fort Worth','San Antonio','Los Angeles',
+      'Public Safety','Safety Documentation','Personal Safety',
+    ]);
+    const fullName = first + ' ' + last;
+    if(skipPhrases.has(fullName)) continue;
+    counts[fullName] = (counts[fullName]||0) + 1;
+  }
+
+  // Strategy 2: Single capitalized words appearing 2+ times
+  // (catches names mentioned repeatedly without last name)
+  const capWords = allText.match(/[A-Z][a-z]{2,}/g) || [];
+  const capCounts = {};
+  capWords.forEach(w => { capCounts[w] = (capCounts[w]||0)+1; });
+  Object.entries(capCounts).forEach(([w,c]) => {
+    if(c >= 2 && !STOP_WORDS.has(w) && !counts[w]){
+      // Only add if not already captured as part of a full name
+      const alreadyCaptured = Object.keys(counts).some(k => k.includes(w));
+      if(!alreadyCaptured) counts[w] = c;
+    }
   });
-  const capWords=allText.match(/\b[A-Z][a-z]{2,}\b/g)||[];
-  const capCounts={};
-  capWords.forEach(w=>{capCounts[w]=(capCounts[w]||0)+1;});
-  Object.entries(capCounts).forEach(([w,c])=>{ if(c>=2&&!counts[w]&&!STOP_WORDS.has(w)) counts[w]=c; });
-  return Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,8);
+
+  return Object.entries(counts)
+    .map(([name,count]) => ({name,count}))
+    .sort((a,b) => b.count - a.count)
+    .slice(0,8);
 }
 
 // PLACES
