@@ -40,19 +40,29 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .login-hero{
   position:relative;z-index:1;
   text-align:center;
-  padding:48px 24px 36px;
+  padding:36px 24px 28px;
   border-bottom:1px solid var(--border);
   background:linear-gradient(180deg,rgba(29,184,122,0.03) 0%,transparent 100%);
 }
-.hero-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;}
-.hero-logo-text{font-size:32px;font-weight:800;color:var(--white);}
+.hero-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+.hero-logo-text{font-size:36px;font-weight:800;color:var(--white);letter-spacing:-0.5px;}
 .hero-logo-text span{color:var(--safe);}
-.hero-tagline{font-size:11px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;}
-.hero-statement{font-size:15px;color:var(--text);line-height:1.7;margin-bottom:16px;max-width:640px;margin-left:auto;margin-right:auto;}
-.hero-statement strong{color:var(--white);}
-.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
-.hero-badge-pill{background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.25);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--safe);letter-spacing:0.04em;font-weight:600;}
-.hero-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:560px;margin:0 auto;}
+.hero-tagline{font-size:11px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:16px;}
+.hero-statement{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px;max-width:580px;margin-left:auto;margin-right:auto;}
+.hero-statement strong{color:var(--text);}
+.hero-badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px;}
+.hero-badge-pill{background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--safe);letter-spacing:0.04em;font-weight:600;}
+.hero-sub{font-size:12px;color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 0;}
+.hero-sms{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:16px;padding:12px 24px;
+  background:rgba(29,184,122,0.06);
+  border:1px solid rgba(29,184,122,0.2);
+  border-radius:12px;
+  font-size:16px;font-weight:700;color:var(--safe);
+  letter-spacing:0.02em;
+}
+.hero-sms svg{flex-shrink:0;}
 
 /* Auth + pricing row */
 .login-body{
@@ -70,21 +80,22 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .login-left{
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  padding:32px 28px;
+  justify-content:flex-start;
+  padding:28px 28px 24px;
   border-right:1px solid var(--border);
   background:rgba(0,0,0,0.15);
+  overflow-y:auto;
 }
 @media(max-width:800px){
-  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:28px 20px;}
+  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:24px 20px;}
 }
 
 /* Right panel - pricing */
 .login-right{
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  padding:32px 28px;
+  justify-content:flex-start;
+  padding:28px 28px 24px;
   overflow-y:auto;
 }
 @media(max-width:800px){
@@ -381,7 +392,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span class="hero-logo-text">SOS<span>Logs</span></span>
   </div>
-  <div class="hero-tagline">Document · Protect · Prove</div>
+  <div class="hero-tagline">Transparent · Self-Evident · Documented</div>
   <p class="hero-statement">
     When incidents happen, everyone claims they did nothing wrong.<br>
     <strong>But when you document with specificity, consistency, corroboration and an unbroken timeline — timestamped and objectively scored — decision makers finally see exactly what happened.</strong>
@@ -396,6 +407,12 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <span class="hero-badge-pill">Objectivity</span>
   </div>
   <p class="hero-sub">Your documented truth, ready when it matters most.</p>
+  <div style="display:flex;justify-content:center;margin-top:16px;">
+    <div class="hero-sms">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Text your logs to 1-888-799-LOGS
+    </div>
+  </div>
 </div>
 
 <div class="login-body">
@@ -436,11 +453,8 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password? Reset via Email</button>
     </div>
   </div>
-  <div class="sms-hint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div>Text your logs to <strong>1-888-799-LOGS</strong></div></div>
-  <div class="login-footer">
-    <div>2026 Athens Innovation and Development LLC</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px;flex-wrap:wrap;"><a href="/about.html">About</a><span>·</span><a href="/privacy.html">Privacy Policy</a><span>·</span><a href="/terms.html">Terms of Service</a><span>·</span><a href="mailto:admin@soslogs.org">Contact</a></div>
-  </div>
+
+
 
   <!-- Pricing section - moved outside login-wrap below -->
   <div style="display:none;">
@@ -558,6 +572,21 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 </div><!-- end pricing-inner -->
 </div><!-- end login-right -->
 </div><!-- end login-body -->
+
+<!-- Footer - bottom center -->
+<footer style="position:relative;z-index:1;text-align:center;padding:20px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:2;">
+  <div>© 2026 Athens Innovation and Development LLC</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
+    <a href="/about.html" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--safe)'" onmouseout="this.style.color='var(--muted)'">About</a>
+    <span>·</span>
+    <a href="/privacy.html" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--safe)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
+    <span>·</span>
+    <a href="/terms.html" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--safe)'" onmouseout="this.style.color='var(--muted)'">Terms of Service</a>
+    <span>·</span>
+    <a href="mailto:admin@soslogs.org" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--safe)'" onmouseout="this.style.color='var(--muted)'">Contact</a>
+  </div>
+</footer>
+
 </div><!-- end login-screen -->
 
 <!-- DASHBOARD -->
