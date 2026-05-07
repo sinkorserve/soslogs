@@ -36,29 +36,47 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 }
 #login-screen::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,184,122,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,184,122,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 
-/* Two column layout */
+/* Hero section - full width top */
+.login-hero{
+  position:relative;z-index:1;
+  text-align:center;
+  padding:48px 24px 36px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(29,184,122,0.03) 0%,transparent 100%);
+}
+.hero-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;}
+.hero-logo-text{font-size:32px;font-weight:800;color:var(--white);}
+.hero-logo-text span{color:var(--safe);}
+.hero-tagline{font-size:11px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;}
+.hero-statement{font-size:15px;color:var(--text);line-height:1.7;margin-bottom:16px;max-width:640px;margin-left:auto;margin-right:auto;}
+.hero-statement strong{color:var(--white);}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
+.hero-badge-pill{background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.25);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--safe);letter-spacing:0.04em;font-weight:600;}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:560px;margin:0 auto;}
+
+/* Auth + pricing row */
 .login-body{
   display:grid;
-  grid-template-columns:400px 1fr;
-  min-height:100dvh;
+  grid-template-columns:420px 1fr;
   position:relative;
   z-index:1;
+  flex:1;
 }
-@media(max-width:760px){
+@media(max-width:800px){
   .login-body{grid-template-columns:1fr;min-height:auto;}
 }
 
-/* Left panel */
+/* Left panel - auth */
 .login-left{
   display:flex;
   flex-direction:column;
   justify-content:center;
   padding:32px 28px;
   border-right:1px solid var(--border);
-  background:rgba(0,0,0,0.2);
+  background:rgba(0,0,0,0.15);
 }
-@media(max-width:760px){
-  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:32px 20px;}
+@media(max-width:800px){
+  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:28px 20px;}
 }
 
 /* Right panel - pricing */
@@ -69,7 +87,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   padding:32px 28px;
   overflow-y:auto;
 }
-@media(max-width:760px){
+@media(max-width:800px){
   .login-right{padding:24px 20px;}
 }
 
@@ -355,66 +373,58 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
+
+<!-- Hero - full width top -->
+<div class="login-hero">
+  <div class="hero-logo">
+    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
+    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="hero-logo-text">SOS<span>Logs</span></span>
+  </div>
+  <div class="hero-tagline">Document · Protect · Prove</div>
+  <p class="hero-statement">
+    When incidents happen, everyone claims they did nothing wrong.<br>
+    <strong>But when you document with specificity, consistency, corroboration and an unbroken timeline — timestamped and objectively scored — decision makers finally see exactly what happened.</strong>
+  </p>
+  <div class="hero-badges">
+    <span class="hero-badge-pill">Specificity</span>
+    <span class="hero-badge-pill">Consistency</span>
+    <span class="hero-badge-pill">Documentation</span>
+    <span class="hero-badge-pill">Corroboration</span>
+    <span class="hero-badge-pill">Timeline</span>
+    <span class="hero-badge-pill">Patterns</span>
+    <span class="hero-badge-pill">Objectivity</span>
+  </div>
+  <p class="hero-sub">Your documented truth, ready when it matters most.</p>
+</div>
+
 <div class="login-body">
 <div class="login-left">
 <div class="login-wrap">
-  <div class="login-logo">
-    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
-    <svg width="34" height="34" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="login-logo-text">SOS<span>Logs</span></span>
-  </div>
-  <p class="login-tagline">Document · Protect · Prove</p>
 
-  <!-- Hero statement -->
-  <div style="margin-bottom:16px;padding:14px 16px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:12px;">
-    <p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:8px;">
-      When incidents happen, everyone claims they did nothing wrong.
-    </p>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Specificity</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Consistency</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Documentation</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Corroboration</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Timeline</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Patterns</span>
-      <span style="background:rgba(29,184,122,0.1);border:1px solid rgba(29,184,122,0.2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--safe);letter-spacing:0.05em;">Objectivity</span>
-    </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.6;">
-      Timestamped incident logs scored across all seven dimensions — your documented truth, ready when it matters.
-    </p>
-  </div>
-
-  <!-- SVG illustration: document with pen -->
-  <div style="display:flex;justify-content:center;margin-bottom:14px;">
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Document -->
-      <rect x="12" y="8" width="44" height="56" rx="4" fill="#161c21" stroke="rgba(29,184,122,0.3)" stroke-width="1.5"/>
-      <!-- Lines on document -->
-      <line x1="20" y1="22" x2="48" y2="22" stroke="rgba(29,184,122,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="20" y1="30" x2="48" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="20" y1="38" x2="42" y2="38" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="20" y1="46" x2="45" y2="46" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="20" y1="54" x2="38" y2="54" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
-      <!-- Timestamp badge -->
-      <rect x="30" y="58" width="36" height="16" rx="8" fill="#0e1318" stroke="rgba(29,184,122,0.4)" stroke-width="1"/>
-      <circle cx="39" cy="66" r="3" fill="var(--safe)" opacity="0.8"/>
-      <line x1="44" y1="64" x2="58" y2="64" stroke="rgba(29,184,122,0.5)" stroke-width="1" stroke-linecap="round"/>
-      <line x1="44" y1="68" x2="54" y2="68" stroke="rgba(29,184,122,0.3)" stroke-width="1" stroke-linecap="round"/>
-      <!-- Pen writing -->
-      <g transform="rotate(-35 60 40)">
-        <rect x="54" y="28" width="6" height="20" rx="2" fill="#1db87a" opacity="0.9"/>
-        <polygon points="54,48 60,48 57,54" fill="#0d7a50"/>
-        <rect x="54" y="28" width="6" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
-      </g>
-      <!-- Writing glow -->
-      <circle cx="57" cy="52" r="3" fill="rgba(29,184,122,0.3)" opacity="0.6"/>
-    </svg>
+  <!-- Auth tabs -->
+  <div style="display:flex;gap:0;margin-bottom:16px;background:var(--dark);border-radius:10px;padding:3px;">
+    <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:8px;border:none;border-radius:8px;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;">Create Account</button>
+    <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:8px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;">Sign In</button>
   </div>
 
   <div class="login-card">
-    <div id="step-login" class="step active">
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Access your records</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Enter your phone or email and password.</div>
+    <!-- Signup step - shown by default -->
+    <div id="step-signup" class="step active">
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Your phone number is your primary identity.</div>
+      <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
+      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country" autocomplete="country-name" value="United States"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
+      <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
+      <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
+      <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
+    </div>
+
+    <!-- Login step -->
+    <div id="step-login" class="step">
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Welcome back</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Enter your phone or email and password.</div>
       <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Phone number or email address" autocomplete="off"></div>
       <div class="field-wrap"><label class="f-label">Password</label>
         <div class="pw-row">
@@ -423,21 +433,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         </div>
       </div>
       <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-        <button class="btn-ghost" onclick="doForgotPw()">Reset Password</button>
-        <button class="btn-ghost btn-warn" onclick="stepShow('step-signup')">Create Account</button>
-      </div>
-    </div>
-    <div id="step-signup" class="step">
-      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Your phone number is your primary identity.</div>
-      <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
-      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country" autocomplete="country-name" value="United States"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
-      <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
-      <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
-      <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
-      <div style="text-align:center;margin-top:10px;"><a class="toggle-link muted-link" onclick="stepShow('step-login')">Already have an account? Sign in</a></div>
+      <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password? Reset via Email</button>
     </div>
   </div>
   <div class="sms-hint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div>Text your logs to <strong>1-888-799-LOGS</strong></div></div>
@@ -1493,6 +1489,17 @@ function showScreen(id){
   el.style.display = id==='login-screen' ? 'flex' : 'block';
 }
 window.stepShow = id => { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
+window.switchTab = function(tab){
+  const isSignup = tab === 'signup';
+  document.getElementById('step-signup').classList.toggle('active', isSignup);
+  document.getElementById('step-login').classList.toggle('active', !isSignup);
+  const tabSignup = document.getElementById('tab-signup');
+  const tabLogin  = document.getElementById('tab-login');
+  tabSignup.style.background = isSignup ? 'var(--safe)' : 'transparent';
+  tabSignup.style.color      = isSignup ? '#000' : 'var(--muted)';
+  tabLogin.style.background  = isSignup ? 'transparent' : 'var(--safe)';
+  tabLogin.style.color       = isSignup ? 'var(--muted)' : '#000';
+};
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
 function showOk(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
 function clearMsg(id){ const e=document.getElementById(id); e.textContent=''; e.classList.remove('show'); }
