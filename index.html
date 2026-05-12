@@ -270,6 +270,43 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Document Analysis Widget ───────────────────────────────── */
+.analyze-widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.analyze-widget-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.analyze-tabs{display:flex;gap:0;margin-bottom:16px;background:var(--dark);border-radius:10px;padding:3px;}
+.analyze-tab{flex:1;padding:7px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;}
+.analyze-tab.active{background:var(--safe);color:#000;}
+.analyze-drop-zone{border:2px dashed var(--border);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px;}
+.analyze-drop-zone:hover,.analyze-drop-zone.dragover{border-color:rgba(29,184,122,0.4);background:rgba(29,184,122,0.04);}
+.analyze-drop-icon{font-size:28px;margin-bottom:8px;}
+.analyze-drop-text{font-size:13px;color:var(--muted);}
+.analyze-drop-text strong{color:var(--safe);}
+.analyze-ta{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;outline:none;resize:vertical;min-height:100px;transition:border-color 0.2s;-webkit-text-fill-color:var(--text);}
+.analyze-ta:focus{border-color:rgba(29,184,122,0.4);}
+.analyze-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;margin-top:12px;}
+.analyze-btn:hover{background:var(--safe2);}
+.analyze-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* Analysis result modal */
+.analysis-modal-backdrop{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease;}
+.analysis-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;animation:fadeUp 0.25s cubic-bezier(.22,.68,0,1.2);}
+.analysis-modal-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.analysis-modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.analysis-field{margin-bottom:14px;}
+.analysis-field-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.analysis-field-value{font-size:13px;color:var(--text);line-height:1.6;background:var(--dark);border-radius:8px;padding:10px 12px;border:1px solid var(--border);}
+.analysis-field-value.highlight{border-color:rgba(245,166,35,0.3);color:var(--warn);}
+.analysis-field-value.good{border-color:rgba(29,184,122,0.3);color:var(--safe2);}
+.analysis-modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+.analysis-cancel-btn{padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
+.analysis-cancel-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.analysis-save-btn{padding:9px 18px;border-radius:9px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:6px;}
+.analysis-save-btn:hover{background:var(--safe2);}
+.analysis-relevance-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.relevance-high{background:rgba(230,62,47,0.15);color:#ff6b4a;}
+.relevance-medium{background:rgba(245,166,35,0.15);color:var(--warn);}
+.relevance-low{background:rgba(90,112,144,0.15);color:var(--muted);}
+
 /* ── Paywall ─────────────────────────────────────────────────── */
 .paywall-banner{
   position:sticky;top:var(--nav-h);z-index:90;
@@ -682,6 +719,95 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     </div>
     <div style="margin-bottom:24px;"></div>
 
+    <!-- ── Document Analysis Widget ── -->
+    <div class="analyze-widget">
+      <div class="analyze-widget-title">
+        🔍 Analyze a Document
+        <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;">Claude AI — confirm before saving</span>
+      </div>
+      <div class="analyze-tabs">
+        <button class="analyze-tab active" id="analyze-tab-text" onclick="switchAnalyzeTab('text')">Paste Text</button>
+        <button class="analyze-tab" id="analyze-tab-file" onclick="switchAnalyzeTab('file')">Upload PDF / Image</button>
+      </div>
+
+      <!-- Text input -->
+      <div id="analyze-text-panel">
+        <textarea class="analyze-ta" id="analyze-ta" placeholder="Paste email, document text, or describe an incident for analysis...&#10;&#10;Example: Sent email to Radhika on May 12 requesting insurance carrier details and documenting seven years of coverage gap..."></textarea>
+        <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis('text')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Analyze with Claude
+        </button>
+      </div>
+
+      <!-- File upload -->
+      <div id="analyze-file-panel" style="display:none;">
+        <div class="analyze-drop-zone" id="analyze-drop-zone" onclick="document.getElementById('analyze-file-input').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+          <div class="analyze-drop-icon">📄</div>
+          <div class="analyze-drop-text"><strong>Click to upload</strong> or drag and drop</div>
+          <div class="analyze-drop-text" style="font-size:11px;margin-top:4px;">PDF, JPG, PNG up to 10MB</div>
+        </div>
+        <input type="file" id="analyze-file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="handleFileSelect(event)">
+        <div id="analyze-file-name" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
+        <button class="analyze-btn" id="analyze-file-btn" onclick="runAnalysis('file')" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Analyze with Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- Analysis result modal -->
+    <div class="analysis-modal-backdrop" id="analysis-modal" style="display:none;">
+      <div class="analysis-modal">
+        <div class="analysis-modal-title">📋 Review Analysis Before Saving</div>
+        <div class="analysis-modal-sub">Claude analyzed your document. Review each field and confirm to save to your SOSLogs record.</div>
+
+        <div class="analysis-field">
+          <div class="analysis-field-label">Date</div>
+          <div class="analysis-field-value" id="af-date"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Thread / Document</div>
+          <div class="analysis-field-value" id="af-thread"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Your Action</div>
+          <div class="analysis-field-value good" id="af-your-action"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Their Request or Response</div>
+          <div class="analysis-field-value" id="af-their-action"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Response Status</div>
+          <div class="analysis-field-value" id="af-status"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Judge's Observation</div>
+          <div class="analysis-field-value good" id="af-judge"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Court Relevance</div>
+          <div class="analysis-field-value" id="af-relevance"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Devil's Advocate</div>
+          <div class="analysis-field-value highlight" id="af-devil"></div>
+        </div>
+        <div class="analysis-field">
+          <div class="analysis-field-label">Key Facts</div>
+          <div class="analysis-field-value" id="af-facts"></div>
+        </div>
+
+        <div class="analysis-modal-actions">
+          <button class="analysis-cancel-btn" onclick="closeAnalysisModal()">Discard</button>
+          <button class="analysis-save-btn" id="analysis-save-btn" onclick="saveAnalysis()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Confirm and Save
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Log entry widget ── -->
     <div class="log-widget">
       <div class="log-widget-title">📝 Add a New Log Entry</div>
@@ -778,23 +904,13 @@ import { getFirestore, collection, collectionGroup, doc, setDoc, getDoc, getDocs
          addDoc, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// const fbApp = initializeApp({
-  
-//   apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
-//   authDomain:"soslog-v1.firebaseapp.com",
-//   projectId:"soslog-v1",
-//   storageBucket:"soslog-v1.firebasestorage.app",
-//   messagingSenderId:"873518719449",
-//   appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
-// });
 const fbApp = initializeApp({
-  
-  apiKey:"AIzaSyB15DOi1oLFglZMA8mEFWtYNf8fpwgAPBE",
-  authDomain:"soslog-v1-dev.firebaseapp.com",
-  projectId:"soslog-v1-dev",
-  storageBucket:"soslog-v1-dev.firebasestorage.app",
-  messagingSenderId:"591855516889",
-  appId:"1:591855516889:web:316ac5c9acabd9383012c8"
+  apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain:"soslog-v1.firebaseapp.com",
+  projectId:"soslog-v1",
+  storageBucket:"soslog-v1.firebasestorage.app",
+  messagingSenderId:"873518719449",
+  appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
 });
 const auth = getAuth(fbApp);
 const db   = getFirestore(fbApp);
@@ -1935,6 +2051,176 @@ async function checkPlanAndApplyPaywall(phone){
 
   return !isLocked;
 }
+
+// ── Document Analysis Widget ─────────────────────────────────
+let currentAnalysis = null;
+let currentAnalysisText = '';
+let selectedFile = null;
+const RAILWAY_URL = 'https://web-production-516b3.up.railway.app';
+
+window.switchAnalyzeTab = function(tab){
+  const isText = tab === 'text';
+  document.getElementById('analyze-text-panel').style.display = isText ? 'block' : 'none';
+  document.getElementById('analyze-file-panel').style.display = isText ? 'none' : 'block';
+  document.getElementById('analyze-tab-text').classList.toggle('active', isText);
+  document.getElementById('analyze-tab-file').classList.toggle('active', !isText);
+};
+
+window.handleDragOver = function(e){
+  e.preventDefault();
+  document.getElementById('analyze-drop-zone').classList.add('dragover');
+};
+
+window.handleDrop = function(e){
+  e.preventDefault();
+  document.getElementById('analyze-drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(file) processFile(file);
+};
+
+window.handleFileSelect = function(e){
+  const file = e.target.files[0];
+  if(file) processFile(file);
+};
+
+function processFile(file){
+  selectedFile = file;
+  document.getElementById('analyze-file-name').textContent = '📎 ' + file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+  document.getElementById('analyze-file-btn').style.display = 'flex';
+}
+
+window.runAnalysis = async function(type){
+  const btn = document.getElementById(type === 'text' ? 'analyze-btn' : 'analyze-file-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div> Analyzing...';
+
+  try{
+    let textToAnalyze = '';
+
+    if(type === 'text'){
+      textToAnalyze = document.getElementById('analyze-ta').value.trim();
+      if(!textToAnalyze){ alert('Please enter some text to analyze.'); return; }
+    } else {
+      if(!selectedFile){ alert('Please select a file first.'); return; }
+      // Convert file to base64 for API
+      textToAnalyze = await extractTextFromFile(selectedFile);
+      if(!textToAnalyze){ alert('Could not extract text from file. Please try pasting the text directly.'); return; }
+    }
+
+    currentAnalysisText = textToAnalyze;
+
+    // Call Railway analyze endpoint
+    const response = await fetch(RAILWAY_URL + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: textToAnalyze, phone: currentPhone })
+    });
+
+    if(!response.ok) throw new Error('Analysis failed: ' + response.status);
+
+    const data = await response.json();
+    currentAnalysis = data.analysis;
+    showAnalysisModal(data.analysis);
+
+  } catch(e){
+    console.error('Analysis error:', e);
+    alert('Analysis failed. Please try again or check your connection.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyze with Claude';
+  }
+};
+
+async function extractTextFromFile(file){
+  // For PDF/image files, read as base64 and send to Claude via Railway
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Return base64 with a marker so Railway knows to handle as file
+      resolve('FILE_BASE64:' + file.type + ':' + e.target.result.split(',')[1]);
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+function showAnalysisModal(analysis){
+  document.getElementById('af-date').textContent         = analysis.date || '';
+  document.getElementById('af-thread').textContent       = analysis.thread || '';
+  document.getElementById('af-your-action').textContent  = analysis.your_action || '';
+  document.getElementById('af-their-action').textContent = analysis.her_request_or_response || '';
+  document.getElementById('af-status').textContent       = analysis.response_status || '';
+  document.getElementById('af-judge').textContent        = analysis.judges_observation || '';
+  document.getElementById('af-devil').textContent        = analysis.devils_advocate || '';
+
+  // Court relevance with badge
+  const rel = analysis.court_relevance || '';
+  const relLevel = rel.toLowerCase().startsWith('high') ? 'high' : rel.toLowerCase().startsWith('medium') ? 'medium' : 'low';
+  document.getElementById('af-relevance').innerHTML =
+    `<span class="analysis-relevance-badge relevance-${relLevel}">${rel}</span>`;
+
+  // Key facts as list
+  const facts = analysis.key_facts || [];
+  document.getElementById('af-facts').innerHTML = facts.map(f => `• ${f}`).join('<br>');
+
+  document.getElementById('analysis-modal').style.display = 'flex';
+}
+
+window.closeAnalysisModal = function(){
+  document.getElementById('analysis-modal').style.display = 'none';
+  currentAnalysis = null;
+  currentAnalysisText = '';
+};
+
+window.saveAnalysis = async function(){
+  const btn = document.getElementById('analysis-save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div> Saving...';
+
+  try{
+    const response = await fetch(RAILWAY_URL + '/analyze/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone:    currentPhone,
+        analysis: currentAnalysis,
+        text:     currentAnalysisText
+      })
+    });
+
+    if(!response.ok) throw new Error('Save failed: ' + response.status);
+
+    document.getElementById('analysis-modal').style.display = 'none';
+    currentAnalysis = null;
+
+    // Clear input
+    document.getElementById('analyze-ta').value = '';
+    selectedFile = null;
+    document.getElementById('analyze-file-name').textContent = '';
+    document.getElementById('analyze-file-btn').style.display = 'none';
+
+    // Refresh dashboard
+    allRecords = await loadAllRecords();
+    renderStats(allRecords);
+    renderRecentLogs(allRecords);
+    renderPeople(allRecords);
+    renderPlaces(allRecords);
+    renderSpider(allRecords);
+    if(typeof google !== 'undefined' && google.maps) initMiniMap(allRecords);
+    if(msgsVisible) renderMessages(allRecords);
+
+    // Show success
+    const countEl = document.getElementById('msg-count');
+    if(countEl) countEl.textContent = '✅ Analysis saved to your SOSLogs record';
+    setTimeout(() => { if(msgsVisible) renderMessages(allRecords); }, 2000);
+
+  } catch(e){
+    console.error('Save error:', e);
+    alert('Could not save. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm and Save';
+  }
+};
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
