@@ -1092,16 +1092,40 @@ window.doLogin = async function(){
   clearMsg('login-err'); clearMsg('login-ok');
   if(!id||!pw){ showErr('login-err','Please enter your phone/email and password.'); return; }
   btn.innerHTML='<div class="spinner"></div>'; btn.disabled=true;
-  const loginEmail = id.includes('@') ? id : id.replace(/\D/g,'')+'@soslog.phone';
-  try{
-    await signInWithEmailAndPassword(auth,loginEmail,pw);
-    // onAuthStateChanged handles redirect - reset button just in case
+
+  const resetBtn = () => {
     btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     btn.disabled=false;
+  };
+
+  try{
+    let loginEmail = id;
+
+    // If input looks like a phone number, look up the email from Firestore
+    if(!id.includes('@')){
+      const phone = normPhone('+1', id.replace(/\D/g,''));
+      try{
+        const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+        if(!emailsSnap.empty){
+          // Find primary email
+          const primary = emailsSnap.docs.find(d => d.data().primary);
+          loginEmail = primary ? primary.data().email : emailsSnap.docs[0].data().email;
+        } else {
+          showErr('login-err','No account found for that phone number.');
+          resetBtn(); return;
+        }
+      } catch(e){
+        showErr('login-err','Could not look up account. Please use your email address.');
+        resetBtn(); return;
+      }
+    }
+
+    await signInWithEmailAndPassword(auth, loginEmail, pw);
+    resetBtn();
   }
   catch(e){
-    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    btn.disabled=false; showErr('login-err',fErr(e.code));
+    resetBtn();
+    showErr('login-err', fErr(e.code));
   }
 };
 
