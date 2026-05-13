@@ -270,6 +270,24 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── OTP Verification ───────────────────────────────────────── */
+.otp-section{display:none;margin-top:10px;animation:fadeIn 0.2s ease;}
+.otp-section.show{display:block;}
+.otp-input-row{display:flex;gap:8px;margin-top:6px;}
+.otp-input{
+  flex:1;background:var(--dark);border:1.5px solid rgba(29,184,122,0.4);
+  border-radius:10px;padding:10px 13px;color:var(--text);
+  font-family:var(--font);font-size:20px;font-weight:700;
+  text-align:center;outline:none;letter-spacing:0.2em;
+  -webkit-text-fill-color:var(--text);
+}
+.otp-input:focus{border-color:var(--safe);box-shadow:0 0 0 3px rgba(29,184,122,0.1);}
+.otp-hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.otp-resend{font-size:11px;color:var(--safe);cursor:pointer;margin-top:6px;display:inline-block;}
+.otp-resend:hover{text-decoration:underline;}
+.otp-verified{display:none;align-items:center;gap:6px;font-size:12px;color:var(--safe);margin-top:6px;}
+.otp-verified.show{display:flex;}
+
 /* ── Document Analysis Widget ───────────────────────────────── */
 .analyze-widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
 .analyze-widget-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
@@ -465,11 +483,31 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <div id="step-signup" class="step active">
       <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Your phone number is your primary identity.</div>
-      <div class="grid-cc"><div><label class="f-label">Code</label><input class="f-input" id="su-cc" type="text" placeholder="+1" value="+1" maxlength="6"></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel"></div></div>
-      <div class="grid-2"><div><label class="f-label">Country</label><input class="f-input" id="su-country" type="text" placeholder="Country" autocomplete="country-name" value="United States"></div><div><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div></div>
+      <div class="grid-cc"><div><label class="f-label">Country</label><select class="f-input" id="su-cc" onchange="resetOtp()" style="cursor:pointer;"><option value="+1">🇺🇸 +1 United States</option><!-- EXPAND: <option value="+91">🇮🇳 +91 India</option> --></select></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel" oninput="resetOtp()"></div></div>
+      <div class="field-wrap"><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div>
       <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()"></div>
-      <button class="btn-safe" id="signup-btn" onclick="doSignup()" style="margin-top:6px;">Create Account &amp; Secure My Log</button>
+      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+
+      <!-- OTP verification section -->
+      <div class="otp-section" id="otp-section">
+        <label class="f-label">Verification Code</label>
+        <div class="otp-input-row">
+          <input class="otp-input" id="otp-input" type="tel" maxlength="6" placeholder="000000" onkeydown="if(event.key==='Enter')verifyOtp()">
+          <button class="btn-icon" onclick="verifyOtp()" id="otp-verify-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="otp-hint">Enter the 6-digit code sent to your phone.</div>
+        <span class="otp-resend" onclick="sendOtp(true)">Resend code</span>
+      </div>
+      <div class="otp-verified" id="otp-verified">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#1db87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Phone number verified
+      </div>
+
+      <button class="btn-safe" id="signup-btn" onclick="sendOtp()" style="margin-top:10px;">
+        Send Verification Code
+      </button>
       <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
     </div>
 
@@ -905,18 +943,12 @@ import { getFirestore, collection, collectionGroup, doc, setDoc, getDoc, getDocs
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const fbApp = initializeApp({
-  // apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
-  // authDomain:"soslog-v1.firebaseapp.com",
-  // projectId:"soslog-v1",
-  // storageBucket:"soslog-v1.firebasestorage.app",
-  // messagingSenderId:"873518719449",
-  // appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
-  apiKey: "AIzaSyB15DOi1oLFglZMA8mEFWtYNf8fpwgAPBE",
-  authDomain: "soslog-v1-dev.firebaseapp.com",
-  projectId: "soslog-v1-dev",
-  storageBucket: "soslog-v1-dev.firebasestorage.app",
-  messagingSenderId: "591855516889",
-  appId: "1:591855516889:web:316ac5c9acabd9383012c8"
+  apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain:"soslog-v1.firebaseapp.com",
+  projectId:"soslog-v1",
+  storageBucket:"soslog-v1.firebasestorage.app",
+  messagingSenderId:"873518719449",
+  appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
 });
 const auth = getAuth(fbApp);
 const db   = getFirestore(fbApp);
@@ -1075,7 +1107,7 @@ window.doLogin = async function(){
 window.doSignup = async function(){
   const cc=document.getElementById('su-cc').value.trim()||'+1';
   const phone=document.getElementById('su-phone').value.trim();
-  const country=document.getElementById('su-country').value.trim();
+  const country=cc==='+91'?'India':'United States';
   const email=document.getElementById('su-email').value.trim();
   const pw=document.getElementById('su-pw').value;
   const pw2=document.getElementById('su-pw2').value;
@@ -1084,7 +1116,16 @@ window.doSignup = async function(){
   if(!phone||!email||!country){ showErr('signup-err','Please fill in all fields.'); return; }
   if(pw.length<8){ showErr('signup-err','Password must be at least 8 characters.'); return; }
   if(pw!==pw2){ showErr('signup-err','Passwords do not match.'); return; }
-  const fullPhone=normPhone(cc,phone);
+
+  // Require phone verification before account creation
+  if(!phoneVerified){
+    showErr('signup-err','Please verify your phone number first.');
+    return;
+  }
+  const selectedCC = document.getElementById('su-cc').value;
+  const fullPhone=normPhone(selectedCC,phone);
+  // Store country for profile
+  const countryName = selectedCC === '+1' ? 'United States' : selectedCC === '+91' ? 'India' : 'United States';
   btn.disabled=true; btn.innerHTML='<div class="spinner spinner-g"></div> Creating...';
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pw);
@@ -1094,7 +1135,7 @@ window.doSignup = async function(){
     await setDoc(doc(db,'users',fullPhone,'profile','data'),{
       uid:      cred.user.uid,
       phone:    fullPhone,
-      country,
+      country:  countryName,
       plan:     'free',  // Always start as free
       status:   'active',
       joinedAt: serverTimestamp(),
@@ -1973,7 +2014,8 @@ window.saveEditEntry = async function(){
     renderPeople(allRecords);
     renderPlaces(allRecords);
     renderSpider(allRecords);
-    if(typeof google !== 'undefined' && google.maps) initMiniMap(allRecords);
+    const mapEl = document.getElementById('mini-map');
+    if(typeof google !== 'undefined' && google.maps && mapEl) initMiniMap(allRecords);
     if(msgsVisible) renderMessages(allRecords);
 
     // Show success in message log area
@@ -2213,7 +2255,8 @@ window.saveAnalysis = async function(){
     renderPeople(allRecords);
     renderPlaces(allRecords);
     renderSpider(allRecords);
-    if(typeof google !== 'undefined' && google.maps) initMiniMap(allRecords);
+    const mapEl = document.getElementById('mini-map');
+    if(typeof google !== 'undefined' && google.maps && mapEl) initMiniMap(allRecords);
     if(msgsVisible) renderMessages(allRecords);
 
     // Show success
@@ -2226,6 +2269,118 @@ window.saveAnalysis = async function(){
     alert('Could not save. Please try again.');
     btn.disabled = false;
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm and Save';
+  }
+};
+
+// ── Phone OTP Verification ───────────────────────────────────
+let phoneVerified = false;
+// RAILWAY_URL: update to dev URL when testing on dev branch
+const RAILWAY_URL_BASE = 'https://web-production-516b3.up.railway.app';
+
+window.resetOtp = function(){
+  phoneVerified = false;
+  document.getElementById('otp-section').classList.remove('show');
+  document.getElementById('otp-verified').classList.remove('show');
+  document.getElementById('otp-input').value = '';
+  document.getElementById('signup-btn').textContent = 'Send Verification Code';
+};
+
+window.sendOtp = async function(resend=false){
+  const cc    = document.getElementById('su-cc').value.trim();
+  const phone = document.getElementById('su-phone').value.trim();
+  const btn   = document.getElementById('signup-btn');
+  clearMsg('signup-err');
+
+  if(!phone){ showErr('signup-err','Please enter your phone number first.'); return; }
+
+  const selectedCC = document.getElementById('su-cc').value;
+  const digitsOnly = phone.replace(/\D/g,'');
+  const fullPhone = selectedCC + digitsOnly;
+
+  // Validate length based on country
+  const expectedLengths = { '+1': 10, '+91': 10 };
+  const expected = expectedLengths[selectedCC] || 10;
+  if(digitsOnly.length !== expected){
+    showErr('signup-err', `Please enter a valid ${expected}-digit phone number.`);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner spinner-g"></div> Sending...';
+
+  try{
+    const res = await fetch(RAILWAY_URL_BASE + '/verify/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: fullPhone })
+    });
+    const data = await res.json();
+    if(res.ok){
+      document.getElementById('otp-section').classList.add('show');
+      document.getElementById('otp-input').focus();
+      showOk('signup-ok', resend ? 'New code sent!' : 'Verification code sent to your phone.');
+      btn.innerHTML = 'Send Verification Code';
+      btn.disabled = false;
+      // Change button to create account after OTP shown
+      btn.onclick = null;
+      btn.onclick = () => sendOtp(true);
+      btn.textContent = 'Resend Code';
+    } else {
+      showErr('signup-err', data.error || 'Could not send code. Please try again.');
+      btn.innerHTML = 'Send Verification Code';
+      btn.disabled = false;
+    }
+  } catch(e){
+    showErr('signup-err', 'Connection error. Please try again.');
+    btn.innerHTML = 'Send Verification Code';
+    btn.disabled = false;
+  }
+};
+
+window.verifyOtp = async function(){
+  const phone = document.getElementById('su-phone').value.trim();
+  const code  = document.getElementById('otp-input').value.trim();
+  const btn   = document.getElementById('otp-verify-btn');
+  clearMsg('signup-err');
+
+  if(!code || code.length !== 6){
+    showErr('signup-err', 'Please enter the 6-digit verification code.');
+    return;
+  }
+
+  const selectedCC = document.getElementById('su-cc').value;
+  const fullPhone = selectedCC + phone.replace(/\D/g,'');
+  btn.innerHTML = '<div class="spinner spinner-g" style="width:14px;height:14px;border-width:1.5px;"></div>';
+  btn.disabled = true;
+
+  try{
+    const res = await fetch(RAILWAY_URL_BASE + '/verify/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: fullPhone, code })
+    });
+    const data = await res.json();
+
+    if(res.ok && data.status === 'approved'){
+      phoneVerified = true;
+      document.getElementById('otp-section').classList.remove('show');
+      document.getElementById('otp-verified').classList.add('show');
+      clearMsg('signup-ok');
+
+      // Now show Create Account button
+      const signupBtn = document.getElementById('signup-btn');
+      signupBtn.textContent = 'Create Account & Secure My Log';
+      signupBtn.onclick = doSignup;
+      signupBtn.style.display = 'flex';
+
+    } else {
+      showErr('signup-err', data.error || 'Invalid code. Please try again.');
+    }
+  } catch(e){
+    showErr('signup-err', 'Connection error. Please try again.');
+  } finally {
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    btn.disabled = false;
   }
 };
 
