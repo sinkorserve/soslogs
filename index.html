@@ -519,12 +519,10 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Enter your phone or email and password.</div>
       <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Email or 10-digit US phone number" autocomplete="off"></div>
       <div class="field-wrap"><label class="f-label">Password</label>
-        <div class="pw-row">
-          <input class="f-input" id="login-pw" type="password" placeholder="Your password" style="flex:1;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-          <button class="btn-icon" onclick="doLogin()" id="login-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        </div>
+        <input class="f-input" id="login-pw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
+      <button class="btn-safe" onclick="doLogin()" id="login-btn" style="margin-top:6px;width:100%;">Sign In</button>
       <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password?</button>
     </div>
   </div>
@@ -1091,11 +1089,11 @@ window.doLogin = async function(){
   const btn=document.getElementById('login-btn');
   clearMsg('login-err'); clearMsg('login-ok');
   if(!id||!pw){ showErr('login-err','Please enter your phone/email and password.'); return; }
-  btn.innerHTML='<div class="spinner"></div>'; btn.disabled=true;
+  btn.innerHTML='<div class="spinner spinner-g" style="width:14px;height:14px;border-width:1.5px;display:inline-block;margin-right:6px;"></div> Signing in...'; btn.disabled=true;
 
   const resetBtn = () => {
-    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    btn.disabled=false;
+    btn.innerHTML = 'Sign In';
+    btn.disabled = false;
   };
 
   try{
@@ -1106,18 +1104,26 @@ window.doLogin = async function(){
       // Normalize phone — handle +19167900975, 19167900975, 9167900975, (916) 790-0975
       let digits = id.replace(/\D/g,'');
       if(digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+      if(digits.length !== 10){ showErr('login-err','Please enter a valid 10-digit US phone number.'); resetBtn(); return; }
       const phone = '+1' + digits;
+      console.log('Looking up phone:', phone);
       try{
         const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+        console.log('Emails found:', emailsSnap.size);
         if(!emailsSnap.empty){
-          // Find primary email
+          // Try primary first, fall back to first doc
           const primary = emailsSnap.docs.find(d => d.data().primary);
-          loginEmail = primary ? primary.data().email : emailsSnap.docs[0].data().email;
+          const anyDoc = emailsSnap.docs[0];
+          const emailDoc = primary || anyDoc;
+          loginEmail = emailDoc.data().email || emailDoc.data().Email || '';
+          console.log('Found email:', loginEmail);
+          if(!loginEmail){ showErr('login-err','Account found but no email on file. Please contact support.'); resetBtn(); return; }
         } else {
-          showErr('login-err','No account found for that phone number.');
+          showErr('login-err','No account found for that phone number. Please try your email address.');
           resetBtn(); return;
         }
       } catch(e){
+        console.error('Phone lookup error:', e);
         showErr('login-err','Could not look up account. Please use your email address.');
         resetBtn(); return;
       }
