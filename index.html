@@ -301,6 +301,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .analyze-drop-text strong{color:var(--safe);}
 .analyze-ta{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);font-size:13px;line-height:1.6;outline:none;resize:vertical;min-height:100px;transition:border-color 0.2s;-webkit-text-fill-color:var(--text);}
 .analyze-ta:focus{border-color:rgba(29,184,122,0.4);}
+.analyze-ta::placeholder{color:var(--muted);opacity:0.5;font-style:italic;}
 .analyze-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;margin-top:12px;}
 .analyze-btn:hover{background:var(--safe2);}
 .analyze-btn:disabled{opacity:0.5;cursor:not-allowed;}
@@ -312,7 +313,9 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .analysis-modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
 .analysis-field{margin-bottom:14px;}
 .analysis-field-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.analysis-field-value{font-size:13px;color:var(--text);line-height:1.6;background:var(--dark);border-radius:8px;padding:10px 12px;border:1px solid var(--border);}
+.analysis-field-value{font-size:13px;color:var(--text);line-height:1.6;background:var(--dark);border-radius:8px;padding:10px 12px;border:1px solid var(--border);outline:none;transition:border-color 0.2s;}
+.analysis-field-value[contenteditable="true"]:hover{border-color:var(--border2);cursor:text;}
+.analysis-field-value[contenteditable="true"]:focus{border-color:rgba(29,184,122,0.4);box-shadow:0 0 0 3px rgba(29,184,122,0.06);}
 .analysis-field-value.highlight{border-color:rgba(245,166,35,0.3);color:var(--warn);}
 .analysis-field-value.good{border-color:rgba(29,184,122,0.3);color:var(--safe2);}
 .analysis-modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
@@ -555,6 +558,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         <div class="pricing-tier">Base</div>
         <div class="pricing-price">$4.99<span>/month</span></div>
         <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <div style="background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--safe);margin-bottom:8px;text-align:center;">✨ 30-day free trial — no charge until day 31</div>
         <ul class="pricing-features">
           <li>Everything in Free</li>
           <li>Personal dashboard with full message history</li>
@@ -565,7 +569,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>LE and personal log entry with voice input</li>
           <li>Amend entries with full audit trail</li>
         </ul>
-        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Start Free Trial — $4.99/mo after 30 days</a>
       </div>
 
 
@@ -621,6 +625,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         <div class="pricing-tier">Base</div>
         <div class="pricing-price">$4.99<span>/month</span></div>
         <div class="pricing-desc">Full access to your documented history and insights.</div>
+        <div style="background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--safe);margin-bottom:8px;text-align:center;">✨ 30-day free trial — no charge until day 31</div>
         <ul class="pricing-features">
           <li>Everything in Free</li>
           <li>Personal dashboard with full message history</li>
@@ -631,7 +636,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
           <li>LE and personal log entry with voice input</li>
           <li>Amend entries with full audit trail</li>
         </ul>
-        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Get Base — $4.99/mo</a>
+        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Start Free Trial — $4.99/mo after 30 days</a>
       </div>
 
 
@@ -678,7 +683,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   <!-- Paywall banner -->
   <div class="paywall-banner" id="paywall-banner">
     <div class="paywall-banner-text">
-      You are on the <strong>Free tier</strong> — create an account and upgrade to <strong>Base</strong> to unlock your full dashboard, incident map, credibility profile and message log.
+      You are on the <strong>Free tier</strong> — create an account and start your <strong>30-day free trial</strong> to unlock your full dashboard, incident map, credibility profile and message log.
     </div>
     <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="paywall-banner-btn">
       Upgrade to Base — $4.99/mo
@@ -770,7 +775,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
       <!-- Text input -->
       <div id="analyze-text-panel">
-        <textarea class="analyze-ta" id="analyze-ta" placeholder="Paste email, document text, or describe an incident for analysis...&#10;&#10;Example: Sent email to Radhika on May 12 requesting insurance carrier details and documenting seven years of coverage gap..."></textarea>
+        <textarea class="analyze-ta" id="analyze-ta" placeholder="Paste email, document text, or describe an incident for analysis...&#10;&#10;Example: On May 1 2026 I sent an email to John Doe requesting documentation of prior coverage. John has not responded as of May 10 2026."></textarea>
         <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis('text')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           Analyze with Claude
@@ -799,41 +804,45 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         <div class="analysis-modal-title">📋 Review Analysis Before Saving</div>
         <div class="analysis-modal-sub">Claude analyzed your document. Review each field and confirm to save to your SOSLogs record.</div>
 
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;">
+          ✏️ All fields are editable — click any field to make corrections before saving.
+        </div>
+
         <div class="analysis-field">
           <div class="analysis-field-label">Date</div>
-          <div class="analysis-field-value" id="af-date"></div>
+          <div class="analysis-field-value" id="af-date" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Thread / Document</div>
-          <div class="analysis-field-value" id="af-thread"></div>
+          <div class="analysis-field-value" id="af-thread" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Your Action</div>
-          <div class="analysis-field-value good" id="af-your-action"></div>
+          <div class="analysis-field-value good" id="af-your-action" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Their Request or Response</div>
-          <div class="analysis-field-value" id="af-their-action"></div>
+          <div class="analysis-field-value" id="af-their-action" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Response Status</div>
-          <div class="analysis-field-value" id="af-status"></div>
+          <div class="analysis-field-value" id="af-status" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Judge's Observation</div>
-          <div class="analysis-field-value good" id="af-judge"></div>
+          <div class="analysis-field-value good" id="af-judge" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Court Relevance</div>
-          <div class="analysis-field-value" id="af-relevance"></div>
+          <div class="analysis-field-value" id="af-relevance" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Devil's Advocate</div>
-          <div class="analysis-field-value highlight" id="af-devil"></div>
+          <div class="analysis-field-value highlight" id="af-devil" contenteditable="true" spellcheck="false"></div>
         </div>
         <div class="analysis-field">
           <div class="analysis-field-label">Key Facts</div>
-          <div class="analysis-field-value" id="af-facts"></div>
+          <div class="analysis-field-value" id="af-facts" contenteditable="true" spellcheck="false"></div>
         </div>
 
         <div class="analysis-modal-actions">
@@ -943,12 +952,12 @@ import { getFirestore, collection, collectionGroup, doc, setDoc, getDoc, getDocs
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const fbApp = initializeApp({
-  apiKey:            "AIzaSyB15DOi1oLFglZMA8mEFWtYNf8fpwgAPBE",
-  authDomain:        "soslog-v1-dev.firebaseapp.com",
-  projectId:         "soslog-v1-dev",
-  storageBucket:     "soslog-v1-dev.firebasestorage.app",
-  messagingSenderId: "591855516889",
-  appId:             "1:591855516889:web:316ac5c9acabd9383012c8"
+  apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain:"soslog-v1.firebaseapp.com",
+  projectId:"soslog-v1",
+  storageBucket:"soslog-v1.firebasestorage.app",
+  messagingSenderId:"873518719449",
+  appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
 });
 const auth = getAuth(fbApp);
 const db   = getFirestore(fbApp);
@@ -1355,9 +1364,18 @@ function renderRecentLogs(records){
 // PEOPLE
 function extractPeople(records){
   const counts={};
-  const allText = records.map(r=>(r.body||r.message||'')
-    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
-  ).join(' ');
+  const allText = records.map(r=>{
+    const body = r.body||r.message||'';
+    // Skip base64 encoded file content - use analysisData fields instead
+    if(body.includes('FILE_BASE64:')){
+      const a = r.analysisData||{};
+      return [a.your_action||'',a.her_request_or_response||'',
+              a.judges_observation||'',(a.key_facts||[]).join(' ')].join(' ');
+    }
+    // Also skip the ANALYZED DOCUMENT prefix line
+    const cleaned = body.replace(/^ANALYZED DOCUMENT[\s\S]*?Original Text:[\s\S]*?--- SOSLogs Analysis ---/,'');
+    return cleaned.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
+  }).join(' ');
 
   const SKIP_PHRASES = new Set([
     'Law Enforcement','Direct Report','Personal Device','Toll Free',
@@ -2161,7 +2179,7 @@ async function checkPlanAndApplyPaywall(phone){
 let currentAnalysis = null;
 let currentAnalysisText = '';
 let selectedFile = null;
-const RAILWAY_URL = 'https://web-production-1659b.up.railway.app'; // DEV
+const RAILWAY_URL = 'https://web-production-516b3.up.railway.app';
 
 window.switchAnalyzeTab = function(tab){
   const isText = tab === 'text';
@@ -2282,13 +2300,27 @@ window.saveAnalysis = async function(){
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner spinner-g" style="width:12px;height:12px;border-width:1.5px;"></div> Saving...';
 
+  // Read edited values from contenteditable fields before saving
+  const editedAnalysis = {
+    ...currentAnalysis,
+    date:                    document.getElementById('af-date')?.innerText        || currentAnalysis.date,
+    thread:                  document.getElementById('af-thread')?.innerText      || currentAnalysis.thread,
+    your_action:             document.getElementById('af-your-action')?.innerText || currentAnalysis.your_action,
+    her_request_or_response: document.getElementById('af-their-action')?.innerText|| currentAnalysis.her_request_or_response,
+    response_status:         document.getElementById('af-status')?.innerText      || currentAnalysis.response_status,
+    judges_observation:      document.getElementById('af-judge')?.innerText       || currentAnalysis.judges_observation,
+    court_relevance:         document.getElementById('af-relevance')?.innerText   || currentAnalysis.court_relevance,
+    devils_advocate:         document.getElementById('af-devil')?.innerText       || currentAnalysis.devils_advocate,
+    key_facts:               (document.getElementById('af-facts')?.innerText||'').split('\n').filter(f=>f.trim().replace(/^•\s*/,'')),
+  };
+
   try{
     const response = await fetch(RAILWAY_URL + '/analyze/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         phone:    currentPhone,
-        analysis: currentAnalysis,
+        analysis: editedAnalysis,
         text:     currentAnalysisText,
         email:    auth.currentUser?.email || ''
       })
@@ -2332,7 +2364,7 @@ window.saveAnalysis = async function(){
 // ── Phone OTP Verification ───────────────────────────────────
 let phoneVerified = false;
 // DEV Railway URL
-const RAILWAY_URL_BASE = 'https://web-production-1659b.up.railway.app'; // DEV
+const RAILWAY_URL_BASE = 'https://web-production-516b3.up.railway.app';
 
 window.resetOtp = function(){
   phoneVerified = false;

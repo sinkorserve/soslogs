@@ -14,12 +14,12 @@ import re
 # ── Dev Firebase config — update these values once ───────────
 # Get from Firebase Console -> soslog-v1-dev -> Project Settings -> Your apps -> Config
 DEV_CONFIG = {
-    "apiKey":            "PASTE_DEV_API_KEY_HERE",
+    "apiKey":            "AIzaSyB15DOi1oLFglZMA8mEFWtYNf8fpwgAPBE",
     "authDomain":        "soslog-v1-dev.firebaseapp.com",
     "projectId":         "soslog-v1-dev",
-    "storageBucket":     "soslog-v1-dev.appspot.com",
-    "messagingSenderId": "PASTE_DEV_SENDER_ID_HERE",
-    "appId":             "PASTE_DEV_APP_ID_HERE",
+    "storageBucket":     "soslog-v1-dev.firebasestorage.app",
+    "messagingSenderId": "591855516889",
+    "appId":             "1:591855516889:web:316ac5c9acabd9383012c8",
 }
 
 # ── Production Firebase config — for reference only ──────────
