@@ -2104,7 +2104,7 @@ async function checkPlanAndApplyPaywall(phone){
 let currentAnalysis = null;
 let currentAnalysisText = '';
 let selectedFile = null;
-const RAILWAY_URL = 'https://web-production-516b3.up.railway.app';
+const RAILWAY_URL = 'https://web-production-1659b.up.railway.app'; // DEV
 
 window.switchAnalyzeTab = function(tab){
   const isText = tab === 'text';
@@ -2274,8 +2274,8 @@ window.saveAnalysis = async function(){
 
 // ── Phone OTP Verification ───────────────────────────────────
 let phoneVerified = false;
-// RAILWAY_URL: update to dev URL when testing on dev branch
-const RAILWAY_URL_BASE = 'https://web-production-516b3.up.railway.app';
+// DEV Railway URL
+const RAILWAY_URL_BASE = 'https://web-production-1659b.up.railway.app'; // DEV
 
 window.resetOtp = function(){
   phoneVerified = false;
