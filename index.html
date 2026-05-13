@@ -474,13 +474,13 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
   <!-- Auth tabs -->
   <div style="display:flex;gap:0;margin-bottom:16px;background:var(--dark);border-radius:10px;padding:3px;">
-    <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:8px;border:none;border-radius:8px;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;">Create Account</button>
-    <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:8px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;">Sign In</button>
+    <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:8px;border:none;border-radius:8px;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;">Sign In</button>
+    <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:8px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;">Create Account</button>
   </div>
 
   <div class="login-card">
     <!-- Signup step - shown by default -->
-    <div id="step-signup" class="step active">
+    <div id="step-signup" class="step">
       <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Your phone number is your primary identity.</div>
       <div class="grid-cc"><div><label class="f-label">Country</label><select class="f-input" id="su-cc" onchange="resetOtp()" style="cursor:pointer;"><option value="+1">🇺🇸 +1 United States</option><!-- EXPAND: <option value="+91">🇮🇳 +91 India</option> --></select></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel" oninput="resetOtp()"></div></div>
@@ -514,10 +514,10 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     </div>
 
     <!-- Login step -->
-    <div id="step-login" class="step">
+    <div id="step-login" class="step active">
       <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Welcome back</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Enter your phone or email and password.</div>
-      <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Phone number or email address" autocomplete="off"></div>
+      <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Email or 10-digit US phone number" autocomplete="off"></div>
       <div class="field-wrap"><label class="f-label">Password</label>
         <div class="pw-row">
           <input class="f-input" id="login-pw" type="password" placeholder="Your password" style="flex:1;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -525,7 +525,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
         </div>
       </div>
       <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
-      <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password? Reset via Email</button>
+      <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password?</button>
     </div>
   </div>
 
@@ -1103,7 +1103,10 @@ window.doLogin = async function(){
 
     // If input looks like a phone number, look up the email from Firestore
     if(!id.includes('@')){
-      const phone = normPhone('+1', id.replace(/\D/g,''));
+      // Normalize phone — handle +19167900975, 19167900975, 9167900975, (916) 790-0975
+      let digits = id.replace(/\D/g,'');
+      if(digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+      const phone = '+1' + digits;
       try{
         const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
         if(!emailsSnap.empty){
@@ -1173,10 +1176,31 @@ window.doSignup = async function(){
 };
 
 window.doForgotPw = async function(){
-  const id=document.getElementById('login-id').value.trim();
+  let id = document.getElementById('login-id').value.trim();
   clearMsg('login-err');
-  if(!id||!id.includes('@')){ showErr('login-err','Enter your email address first.'); return; }
-  try{ await sendPasswordResetEmail(auth,id); showOk('login-ok','Reset email sent.'); }
+  if(!id){ showErr('login-err','Enter your email or phone number first.'); return; }
+
+  // If phone entered, look up email first
+  if(!id.includes('@')){
+    let digits = id.replace(/\D/g,'');
+    if(digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+    const phone = '+1' + digits;
+    try{
+      const emailsSnap = await getDocs(collection(db,'users',phone,'emails'));
+      if(!emailsSnap.empty){
+        const primary = emailsSnap.docs.find(d => d.data().primary);
+        id = primary ? primary.data().email : emailsSnap.docs[0].data().email;
+      } else {
+        showErr('login-err','No account found for that phone number.');
+        return;
+      }
+    } catch(e){
+      showErr('login-err','Please enter your email address to reset password.');
+      return;
+    }
+  }
+
+  try{ await sendPasswordResetEmail(auth,id); showOk('login-ok','Password reset email sent.'); }
   catch(e){ showErr('login-err',fErr(e.code)); }
 };
 
@@ -1717,14 +1741,15 @@ function showScreen(id){
 window.stepShow = id => { document.querySelectorAll('.step').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
 window.switchTab = function(tab){
   const isSignup = tab === 'signup';
+  const isLogin  = tab === 'login';
   document.getElementById('step-signup').classList.toggle('active', isSignup);
-  document.getElementById('step-login').classList.toggle('active', !isSignup);
+  document.getElementById('step-login').classList.toggle('active', isLogin);
   const tabSignup = document.getElementById('tab-signup');
   const tabLogin  = document.getElementById('tab-login');
+  tabLogin.style.background  = isLogin  ? 'var(--safe)' : 'transparent';
+  tabLogin.style.color       = isLogin  ? '#000' : 'var(--muted)';
   tabSignup.style.background = isSignup ? 'var(--safe)' : 'transparent';
   tabSignup.style.color      = isSignup ? '#000' : 'var(--muted)';
-  tabLogin.style.background  = isSignup ? 'transparent' : 'var(--safe)';
-  tabLogin.style.color       = isSignup ? 'var(--muted)' : '#000';
 };
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
 function showOk(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('show'); }
