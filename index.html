@@ -276,30 +276,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-/* ── PDF Print Styles ────────────────────────────────────────── */
-@media print {
-  body * { visibility: hidden; }
-  #pdf-print-area, #pdf-print-area * { visibility: visible; }
-  #pdf-print-area {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    background: white;
-    color: #111;
-    font-family: Georgia, serif;
-    padding: 40px;
-    box-sizing: border-box;
-  }
-  .pdf-header { border-bottom: 2px solid #1db87a; padding-bottom: 16px; margin-bottom: 24px; }
-  .pdf-logo { font-size: 22px; font-weight: 800; color: #1db87a; }
-  .pdf-meta { font-size: 11px; color: #666; margin-top: 4px; }
-  .pdf-title { font-size: 16px; font-weight: 700; color: #111; margin: 20px 0 8px; }
-  .pdf-question { font-size: 13px; color: #333; font-style: italic; margin-bottom: 16px; padding: 12px; background: #f5f5f5; border-left: 3px solid #1db87a; border-radius: 4px; }
-  .pdf-response { font-size: 13px; color: #111; line-height: 1.8; white-space: pre-wrap; }
-  .pdf-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; display: flex; justify-content: space-between; }
-  .pdf-verify { font-size: 10px; color: #666; margin-top: 12px; }
-}
-
 /* ── Split Dashboard Layout ─────────────────────────────────── */
 .dash-split{
   display:grid;
@@ -1155,12 +1131,12 @@ import { getFirestore, collection, collectionGroup, doc, setDoc, getDoc, getDocs
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const fbApp = initializeApp({
-  apiKey:"AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
-  authDomain:"soslog-v1.firebaseapp.com",
-  projectId:"soslog-v1",
-  storageBucket:"soslog-v1.firebasestorage.app",
-  messagingSenderId:"873518719449",
-  appId:"1:873518719449:web:6a2202cd4241a6b252b9c8"
+  apiKey:            "AIzaSyCOS5vQrEXqCsfPFgTgrBip_c9g7tD_nG0",
+  authDomain:        "soslog-v1.firebaseapp.com",
+  projectId:         "soslog-v1",
+  storageBucket:     "soslog-v1.firebasestorage.app",
+  messagingSenderId: "873518719449",
+  appId:             "1:873518719449:web:6a2202cd4241a6b252b9c8"
 });
 const auth = getAuth(fbApp);
 const db   = getFirestore(fbApp);
@@ -2733,8 +2709,8 @@ window.sendInsight = async function(){
     actions.className = 'chat-actions';
     const saveBtn = document.createElement('button');
     saveBtn.className = 'chat-save-btn';
-    saveBtn.textContent = '📄 Save as PDF';
-    saveBtn.onclick = () => saveInsightAsPDF(question, reply, saveBtn);
+    saveBtn.textContent = '💾 Save as record';
+    saveBtn.onclick = () => saveInsightAsRecord(question, reply, saveBtn);
     actions.appendChild(saveBtn);
     assistantMsg.appendChild(actions);
 
@@ -2766,28 +2742,45 @@ function buildRecordContext(records){
   return `Total records: ${records.length}\n\nRecent entries:\n${summary}`;
 }
 
-function saveInsightAsPDF(question, answer, btn){
-  btn.textContent = '⏳ Preparing...';
+async function saveInsightAsRecord(question, answer, btn){
+  btn.textContent = 'Saving...';
   btn.disabled = true;
-
-  // Populate print area
-  const now = new Date();
-  document.getElementById('pdf-meta').textContent =
-    'Generated: ' + now.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) +
-    ' at ' + now.toLocaleTimeString('en-US') +
-    ' | Account: ' + (auth.currentUser?.email || currentPhone);
-  document.getElementById('pdf-question').textContent = 'Q: ' + question;
-  document.getElementById('pdf-response').textContent = answer.replace(/\*\*(.*?)\*\*/g, '$1');
-  document.getElementById('pdf-date').textContent = now.toISOString().slice(0,10);
-
-  // Show print area and trigger print
-  document.getElementById('pdf-print-area').style.display = 'block';
-  setTimeout(() => {
-    window.print();
-    document.getElementById('pdf-print-area').style.display = 'none';
-    btn.textContent = '📄 Save as PDF';
+  try{
+    const response = await fetch(RAILWAY_URL + '/analyze/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone:    currentPhone,
+        email:    auth.currentUser?.email || '',
+        text:     `Question: ${question}\n\nAnswer: ${answer}`,
+        analysis: {
+          date:                    new Date().toISOString().slice(0,10),
+          thread:                  'Claude Insight: ' + question.slice(0,60),
+          your_action:             'Asked Claude for data insight',
+          her_request_or_response: '',
+          response_status:         'Completed',
+          judges_observation:      answer.slice(0,500),
+          court_relevance:         'Low — analytical summary',
+          devils_advocate:         'AI-generated analysis should be verified against source records',
+          soslogs_relevance:       'User-requested insight from documentation patterns',
+          category:                'analysis',
+          key_facts:               [question]
+        }
+      })
+    });
+    if(response.ok){
+      btn.textContent = '✅ Saved';
+      allRecords = await loadAllRecords();
+      renderStats(allRecords);
+      renderRecentLogs(allRecords);
+    } else {
+      btn.textContent = '❌ Failed';
+      btn.disabled = false;
+    }
+  } catch(e){
+    btn.textContent = '❌ Error';
     btn.disabled = false;
-  }, 300);
+  }
 }
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
@@ -2811,22 +2804,6 @@ const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementTyp
         Save as New Entry
       </button>
     </div>
-  </div>
-</div>
-
-<!-- Hidden PDF print area -->
-<div id="pdf-print-area" style="display:none;">
-  <div class="pdf-header">
-    <div class="pdf-logo">SOSLogs</div>
-    <div class="pdf-meta" id="pdf-meta"></div>
-  </div>
-  <div class="pdf-title">AI Insight Report</div>
-  <div class="pdf-question" id="pdf-question"></div>
-  <div class="pdf-response" id="pdf-response"></div>
-  <div class="pdf-verify">Generated by SOSLogs — soslogs.org | Athens Innovation and Development LLC</div>
-  <div class="pdf-footer">
-    <span>SOSLogs — Personal Safety Documentation Platform</span>
-    <span id="pdf-date"></span>
   </div>
 </div>
 
