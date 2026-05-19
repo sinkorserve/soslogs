@@ -2566,30 +2566,18 @@ window.sendInsight = async function(){
   insightsHistory.push({ role: 'user', content: question });
 
   try{
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(RAILWAY_URL + '/insights', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a helpful documentation analyst assistant for SOSLogs, a personal safety documentation platform. 
-You have access to the user's incident logs and help them understand patterns, generate insights, and assess their documentation strength.
-
-The user's log data summary:
-${recordSummary}
-
-Guidelines:
-- Be concise, factual, and supportive
-- Reference specific dates, people, or locations from the logs when relevant
-- Assess documentation strength using: Specificity, Consistency, Corroboration, Timeline, Patterns, Objectivity
-- Never make legal conclusions — suggest consulting an attorney for legal advice
-- Format responses clearly with line breaks for readability`,
+        phone:    currentPhone,
+        records:  recordSummary,
         messages: insightsHistory
       })
     });
 
     const data = await response.json();
-    const reply = data.content?.[0]?.text || 'I could not generate a response. Please try again.';
+    const reply = data.reply || 'I could not generate a response. Please try again.';
 
     // Add assistant message
     insightsHistory.push({ role: 'assistant', content: reply });
