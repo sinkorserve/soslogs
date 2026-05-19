@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SOSLogs — Personal Safety Documentation</title>
 <style>
 :root{
@@ -112,8 +112,11 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .login-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(29,184,122,0.05) 0%,transparent 70%);pointer-events:none;}
 .f-label{display:block;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
 .f-input{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:8px 13px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-text-fill-color:var(--text);}
-.f-input::placeholder{color:var(--muted);}
+.f-input::placeholder{color:var(--muted);opacity:0.5;}
+input::placeholder,textarea::placeholder,select::placeholder{color:var(--muted);opacity:0.5;font-style:italic;}
 .f-input:focus{border-color:rgba(29,184,122,0.45);box-shadow:0 0 0 3px rgba(29,184,122,0.07);}
+.f-input:focus-visible{outline:2px solid var(--safe);outline-offset:2px;}
+button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focus-visible{outline:2px solid var(--safe);outline-offset:2px;}
 .f-input:-webkit-autofill,
 .f-input:-webkit-autofill:hover,
 .f-input:-webkit-autofill:focus{
@@ -130,6 +133,9 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .btn-safe:hover:not(:disabled){background:var(--safe2);transform:translateY(-1px);}
 .btn-safe:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
 .btn-icon{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:none;background:var(--safe);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+.forgot-link{text-align:right;margin-top:-2px;margin-bottom:8px;}
+.forgot-link a{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:none;transition:color 0.2s;}
+.forgot-link a:hover{color:var(--safe);}
 .btn-icon:hover{background:var(--safe2);}
 .btn-ghost{flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.18s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,0.2);}
@@ -270,6 +276,30 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Claude Insights Panel ──────────────────────────────────── */
+.insights-widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;}
+.insights-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.insights-subtitle{font-size:11px;color:var(--muted);opacity:0.7;margin-bottom:16px;}
+.insights-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.insights-suggestion{background:rgba(29,184,122,0.06);border:1px solid rgba(29,184,122,0.15);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--safe);cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+.insights-suggestion:hover{background:rgba(29,184,122,0.12);border-color:rgba(29,184,122,0.3);}
+.insights-input-row{display:flex;gap:8px;margin-bottom:12px;}
+.insights-input{flex:1;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color 0.2s;-webkit-text-fill-color:var(--text);}
+.insights-input:focus{border-color:rgba(29,184,122,0.4);}
+.insights-input::placeholder{color:var(--muted);opacity:0.5;font-style:italic;}
+.insights-send-btn{padding:10px 16px;border-radius:10px;border:none;background:var(--safe);color:#000;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+.insights-send-btn:hover{background:var(--safe2);}
+.insights-send-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.insights-chat{display:flex;flex-direction:column;gap:12px;max-height:400px;overflow-y:auto;padding-right:4px;}
+.insights-chat:empty{display:none;}
+.insights-msg{padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.7;}
+.insights-msg.user{background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.15);color:var(--text);align-self:flex-end;max-width:85%;}
+.insights-msg.assistant{background:var(--dark);border:1px solid var(--border);color:var(--text);align-self:flex-start;max-width:95%;}
+.insights-msg.assistant strong{color:var(--safe);}
+.insights-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end;}
+.insights-save-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;transition:all 0.18s;}
+.insights-save-btn:hover{border-color:var(--safe);color:var(--safe);}
+
 /* ── OTP Verification ───────────────────────────────────────── */
 .otp-section{display:none;margin-top:10px;animation:fadeIn 0.2s ease;}
 .otp-section.show{display:block;}
@@ -431,6 +461,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:0;z-index:9999;padding:8px 16px;background:var(--safe);color:#000;font-weight:700;border-radius:0 0 8px 0;text-decoration:none;">Skip to main content</a>
 
 <div id="app-loading">
   <div class="loading-logo">
@@ -486,19 +517,19 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <div id="step-signup" class="step">
       <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Create your account</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Your phone number is your primary identity.</div>
-      <div class="grid-cc"><div><label class="f-label">Country</label><select class="f-input" id="su-cc" onchange="resetOtp()" style="cursor:pointer;"><option value="+1">🇺🇸 +1 United States</option><!-- EXPAND: <option value="+91">🇮🇳 +91 India</option> --></select></div><div><label class="f-label">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel" oninput="resetOtp()"></div></div>
-      <div class="field-wrap"><label class="f-label">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div>
-      <div class="field-wrap"><label class="f-label">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <div class="field-wrap"><label class="f-label">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
+      <div class="grid-cc"><div><label class="f-label" for="su-cc">Country</label><select class="f-input" id="su-cc" onchange="resetOtp()" style="cursor:pointer;"><option value="+1">🇺🇸 +1 United States</option><!-- EXPAND: <option value="+91">🇮🇳 +91 India</option> --></select></div><div><label class="f-label" for="su-phone">Phone</label><input class="f-input" id="su-phone" type="tel" placeholder="Phone number" autocomplete="tel" oninput="resetOtp()"></div></div>
+      <div class="field-wrap"><label class="f-label" for="su-email">Email</label><input class="f-input" id="su-email" type="email" placeholder="Email address" autocomplete="email"></div>
+      <div class="field-wrap"><label class="f-label" for="su-pw">Password</label><input class="f-input" id="su-pw" type="password" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="field-wrap"><label class="f-label" for="su-pw2">Confirm Password</label><input class="f-input" id="su-pw2" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
 
       <!-- OTP verification section -->
       <div class="otp-section" id="otp-section">
         <label class="f-label">Verification Code</label>
         <div class="otp-input-row">
-          <input class="otp-input" id="otp-input" type="tel" maxlength="6" placeholder="000000" onkeydown="if(event.key==='Enter')verifyOtp()">
+          <label class="f-label" for="otp-input" style="display:none;">Verification Code</label><input class="otp-input" id="otp-input" aria-label="6-digit verification code" type="tel" maxlength="6" placeholder="000000" onkeydown="if(event.key==='Enter')verifyOtp()">
         </div>
         <div class="otp-hint">Enter the 6-digit code sent to your phone.</div>
-        <button class="btn-safe" onclick="verifyOtp()" id="otp-verify-btn" style="margin-top:8px;width:100%;">
+        <button class="btn-safe" onclick="verifyOtp()" id="otp-verify-btn" style="margin-top:8px;width:100%;" aria-label="Confirm verification code">
           Confirm Code
         </button>
         <div style="text-align:center;margin-top:8px;">
@@ -513,20 +544,20 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       <button class="btn-safe" id="signup-btn" onclick="sendOtp()" style="margin-top:10px;">
         Send Verification Code
       </button>
-      <div class="err-box" id="signup-err"></div><div class="ok-box" id="signup-ok"></div>
+      <div class="err-box" id="signup-err" role="alert" aria-live="assertive"></div><div class="ok-box" id="signup-ok" role="status" aria-live="polite"></div>
     </div>
 
     <!-- Login step -->
     <div id="step-login" class="step active">
       <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">Welcome back</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Enter your phone or email and password.</div>
-      <div class="field-wrap"><label class="f-label">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Email or 10-digit US phone number" autocomplete="off"></div>
+      <div class="field-wrap"><label class="f-label" for="login-id">Phone or Email</label><input class="f-input" id="login-id" type="text" placeholder="Email or 10-digit US phone number" autocomplete="off"></div>
       <div class="field-wrap"><label class="f-label">Password</label>
-        <input class="f-input" id="login-pw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <label class="f-label" for="login-pw" style="display:none;">Password</label><input class="f-input" id="login-pw" aria-label="Password" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <div class="err-box" id="login-err"></div><div class="ok-box" id="login-ok"></div>
+      <div class="forgot-link"><a onclick="doForgotPw()" aria-label="Reset your password">Forgot password?</a></div>
+      <div class="err-box" id="login-err" role="alert" aria-live="assertive"></div><div class="ok-box" id="login-ok" role="status" aria-live="polite"></div>
       <button class="btn-safe" onclick="doLogin()" id="login-btn" style="margin-top:6px;width:100%;">Sign In</button>
-      <button class="btn-ghost" onclick="doForgotPw()" style="margin-top:8px;width:100%;">Forgot Password?</button>
     </div>
   </div>
 
@@ -668,7 +699,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 </div><!-- end login-screen -->
 
 <!-- DASHBOARD -->
-<div id="dashboard-screen" class="screen">
+<div id="dashboard-screen main-content" class="screen">
   <nav class="dash-nav">
     <div class="dash-nav-logo">
       <svg width="20" height="20" viewBox="0 0 42 42"><defs><radialGradient id="rb2" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="ri2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient><radialGradient id="rg2" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="14.5" fill="url(#ri2)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb2)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg2)"/></svg>
@@ -691,6 +722,36 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   </div>
 
   <div class="dash-body">
+    <!-- ── Claude Insights Panel ── -->
+    <div class="insights-widget" id="insights-widget">
+      <div class="insights-title">
+        ✨ Ask About Your Data
+        <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;">Powered by Claude AI</span>
+      </div>
+      <div class="insights-subtitle">Ask anything about your logs — patterns, people, timelines, summaries.</div>
+
+      <!-- Quick suggestion chips -->
+      <div class="insights-suggestions" id="insights-suggestions">
+        <span class="insights-suggestion" onclick="askInsight('Summarize my incident logs from the last 30 days')">📋 Last 30 days summary</span>
+        <span class="insights-suggestion" onclick="askInsight('Who appears most frequently in my logs?')">👤 Most mentioned people</span>
+        <span class="insights-suggestion" onclick="askInsight('What locations appear most in my logs?')">📍 Most frequent locations</span>
+        <span class="insights-suggestion" onclick="askInsight('What patterns do you see in my documentation?')">🔍 Identify patterns</span>
+        <span class="insights-suggestion" onclick="askInsight('How strong is my documentation based on the credibility criteria?')">⚖️ Credibility assessment</span>
+        <span class="insights-suggestion" onclick="askInsight('Create a timeline of key events from my logs')">📅 Event timeline</span>
+      </div>
+
+      <!-- Chat messages -->
+      <div class="insights-chat" id="insights-chat"></div>
+
+      <!-- Input -->
+      <div class="insights-input-row">
+        <input class="insights-input" id="insights-input" type="text"
+          placeholder="Ask about your logs... e.g. What happened in March?"
+          onkeydown="if(event.key==='Enter')sendInsight()">
+        <button class="insights-send-btn" id="insights-send-btn" onclick="sendInsight()">Ask Claude</button>
+      </div>
+    </div>
+
     <div class="section-hdr"><span class="section-title">Overview — Last 90 Days</span></div>
 
     <!-- Stat cards -->
@@ -706,7 +767,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       <div class="wide-card" style="margin-bottom:0;"><div class="wide-card-title">Recent Activity</div><div id="recent-logs" class="log-list"><div class="empty">Loading...</div></div></div>
       <div class="wide-card locked" id="people-card" style="margin-bottom:0;">
         <div class="wide-card-title">People Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div>
-        <div id="people-list" class="freq-list locked-content"><div class="empty">Loading...</div></div>
+        <div id="people-list" class="freq-list locked-content" aria-hidden="true"><div class="empty">Loading...</div></div>
         <div class="lock-overlay" id="people-lock" style="display:none;">
           <div class="lock-icon">👤</div>
           <div class="lock-text">People Analysis Locked</div>
@@ -716,7 +777,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       </div>
       <div class="wide-card locked" id="places-card" style="margin-bottom:0;">
         <div class="wide-card-title">Places Mentioned <span style="font-size:10px;color:var(--muted);font-weight:400;">Last 90 days</span></div>
-        <div id="places-list" class="freq-list locked-content"><div class="empty">Loading...</div></div>
+        <div id="places-list" class="freq-list locked-content" aria-hidden="true"><div class="empty">Loading...</div></div>
         <div class="lock-overlay" id="places-lock" style="display:none;">
           <div class="lock-icon">📍</div>
           <div class="lock-text">Places Analysis Locked</div>
@@ -731,12 +792,12 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
     <div class="cards-row cols-2">
       <div class="wide-card locked" id="spider-card" style="margin-bottom:0;">
         <div class="wide-card-title">Credibility Profile <span style="font-size:10px;color:var(--muted);font-weight:400;">Law enforcement standards</span></div>
-        <div class="locked-content">
+        <div class="locked-content" aria-hidden="true">
         <div class="integrity-row">
           <div><div class="integrity-score" id="integrity-score">—</div><div class="integrity-label">Overall Score</div></div>
           <div class="integrity-desc" id="integrity-desc">Analyzing your log entries...</div>
         </div>
-        <canvas id="spider-canvas" width="300" height="260" style="display:block;margin:0 auto;"></canvas>
+        <canvas id="spider-canvas" width="300" height="260" style="display:block;margin:0 auto;" role="img" aria-label="Credibility spider chart showing scores across seven dimensions: Specificity, Consistency, Documentation, Corroboration, Timeline, Patterns, and Objectivity"></canvas>
         </div><!-- end locked-content -->
         <div class="lock-overlay" id="spider-lock" style="display:none;">
           <div class="lock-icon">🕸️</div>
@@ -747,7 +808,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
       </div>
       <div class="wide-card locked" id="map-card" style="margin-bottom:0;">
         <div class="wide-card-title">Incident Locations <span style="font-size:10px;color:var(--muted);font-weight:400;">City level from SMS origin</span></div>
-        <div id="mini-map" class="locked-content"></div>
+        <div id="mini-map" class="locked-content" aria-hidden="true"></div>
         <div class="lock-overlay" id="map-lock" style="display:none;">
           <div class="lock-icon">🗺️</div>
           <div class="lock-text">Incident Map Locked</div>
@@ -2472,6 +2533,149 @@ window.verifyOtp = async function(){
     btn.disabled = false;
   }
 };
+
+// ── Claude Insights Panel ────────────────────────────────────
+let insightsHistory = [];
+
+window.askInsight = function(question){
+  document.getElementById('insights-input').value = question;
+  sendInsight();
+};
+
+window.sendInsight = async function(){
+  const input = document.getElementById('insights-input');
+  const btn   = document.getElementById('insights-send-btn');
+  const chat  = document.getElementById('insights-chat');
+  const question = input.value.trim();
+  if(!question) return;
+
+  // Add user message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'insights-msg user';
+  userMsg.textContent = question;
+  chat.appendChild(userMsg);
+  input.value = '';
+  btn.disabled = true;
+  btn.textContent = 'Thinking...';
+  chat.scrollTop = chat.scrollHeight;
+
+  // Build context from user's records
+  const recordSummary = buildRecordContext(allRecords);
+
+  // Add to history
+  insightsHistory.push({ role: 'user', content: question });
+
+  try{
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a helpful documentation analyst assistant for SOSLogs, a personal safety documentation platform. 
+You have access to the user's incident logs and help them understand patterns, generate insights, and assess their documentation strength.
+
+The user's log data summary:
+${recordSummary}
+
+Guidelines:
+- Be concise, factual, and supportive
+- Reference specific dates, people, or locations from the logs when relevant
+- Assess documentation strength using: Specificity, Consistency, Corroboration, Timeline, Patterns, Objectivity
+- Never make legal conclusions — suggest consulting an attorney for legal advice
+- Format responses clearly with line breaks for readability`,
+        messages: insightsHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'I could not generate a response. Please try again.';
+
+    // Add assistant message
+    insightsHistory.push({ role: 'assistant', content: reply });
+
+    const assistantMsg = document.createElement('div');
+    assistantMsg.className = 'insights-msg assistant';
+    assistantMsg.innerHTML = reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+
+    // Add save button
+    const actions = document.createElement('div');
+    actions.className = 'insights-actions';
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'insights-save-btn';
+    saveBtn.textContent = '💾 Save as record';
+    saveBtn.onclick = () => saveInsightAsRecord(question, reply, saveBtn);
+    actions.appendChild(saveBtn);
+    assistantMsg.appendChild(actions);
+
+    chat.appendChild(assistantMsg);
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch(e){
+    console.error('Insights error:', e);
+    const errMsg = document.createElement('div');
+    errMsg.className = 'insights-msg assistant';
+    errMsg.textContent = 'Could not connect to Claude. Please check your connection and try again.';
+    chat.appendChild(errMsg);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ask Claude';
+    chat.scrollTop = chat.scrollHeight;
+  }
+};
+
+function buildRecordContext(records){
+  if(!records || records.length === 0) return 'No records found.';
+  const recent = records.slice(0,50); // limit context
+  const summary = recent.map(r => {
+    const date = r.timestampLocal ? r.timestampLocal.slice(0,10) : 'Unknown date';
+    const loc  = r.location?.formatted || '';
+    const body = (r.body||'').slice(0,300);
+    return `[${date}]${loc ? ' @ '+loc : ''}: ${body}`;
+  }).join('\n');
+  return `Total records: ${records.length}\n\nRecent entries:\n${summary}`;
+}
+
+async function saveInsightAsRecord(question, answer, btn){
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  try{
+    const response = await fetch(RAILWAY_URL + '/analyze/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone:    currentPhone,
+        email:    auth.currentUser?.email || '',
+        text:     `Question: ${question}\n\nAnswer: ${answer}`,
+        analysis: {
+          date:                    new Date().toISOString().slice(0,10),
+          thread:                  'Claude Insight: ' + question.slice(0,60),
+          your_action:             'Asked Claude for data insight',
+          her_request_or_response: '',
+          response_status:         'Completed',
+          judges_observation:      answer.slice(0,500),
+          court_relevance:         'Low — analytical summary',
+          devils_advocate:         'AI-generated analysis should be verified against source records',
+          soslogs_relevance:       'User-requested insight from documentation patterns',
+          category:                'analysis',
+          key_facts:               [question]
+        }
+      })
+    });
+    if(response.ok){
+      btn.textContent = '✅ Saved';
+      allRecords = await loadAllRecords();
+      renderStats(allRecords);
+      renderRecentLogs(allRecords);
+    } else {
+      btn.textContent = '❌ Failed';
+      btn.disabled = false;
+    }
+  } catch(e){
+    btn.textContent = '❌ Error';
+    btn.disabled = false;
+  }
+}
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
