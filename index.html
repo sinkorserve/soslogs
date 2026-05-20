@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -114,8 +114,8 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .num-bridge{display:flex;flex-direction:row;align-items:center;gap:14px;padding:14px 18px;background:rgba(14,19,24,0.9);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);}
 .num-bridge-arrows{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .num-bridge-numbers{display:flex;flex-direction:column;gap:4px;}
-.num-bridge .num{font-size:16px;font-weight:700;color:#fff;letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:#fff;font-family:var(--font);}
-.num-bridge .vanity{font-size:16px;font-weight:700;color:var(--safe);letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:var(--safe);font-family:var(--font);}
+.num-bridge .num{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:#fff;font-family:var(--font);}
+.num-bridge .vanity{font-size:16px;font-weight:800;color:var(--safe);letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:var(--safe);font-family:var(--font);}
 .num-bridge-tagline{text-align:center;font-size:11px;color:var(--muted);letter-spacing:0.2px;padding:0 18px 12px;font-style:italic;}
 .persona{display:flex;align-items:flex-start;gap:10px;padding:7px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:6px;}
 .persona:last-child{margin-bottom:0;}
@@ -672,13 +672,13 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
 
-<div style="position:absolute;top:12px;right:16px;z-index:50;">
+<div style="display:flex;justify-content:center;padding:10px 0 0;position:relative;z-index:50;">
   <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode"
     style="background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:20px;
-    padding:6px 12px;cursor:pointer;color:var(--text);font-size:13px;font-family:var(--font);
+    padding:6px 16px;cursor:pointer;color:var(--text);font-size:13px;font-family:var(--font);
     font-weight:600;transition:all 0.2s;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;">
-    <span id="theme-icon">🌙</span>
-    <span id="theme-label">Light</span>
+    <span id="theme-icon">☀️</span>
+    <span id="theme-label">Dark</span>
   </button>
 </div>
 <div class="login-body">
@@ -1228,13 +1228,11 @@ function updateThemeButtons(theme){
   ['theme-icon','dash-theme-icon'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = icon; });
   ['theme-label','dash-theme-label'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = label; });
 }
-// Apply saved theme on load
+// Apply saved theme on load (light is default)
 (function(){
-  const saved = localStorage.getItem('soslogs-theme');
-  if(saved && saved !== 'dark'){
-    document.documentElement.setAttribute('data-theme', saved);
-    document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
-  }
+  const saved = localStorage.getItem('soslogs-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
 })();
 </script>
 
