@@ -82,8 +82,10 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   justify-content:space-between;
   padding:24px 20px;
   border-right:1px solid var(--border);
+  border-left:1px solid var(--border);
   background:rgba(0,0,0,0.15);
   overflow-y:auto;
+  order:2;
 }
 @media(max-width:860px){.login-left{border-right:none;border-bottom:1px solid var(--border);}}
 
@@ -93,8 +95,8 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
   flex-direction:column;
   justify-content:flex-start;
   padding:24px 16px;
-  border-left:1px solid var(--border);
   overflow-y:auto;
+  order:3;
 }
 @media(max-width:860px){.login-right{border-left:none;border-top:1px solid var(--border);}}
 
@@ -185,10 +187,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 }
 .pricing-outer{display:none;}
 .pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
-.pricing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.pricing-cards{display:grid;grid-template-columns:1fr;gap:12px;}
 
-@media(max-width:760px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:420px){.pricing-cards{grid-template-columns:1fr;}}
+
+
 .pricing-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
 .pricing-card:hover{transform:translateY(-2px);}
 .pricing-card.featured{border-color:rgba(29,184,122,0.3);background:linear-gradient(135deg,var(--card) 0%,rgba(29,184,122,0.05) 100%);}
@@ -721,8 +723,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 </div><!-- end left inner flex -->
 </div><!-- end login-left -->
 
-<!-- Center column: auth form -->
-<div style="display:flex;flex-direction:column;justify-content:center;padding:28px 32px;overflow-y:auto;border-right:1px solid var(--border);">
+<!-- Auth column: left 20% -->
+<div style="display:flex;flex-direction:column;justify-content:center;padding:24px 20px;overflow-y:auto;border-right:1px solid var(--border);order:1;">
 <div class="login-wrap">
 
   <!-- Auth tabs -->
@@ -782,69 +784,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 
 
-  <!-- Pricing section - moved outside login-wrap below -->
-  <div style="display:none;">
-    <div class="pricing-cards">
 
-      <!-- Basic - Free -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--muted);"></div>
-        <div class="pricing-tier">Basic</div>
-        <div class="pricing-price">Free</div>
-        <div class="pricing-desc">Text incidents to 1-888-799-LOGS immediately. No account or login required.</div>
-        <ul class="pricing-features">
-          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
-          <li>Timestamped records stored securely</li>
-          <li class="no">No dashboard or message history</li>
-          <li class="no">No map or analytics</li>
-          <li class="no">No AI assistance</li>
-        </ul>
-        <a href="#" onclick="document.getElementById('login-id').focus();return false;" class="pricing-cta free">Start Logging Free</a>
-      </div>
-
-      <!-- Base - $4.99 -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--muted);"></div>
-        <div class="pricing-tier">Base</div>
-        <div class="pricing-price">$4.99<span>/month</span></div>
-        <div class="pricing-desc">Full access to your documented history and insights.</div>
-        <div style="background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--safe);margin-bottom:8px;text-align:center;">✨ 30-day free trial — no charge until day 31</div>
-        <ul class="pricing-features">
-          <li>Everything in Free</li>
-          <li>Personal dashboard with full message history</li>
-          <li>Incident map with geocoded location pins</li>
-          <li>People and places frequency analysis</li>
-          <li>Credibility spider chart</li>
-          <li>Keyword and date filtering</li>
-          <li>LE and personal log entry with voice input</li>
-          <li>Amend entries with full audit trail</li>
-        </ul>
-        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Start Free Trial — $4.99/mo after 30 days</a>
-      </div>
-
-
-
-      <!-- Premium - $19.99 -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--blue);"></div>
-        <div class="pricing-tier">Premium</div>
-        <div class="pricing-price">$19.99<span>/month</span></div>
-        <div class="pricing-desc">On-demand AI mentoring and real-time report generation.</div>
-        <ul class="pricing-features">
-          <li>Everything in Pro</li>
-          <li>On-demand AI up to 30 queries/month</li>
-          <li>Real-time report generation</li>
-          <li>Priority support</li>
-          <li>Early access to new features</li>
-        </ul>
-        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-</div>
 
 </div><!-- end login-wrap -->
 </div><!-- end center column -->
