@@ -120,7 +120,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 .persona{display:flex;align-items:flex-start;gap:10px;padding:7px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:6px;}
 .persona:last-child{margin-bottom:0;}
 .persona-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-.persona-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;font-family:var(--font);}
+.persona-name{font-size:11px;font-weight:400;color:var(--text);margin-bottom:2px;font-family:var(--font);}
 .persona-quote{font-size:11px;color:var(--muted);line-height:1.45;font-style:italic;font-family:var(--font);}
 .pl-headline{font-size:clamp(18px,2.5vw,24px);font-weight:800;line-height:1.2;letter-spacing:-0.5px;margin-bottom:6px;color:var(--white);font-family:var(--font);}
 .pl-headline em{font-style:normal;color:var(--safe);}
@@ -710,8 +710,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
       </div>
 
       <!-- Number bridge -->
-      <div style="background:rgba(8,10,12,0.95);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);">
-        <div class="num-bridge" style="justify-content:flex-end;gap:20px;">
+      <div style="background:rgba(13,42,30,0.95);border-left:1.5px solid rgba(29,184,122,0.4);border-right:1.5px solid rgba(29,184,122,0.4);">
+        <div class="num-bridge" style="justify-content:center;gap:20px;">
           <div class="num-bridge-numbers" style="text-align:right;">
             <span class="num" style="color:#c41e3a;-webkit-text-fill-color:#c41e3a;">1 (888) 799-5647</span>
             <span class="vanity">1-888-799-LOGS</span>
@@ -1211,6 +1211,32 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
   </div><!-- end dash-split -->
 </div>
+
+<script>
+// ── Theme Toggle (global scope — must be outside module) ──────
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('soslogs-theme', next);
+  updateThemeButtons(next);
+}
+function updateThemeButtons(theme){
+  const isLight = theme === 'light';
+  const icon = isLight ? '☀️' : '🌙';
+  const label = isLight ? 'Dark' : 'Light';
+  ['theme-icon','dash-theme-icon'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = icon; });
+  ['theme-label','dash-theme-label'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = label; });
+}
+// Apply saved theme on load
+(function(){
+  const saved = localStorage.getItem('soslogs-theme');
+  if(saved && saved !== 'dark'){
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
+  }
+})();
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -2856,38 +2882,6 @@ function saveInsightAsPDF(question, answer, btn){
     btn.disabled = false;
   }, 300);
 }
-
-// ── Theme Toggle ─────────────────────────────────────────────
-function toggleTheme(){
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('soslogs-theme', next);
-  updateThemeButtons(next);
-}
-
-function updateThemeButtons(theme){
-  const isLight = theme === 'light';
-  const icon = isLight ? '☀️' : '🌙';
-  const label = isLight ? 'Dark' : 'Light';
-  const ti = document.getElementById('theme-icon');
-  const tl = document.getElementById('theme-label');
-  const di = document.getElementById('dash-theme-icon');
-  const dl = document.getElementById('dash-theme-label');
-  if(ti) ti.textContent = icon;
-  if(tl) tl.textContent = label;
-  if(di) di.textContent = icon;
-  if(dl) dl.textContent = label;
-}
-
-// Apply saved theme on page load
-(function(){
-  const saved = localStorage.getItem('soslogs-theme');
-  if(saved && saved !== 'dark'){
-    document.documentElement.setAttribute('data-theme', saved);
-    document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
-  }
-})();
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
