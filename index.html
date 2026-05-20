@@ -623,6 +623,39 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 .edit-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
 .edit-note strong{color:var(--warn);}
 
+
+/* ── Light mode ─────────────────────────────────────────────── */
+[data-theme="light"]{
+  --black:#f8fafc;--dark:#ffffff;--card:#ffffff;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --muted:#64748b;--text:#0f172a;--white:#0f172a;
+}
+[data-theme="light"] body{background:#f8fafc;color:#0f172a;}
+[data-theme="light"] #login-screen{background:#f8fafc;}
+[data-theme="light"] #login-screen::before{opacity:0.3;}
+[data-theme="light"] #dashboard-screen{background:#f8fafc;}
+[data-theme="light"] .login-left{background:rgba(241,245,249,0.8);}
+[data-theme="light"] .login-right{background:#f8fafc;}
+[data-theme="light"] .convo-card.card-you{background:rgba(29,184,122,0.06);border-color:rgba(29,184,122,0.2);}
+[data-theme="light"] .convo-card.card-ai{background:rgba(29,184,122,0.03);border-color:rgba(29,184,122,0.12);}
+[data-theme="light"] .convo-item{color:#0f172a;}
+[data-theme="light"] .persona-name{color:#0f172a;}
+[data-theme="light"] .persona{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.06);}
+[data-theme="light"] .pl-headline{color:#0f172a;}
+[data-theme="light"] .num-bridge-tagline{color:#64748b;}
+[data-theme="light"] .f-input{background:#ffffff;color:#0f172a;border-color:#e2e8f0;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] select.f-input{background:#ffffff;color:#0f172a;}
+[data-theme="light"] .f-input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #fff inset !important;-webkit-text-fill-color:#0f172a !important;}
+[data-theme="light"] .login-card{background:transparent;}
+[data-theme="light"] .pricing-card{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .pricing-tier,.pricing-price{color:#0f172a;}
+[data-theme="light"] .stat-card,.wide-card,.dash-chat-panel,.insights-widget,.analyze-widget{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .analyze-ta,.dash-chat-input,.otp-input{background:#f8fafc;color:#0f172a;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] .wide-card-title,.stat-val,.section-title{color:#0f172a;}
+[data-theme="light"] .dash-nav{background:rgba(248,250,252,0.95);border-color:#e2e8f0;}
+[data-theme="light"] .analysis-field-value{background:#f8fafc;color:#0f172a;border-color:#e2e8f0;}
+[data-theme="light"] .pl-footer{border-color:#e2e8f0;}
+[data-theme="light"] #app-loading{background:#f8fafc;}
 </style>
 </head>
 <body>
@@ -639,6 +672,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
 
+<div style="position:absolute;top:12px;right:16px;z-index:50;">
+  <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode"
+    style="background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:20px;
+    padding:6px 12px;cursor:pointer;color:var(--text);font-size:13px;font-family:var(--font);
+    font-weight:600;transition:all 0.2s;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;">
+    <span id="theme-icon">🌙</span>
+    <span id="theme-label">Light</span>
+  </button>
+</div>
 <div class="login-body">
 
 <!-- Left panel: brand + convo cards (fitlogs style) -->
@@ -2814,6 +2856,38 @@ function saveInsightAsPDF(question, answer, btn){
     btn.disabled = false;
   }, 300);
 }
+
+// ── Theme Toggle ─────────────────────────────────────────────
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('soslogs-theme', next);
+  updateThemeButtons(next);
+}
+
+function updateThemeButtons(theme){
+  const isLight = theme === 'light';
+  const icon = isLight ? '☀️' : '🌙';
+  const label = isLight ? 'Dark' : 'Light';
+  const ti = document.getElementById('theme-icon');
+  const tl = document.getElementById('theme-label');
+  const di = document.getElementById('dash-theme-icon');
+  const dl = document.getElementById('dash-theme-label');
+  if(ti) ti.textContent = icon;
+  if(tl) tl.textContent = label;
+  if(di) di.textContent = icon;
+  if(dl) dl.textContent = label;
+}
+
+// Apply saved theme on page load
+(function(){
+  const saved = localStorage.getItem('soslogs-theme');
+  if(saved && saved !== 'dark'){
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
+  }
+})();
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
