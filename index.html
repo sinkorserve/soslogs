@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
 <title>SOSLogs — Personal Safety Documentation</title>
 <style>
 :root{
@@ -67,42 +68,67 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 /* Auth + pricing row */
 .login-body{
   display:grid;
-  grid-template-columns:420px 1fr;
+  grid-template-columns:25% 1fr 20%;
   position:relative;
   z-index:1;
-  flex:1;
+  min-height:100dvh;
 }
-@media(max-width:800px){
-  .login-body{grid-template-columns:1fr;min-height:auto;}
-}
+@media(max-width:860px){.login-body{grid-template-columns:1fr;}}
 
 /* Left panel - auth */
 .login-left{
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
-  padding:20px 24px 20px;
+  justify-content:space-between;
+  padding:24px 20px;
   border-right:1px solid var(--border);
+  border-left:1px solid var(--border);
   background:rgba(0,0,0,0.15);
   overflow-y:auto;
+  order:2;
 }
-@media(max-width:800px){
-  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:24px 20px;}
-}
+@media(max-width:860px){.login-left{border-right:none;border-bottom:1px solid var(--border);}}
 
 /* Right panel - pricing */
 .login-right{
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
-  padding:20px 24px 20px;
+  padding:24px 16px;
   overflow-y:auto;
+  order:3;
 }
-@media(max-width:800px){
-  .login-right{padding:20px 16px;}
-}
+@media(max-width:860px){.login-right{border-left:none;border-top:1px solid var(--border);}}
 
 .login-wrap{position:relative;z-index:1;width:100%;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
+/* ── Fitlogs-style convo cards ──────────────────────────────── */
+.convo-pair{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.convo-card{padding:14px 16px;border-radius:14px;margin-bottom:0;}
+.convo-card.card-you{background:rgba(29,184,122,0.1);border:1.5px solid rgba(29,184,122,0.3);}
+.convo-card.card-ai{background:rgba(29,184,122,0.06);border:1.5px solid rgba(29,184,122,0.18);}
+.convo-card-label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--safe);margin-bottom:10px;}
+.convo-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px;color:var(--text);line-height:1.5;font-family:var(--font);}
+.convo-item:last-child{margin-bottom:0;}
+.convo-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--safe);}
+.convo-item strong{color:var(--safe2);font-weight:600;}
+.num-bridge{display:flex;flex-direction:row;align-items:center;gap:14px;padding:14px 18px;background:rgba(14,19,24,0.9);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);}
+.num-bridge-arrows{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.num-bridge-numbers{display:flex;flex-direction:column;gap:4px;}
+.num-bridge .num{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:#fff;font-family:var(--font);}
+.num-bridge .vanity{font-size:16px;font-weight:800;color:var(--safe);letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:var(--safe);font-family:var(--font);}
+.num-bridge-tagline{text-align:center;font-size:11px;color:var(--muted);letter-spacing:0.2px;padding:0 18px 12px;font-style:italic;}
+.persona{display:flex;align-items:flex-start;gap:10px;padding:7px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:6px;}
+.persona:last-child{margin-bottom:0;}
+.persona-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.persona-name{font-size:11px;font-weight:400;color:var(--text);margin-bottom:2px;font-family:var(--font);}
+.persona-quote{font-size:11px;color:var(--muted);line-height:1.45;font-style:italic;font-family:var(--font);}
+.pl-headline{font-size:clamp(18px,2.5vw,24px);font-weight:800;line-height:1.2;letter-spacing:-0.5px;margin-bottom:6px;color:var(--white);font-family:var(--font);}
+.pl-headline em{font-style:normal;color:var(--safe);}
+.pl-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;max-width:420px;font-family:var(--font);}
+.pl-brand{font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--white);font-family:var(--font);}
+.pl-brand .ai{color:var(--safe);}
+.pl-footer{font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
 .login-logo-text{font-size:26px;font-weight:800;color:var(--white);}
@@ -161,10 +187,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 }
 .pricing-outer{display:none;}
 .pricing-title{text-align:center;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
-.pricing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.pricing-cards{display:grid;grid-template-columns:1fr;gap:12px;}
 
-@media(max-width:760px){.pricing-cards{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:420px){.pricing-cards{grid-template-columns:1fr;}}
+
+
 .pricing-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
 .pricing-card:hover{transform:translateY(-2px);}
 .pricing-card.featured{border-color:rgba(29,184,122,0.3);background:linear-gradient(135deg,var(--card) 0%,rgba(29,184,122,0.05) 100%);}
@@ -597,6 +623,39 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 .edit-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
 .edit-note strong{color:var(--warn);}
 
+
+/* ── Light mode ─────────────────────────────────────────────── */
+[data-theme="light"]{
+  --black:#f8fafc;--dark:#ffffff;--card:#ffffff;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --muted:#64748b;--text:#0f172a;--white:#0f172a;
+}
+[data-theme="light"] body{background:#f8fafc;color:#0f172a;}
+[data-theme="light"] #login-screen{background:#f8fafc;}
+[data-theme="light"] #login-screen::before{opacity:0.3;}
+[data-theme="light"] #dashboard-screen{background:#f8fafc;}
+[data-theme="light"] .login-left{background:rgba(241,245,249,0.8);}
+[data-theme="light"] .login-right{background:#f8fafc;}
+[data-theme="light"] .convo-card.card-you{background:rgba(29,184,122,0.06);border-color:rgba(29,184,122,0.2);}
+[data-theme="light"] .convo-card.card-ai{background:rgba(29,184,122,0.03);border-color:rgba(29,184,122,0.12);}
+[data-theme="light"] .convo-item{color:#0f172a;}
+[data-theme="light"] .persona-name{color:#0f172a;}
+[data-theme="light"] .persona{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.06);}
+[data-theme="light"] .pl-headline{color:#0f172a;}
+[data-theme="light"] .num-bridge-tagline{color:#64748b;}
+[data-theme="light"] .f-input{background:#ffffff;color:#0f172a;border-color:#e2e8f0;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] select.f-input{background:#ffffff;color:#0f172a;}
+[data-theme="light"] .f-input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #fff inset !important;-webkit-text-fill-color:#0f172a !important;}
+[data-theme="light"] .login-card{background:transparent;}
+[data-theme="light"] .pricing-card{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .pricing-tier,.pricing-price{color:#0f172a;}
+[data-theme="light"] .stat-card,.wide-card,.dash-chat-panel,.insights-widget,.analyze-widget{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .analyze-ta,.dash-chat-input,.otp-input{background:#f8fafc;color:#0f172a;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] .wide-card-title,.stat-val,.section-title{color:#0f172a;}
+[data-theme="light"] .dash-nav{background:rgba(248,250,252,0.95);border-color:#e2e8f0;}
+[data-theme="light"] .analysis-field-value{background:#f8fafc;color:#0f172a;border-color:#e2e8f0;}
+[data-theme="light"] .pl-footer{border-color:#e2e8f0;}
+[data-theme="light"] #app-loading{background:#f8fafc;}
 </style>
 </head>
 <body>
@@ -613,36 +672,103 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
 
-<!-- Hero - full width top -->
-<div class="login-hero">
-  <div class="hero-logo">
-    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
-    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="hero-logo-text">SOS<span>Logs</span></span>
-  </div>
-  <div class="hero-tagline">Documented · Transparent · Self-Evident</div>
-  <p class="hero-statement">
-    When incidents happen, everyone claims they did nothing wrong. You can make a strong case to decision makers by documenting timestamped events that are
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Specific</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Consistent</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Corroborated</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Objective</span>
-    and part of an unbroken
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Timeline</span>
-    with clear
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Patterns</span>
-    — your documented truth stands by itself, available when it matters most.
-  </p>
-  <div style="display:flex;justify-content:center;margin-top:12px;">
-    <div class="hero-sms">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      Text your logs to 1-888-799-LOGS
-    </div>
-  </div>
+<div style="display:flex;justify-content:center;padding:10px 0 0;position:relative;z-index:50;">
+  <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode"
+    style="background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:20px;
+    padding:6px 16px;cursor:pointer;color:var(--text);font-size:13px;font-family:var(--font);
+    font-weight:600;transition:all 0.2s;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;">
+    <span id="theme-icon">☀️</span>
+    <span id="theme-label">Dark</span>
+  </button>
 </div>
-
 <div class="login-body">
+
+<!-- Left panel: brand + convo cards (fitlogs style) -->
 <div class="login-left">
+<div style="display:flex;flex-direction:column;height:100%;">
+  <div>
+    <!-- Brand -->
+    <div class="pl-brand" style="font-size:32px;margin-bottom:20px;">
+      <svg width="38" height="38" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#rg1)"/></svg>
+      <svg width="38" height="38" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="color:#c41e3a;">SOS</span><span class="ai">Logs</span>
+    </div>
+
+    <!-- Headline -->
+    <div class="pl-headline">Let your timestamped logs <em>speak for themselves,</em> one text at a time.</div>
+    <p class="pl-sub">Document incidents, protect your rights, and build a credible record — no app, no login, just text.</p>
+
+    <!-- Convo cards -->
+    <div class="convo-pair">
+
+      <!-- What you text in -->
+      <div class="convo-card card-you">
+        <div class="convo-card-label" style="font-size:14px;color:#c41e3a;letter-spacing:0.5px;">YOUR TEXT → 1-888-799-LOGS</div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>Incidents</strong> — What happened, where, when, who witnessed it</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>ANALYZE:</strong> [paste email or document] — AI breaks it down with court relevance score</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>CONFIRM</strong> — Save the analysis to your permanent record</div></div>
+      </div>
+
+      <!-- Number bridge — single merged rounded card -->
+      <div style="background:rgba(13,42,30,0.95);border:1.5px solid rgba(29,184,122,0.4);border-radius:14px;padding:14px 18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
+          <div class="num-bridge-numbers" style="text-align:right;">
+            <span class="num" style="color:#c41e3a;-webkit-text-fill-color:#c41e3a;font-weight:800;">1 (888) 799-5647</span>
+            <span class="vanity" style="color:#1db87a;-webkit-text-fill-color:#1db87a;font-weight:800;">1-888-799-LOGS</span>
+          </div>
+          <div class="num-bridge-arrows">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+              <path d="M14 4 L14 44" stroke="#1db87a" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M7 36 L14 44 L21 36" stroke="#1db87a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M34 44 L34 4" stroke="#3dd68c" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M27 12 L34 4 L41 12" stroke="#3dd68c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="num-bridge-tagline" style="padding:0;">No app to download. Just you and your record, by text.</div>
+      </div>
+
+      <!-- What SOSLogs texts back -->
+      <div class="convo-card card-ai">
+        <div class="convo-card-label" style="font-size:14px;letter-spacing:0.5px;">HOW <span style="color:#c41e3a;font-style:normal;">SOS</span><span style="color:#1db87a;font-style:normal;">Logs</span> HELPS</div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#1db87a;"></div>
+          <div><div class="persona-name">Timestamped unerasable log saved</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#a855f7;"></div>
+          <div><div class="persona-name">Protects devil's advocate version to help address potential gaps in self-defense documentation</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#3b82f6;"></div>
+          <div><div class="persona-name">Speak or upload documents for AI analysis</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#f5a623;"></div>
+          <div><div class="persona-name">Document only analyzed but never stored</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#c41e3a;"></div>
+          <div><div class="persona-name">Print report when you need it</div></div>
+        </div>
+      </div>
+
+    </div><!-- end convo-pair -->
+  </div>
+
+  <!-- Footer -->
+  <div class="pl-footer">
+    © 2026 Athens Innovation and Development LLC ·
+    <a href="/about.html" style="color:var(--muted);text-decoration:none;">About</a> ·
+    <a href="/privacy.html" style="color:var(--muted);text-decoration:none;">Privacy</a> ·
+    <a href="/terms.html" style="color:var(--muted);text-decoration:none;">Terms</a> ·
+    <a href="mailto:admin@soslogs.org" style="color:var(--muted);text-decoration:none;">Contact</a>
+  </div>
+</div><!-- end left inner flex -->
+</div><!-- end login-left -->
+
+<!-- Auth column: left 20% -->
+<div style="display:flex;flex-direction:column;justify-content:center;padding:24px 20px;overflow-y:auto;border-right:1px solid var(--border);order:1;">
 <div class="login-wrap">
 
   <!-- Auth tabs -->
@@ -702,71 +828,12 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 
 
-  <!-- Pricing section - moved outside login-wrap below -->
-  <div style="display:none;">
-    <div class="pricing-cards">
-
-      <!-- Basic - Free -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--muted);"></div>
-        <div class="pricing-tier">Basic</div>
-        <div class="pricing-price">Free</div>
-        <div class="pricing-desc">Text incidents to 1-888-799-LOGS immediately. No account or login required.</div>
-        <ul class="pricing-features">
-          <li>Unlimited SMS logging via 1-888-799-LOGS</li>
-          <li>Timestamped records stored securely</li>
-          <li class="no">No dashboard or message history</li>
-          <li class="no">No map or analytics</li>
-          <li class="no">No AI assistance</li>
-        </ul>
-        <a href="#" onclick="document.getElementById('login-id').focus();return false;" class="pricing-cta free">Start Logging Free</a>
-      </div>
-
-      <!-- Base - $4.99 -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--muted);"></div>
-        <div class="pricing-tier">Base</div>
-        <div class="pricing-price">$4.99<span>/month</span></div>
-        <div class="pricing-desc">Full access to your documented history and insights.</div>
-        <div style="background:rgba(29,184,122,0.08);border:1px solid rgba(29,184,122,0.2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--safe);margin-bottom:8px;text-align:center;">✨ 30-day free trial — no charge until day 31</div>
-        <ul class="pricing-features">
-          <li>Everything in Free</li>
-          <li>Personal dashboard with full message history</li>
-          <li>Incident map with geocoded location pins</li>
-          <li>People and places frequency analysis</li>
-          <li>Credibility spider chart</li>
-          <li>Keyword and date filtering</li>
-          <li>LE and personal log entry with voice input</li>
-          <li>Amend entries with full audit trail</li>
-        </ul>
-        <a href="https://buy.stripe.com/aFa8wOdDD5mb86L7w1ew806" target="_blank" class="pricing-cta pro">Start Free Trial — $4.99/mo after 30 days</a>
-      </div>
 
 
+</div><!-- end login-wrap -->
+</div><!-- end center column -->
 
-      <!-- Premium - $19.99 -->
-      <div class="pricing-card">
-        <div class="pricing-card-accent" style="background:var(--blue);"></div>
-        <div class="pricing-tier">Premium</div>
-        <div class="pricing-price">$19.99<span>/month</span></div>
-        <div class="pricing-desc">On-demand AI mentoring and real-time report generation.</div>
-        <ul class="pricing-features">
-          <li>Everything in Pro</li>
-          <li>On-demand AI up to 30 queries/month</li>
-          <li>Real-time report generation</li>
-          <li>Priority support</li>
-          <li>Early access to new features</li>
-        </ul>
-        <a href="https://buy.stripe.com/14A4gy1UV8ynaeTaIdew804" target="_blank" class="pricing-cta premium">Get Premium — $19.99/mo</a>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- Right column - pricing (inside login-body) -->
+<!-- Right column: pricing -->
 <div class="login-right">
 <div class="pricing-inner">
   <div class="pricing-title">Choose your plan</div>
@@ -1144,6 +1211,30 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
   </div><!-- end dash-split -->
 </div>
+
+<script>
+// ── Theme Toggle (global scope — must be outside module) ──────
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('soslogs-theme', next);
+  updateThemeButtons(next);
+}
+function updateThemeButtons(theme){
+  const isLight = theme === 'light';
+  const icon = isLight ? '☀️' : '🌙';
+  const label = isLight ? 'Dark' : 'Light';
+  ['theme-icon','dash-theme-icon'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = icon; });
+  ['theme-label','dash-theme-label'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = label; });
+}
+// Apply saved theme on load (light is default)
+(function(){
+  const saved = localStorage.getItem('soslogs-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.addEventListener('DOMContentLoaded', () => updateThemeButtons(saved));
+})();
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
