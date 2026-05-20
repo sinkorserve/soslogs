@@ -68,40 +68,35 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 /* Auth + pricing row */
 .login-body{
   display:grid;
-  grid-template-columns:420px 1fr;
+  grid-template-columns:20% 1fr 20%;
   position:relative;
   z-index:1;
-  flex:1;
+  min-height:100dvh;
 }
-@media(max-width:800px){
-  .login-body{grid-template-columns:1fr;min-height:auto;}
-}
+@media(max-width:860px){.login-body{grid-template-columns:1fr;}}
 
 /* Left panel - auth */
 .login-left{
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
-  padding:20px 24px 20px;
+  justify-content:space-between;
+  padding:24px 20px;
   border-right:1px solid var(--border);
   background:rgba(0,0,0,0.15);
   overflow-y:auto;
 }
-@media(max-width:800px){
-  .login-left{border-right:none;border-bottom:1px solid var(--border);padding:24px 20px;}
-}
+@media(max-width:860px){.login-left{border-right:none;border-bottom:1px solid var(--border);}}
 
 /* Right panel - pricing */
 .login-right{
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
-  padding:20px 24px 20px;
+  padding:24px 16px;
+  border-left:1px solid var(--border);
   overflow-y:auto;
 }
-@media(max-width:800px){
-  .login-right{padding:20px 16px;}
-}
+@media(max-width:860px){.login-right{border-left:none;border-top:1px solid var(--border);}}
 
 .login-wrap{position:relative;z-index:1;width:100%;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
 /* ── Fitlogs-style convo cards ──────────────────────────────── */
@@ -724,7 +719,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
     <a href="mailto:admin@soslogs.org" style="color:var(--muted);text-decoration:none;">Contact</a>
   </div>
 </div><!-- end left inner flex -->
+</div><!-- end login-left -->
 
+<!-- Center column: auth form -->
+<div style="display:flex;flex-direction:column;justify-content:center;padding:28px 32px;overflow-y:auto;border-right:1px solid var(--border);">
 <div class="login-wrap">
 
   <!-- Auth tabs -->
@@ -848,7 +846,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 </div>
 </div>
 
-<!-- Right column - pricing (inside login-body) -->
+</div><!-- end login-wrap -->
+</div><!-- end center column -->
+
+<!-- Right column: pricing -->
 <div class="login-right">
 <div class="pricing-inner">
   <div class="pricing-title">Choose your plan</div>
