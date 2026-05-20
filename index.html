@@ -646,14 +646,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <div style="display:flex;flex-direction:column;height:100%;">
   <div>
     <!-- Brand -->
-    <div class="pl-brand" style="font-size:28px;margin-bottom:20px;">
-      <svg width="32" height="32" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#rg1)"/></svg>
-      <svg width="32" height="32" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      SOS<span class="ai">Logs</span>
+    <div class="pl-brand" style="font-size:32px;margin-bottom:20px;">
+      <svg width="38" height="38" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#rg1)"/></svg>
+      <svg width="38" height="38" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="color:#e63e2f;">SOS</span><span class="ai">Logs</span>
     </div>
 
     <!-- Headline -->
-    <div class="pl-headline">Your proof, <em>one text away.</em></div>
+    <div class="pl-headline">Let your timestamped logs <em>speak for themselves,</em> one text at a time.</div>
     <p class="pl-sub">Document incidents, protect your rights, and build a credible record — no app, no login, just text.</p>
 
     <!-- Convo cards -->
@@ -661,7 +661,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
       <!-- What you text in -->
       <div class="convo-card card-you">
-        <div class="convo-card-label">📲 What you text to 1-888-799-LOGS</div>
+        <div class="convo-card-label" style="font-size:14px;color:#e63e2f;letter-spacing:0.5px;">YOUR TEXT → 1-888-799-LOGS</div>
         <div class="convo-item"><div class="convo-dot"></div><div><strong>Incidents</strong> — What happened, where, when, who witnessed it</div></div>
         <div class="convo-item"><div class="convo-dot"></div><div><strong>ANALYZE:</strong> [paste email or document] — AI breaks it down with court relevance score</div></div>
         <div class="convo-item"><div class="convo-dot"></div><div><strong>CONFIRM</strong> — Save the analysis to your permanent record</div></div>
@@ -669,7 +669,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
       <!-- Number bridge -->
       <div style="background:rgba(8,10,12,0.95);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);">
-        <div class="num-bridge">
+        <div class="num-bridge" style="justify-content:flex-end;gap:20px;">
+          <span class="num" style="color:#e63e2f;-webkit-text-fill-color:#e63e2f;">1 (888) 799-5647</span>
+            <span class="vanity">1-888-799-LOGS</span>
+          </div>
           <div class="num-bridge-arrows">
             <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
               <path d="M14 4 L14 44" stroke="#1db87a" stroke-width="3.5" stroke-linecap="round"/>
@@ -678,28 +681,32 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
               <path d="M27 12 L34 4 L41 12" stroke="#3dd68c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div class="num-bridge-numbers">
-            <span class="num">+1 (888) 799-5647</span>
-            <span class="vanity">1-888-799-LOGS</span>
-          </div>
         </div>
         <div class="num-bridge-tagline">No app to download. Just you and your record, by text.</div>
       </div>
 
       <!-- What SOSLogs texts back -->
       <div class="convo-card card-ai">
-        <div class="convo-card-label">🤖 What SOSLogs texts back</div>
+        <div class="convo-card-label" style="font-size:14px;letter-spacing:0.5px;">HOW <span style="color:#e63e2f;font-style:normal;">SOS</span><span style="color:#1db87a;font-style:normal;">Logs</span> HELPS</div>
         <div class="persona">
           <div class="persona-dot" style="background:#1db87a;"></div>
-          <div><div class="persona-name">Log saved</div><div class="persona-quote">"SOSLog received. Your record is saved."</div></div>
-        </div>
-        <div class="persona">
-          <div class="persona-dot" style="background:#3b82f6;"></div>
-          <div><div class="persona-name">Analysis ready</div><div class="persona-quote">"Court Relevance: High. Reply CONFIRM to save or EDIT to discard."</div></div>
+          <div><div class="persona-name">Timestamped unerasable log saved</div></div>
         </div>
         <div class="persona">
           <div class="persona-dot" style="background:#a855f7;"></div>
-          <div><div class="persona-name">Devil's advocate</div><div class="persona-quote">"Opposing counsel could challenge this — be prepared with documentation."</div></div>
+          <div><div class="persona-name">Protects devil's advocate version to help address potential gaps in self-defense documentation</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#3b82f6;"></div>
+          <div><div class="persona-name">Speak or upload documents for AI analysis</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#f5a623;"></div>
+          <div><div class="persona-name">Document only analyzed but never stored</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#e63e2f;"></div>
+          <div><div class="persona-name">Print report when you need it</div></div>
         </div>
       </div>
 
