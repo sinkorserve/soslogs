@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="telephone=no">
 <title>SOSLogs — Personal Safety Documentation</title>
 <style>
 :root{
@@ -15,6 +16,28 @@
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
   --nav-h:54px;
 }
+[data-theme="light"]{
+  --black:#f8fafc;--dark:#ffffff;--card:#ffffff;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --muted:#64748b;--text:#0f172a;--white:#0f172a;
+}
+[data-theme="light"] body{background:#f8fafc;color:#0f172a;}
+[data-theme="light"] #login-screen::before{opacity:0.2;}
+[data-theme="light"] #dashboard-screen{background:#f8fafc;}
+[data-theme="light"] .login-left,.login-col-auth{background:#ffffff;}
+[data-theme="light"] .login-right,.login-col-pricing,.login-col-hero{background:#f8fafc;}
+[data-theme="light"] .f-input{background:#ffffff;color:#0f172a;border-color:#e2e8f0;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] select.f-input{background:#ffffff;color:#0f172a;}
+[data-theme="light"] .f-input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #fff inset !important;-webkit-text-fill-color:#0f172a !important;}
+[data-theme="light"] .pricing-card{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .stat-card,.wide-card,.dash-chat-panel,.insights-widget,.analyze-widget{background:#ffffff;border-color:#e2e8f0;}
+[data-theme="light"] .analyze-ta,.dash-chat-input,.otp-input{background:#f8fafc;color:#0f172a;-webkit-text-fill-color:#0f172a;}
+[data-theme="light"] .wide-card-title,.stat-val,.section-title,.hero-logo-text{color:#0f172a;}
+[data-theme="light"] .dash-nav{background:rgba(248,250,252,0.95);border-color:#e2e8f0;}
+[data-theme="light"] .analysis-modal,.analysis-field-value{background:#ffffff;color:#0f172a;border-color:#e2e8f0;}
+[data-theme="light"] .hero-statement,.hero-sub,.hero-tagline{color:#475569;}
+[data-theme="light"] .login-topbar{background:#f8fafc;border-color:#e2e8f0;}
+[data-theme="light"] .theme-btn{background:#f1f5f9;border-color:#e2e8f0;color:#0f172a;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;font-family:var(--font);background:var(--black);color:var(--text);-webkit-font-smoothing:antialiased;}
 
@@ -104,6 +127,47 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 }
 
 .login-wrap{position:relative;z-index:1;width:100%;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
+/* ── 3-Column Landing Layout ─────────────────────────────── */
+.login-three-col{
+  display:grid;
+  grid-template-columns:300px 1fr 280px;
+  min-height:calc(100vh - 44px);
+  position:relative;z-index:1;
+}
+.login-col-auth{
+  border-right:1px solid var(--border);
+  background:rgba(0,0,0,0.15);
+  padding:20px 18px;
+  overflow-y:auto;
+}
+.login-col-hero{
+  padding:20px 24px;
+  overflow-y:auto;
+  border-right:1px solid var(--border);
+}
+.login-col-pricing{
+  padding:20px 14px;
+  overflow-y:auto;
+}
+@media(max-width:960px){
+  .login-three-col{grid-template-columns:1fr;}
+  .login-col-auth{border-right:none;border-bottom:1px solid var(--border);}
+  .login-col-hero{border-right:none;border-bottom:1px solid var(--border);}
+}
+/* theme toggle top bar */
+.login-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px;
+  background:var(--black);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+}
+.login-topbar-brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--white);}
+.login-topbar-brand span{color:var(--safe);}
+.login-topbar-right{display:flex;align-items:center;gap:12px;}
+.theme-btn{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;color:var(--text);font-size:14px;transition:all 0.2s;line-height:1;}
+.theme-btn:hover{border-color:var(--border2);}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
 .login-logo-text{font-size:26px;font-weight:800;color:var(--white);}
@@ -614,8 +678,26 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
 
-<!-- Hero - full width top -->
-<div class="login-hero">
+<!-- Top bar -->
+<div class="login-topbar">
+  <div class="login-topbar-brand">
+    <svg width="18" height="18" viewBox="0 0 42 42"><defs><radialGradient id="rbt" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#e63e2f"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rbt)"/></svg>
+    <svg width="18" height="18" viewBox="0 0 42 42"><defs><radialGradient id="gbt" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#1db87a"/><stop offset="100%" stop-color="#064d32"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gbt)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    SOS<span>Logs</span>
+  </div>
+  <div class="login-topbar-right">
+    <a href="/about.html" style="font-size:12px;color:var(--muted);text-decoration:none;">About</a>
+    <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+  </div>
+</div>
+
+<!-- 3-column layout -->
+<div class="login-three-col">
+
+<!-- Left: Auth -->
+<div class="login-col-auth">
+<div class="login-wrap">
+<div class="login-hero" style="padding:0;border:none;background:transparent;margin-bottom:0;">
   <div class="hero-logo">
     <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
     <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -674,11 +756,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
       </div>
     </div>
   </div>
-</div>
+</div><!-- end inline hero -->
 
-<div class="login-body">
-<div class="login-left">
-<div class="login-wrap">
+
 
   <!-- Auth tabs -->
   <div style="display:flex;gap:0;margin-bottom:16px;background:var(--dark);border-radius:10px;padding:3px;">
@@ -801,8 +881,62 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 </div>
 </div>
 
-<!-- Right column - pricing (inside login-body) -->
-<div class="login-right">
+</div><!-- end login-wrap -->
+</div><!-- end login-col-auth -->
+
+<!-- Center: Hero content -->
+<div class="login-col-hero">
+
+  <!-- Hero content moved to center -->
+  <div style="margin-bottom:16px;">
+    <div class="hero-tagline" style="text-align:left;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Documented · Transparent · Self-Evident</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px;">
+      When incidents happen, everyone claims they did nothing wrong. You can make a strong case to decision makers by documenting timestamped events that are
+      <span class="hero-badge-pill" style="display:inline;padding:1px 6px;margin:0 1px;">Specific</span>
+      <span class="hero-badge-pill" style="display:inline;padding:1px 6px;margin:0 1px;">Consistent</span>
+      <span class="hero-badge-pill" style="display:inline;padding:1px 6px;margin:0 1px;">Corroborated</span>
+      and part of an unbroken
+      <span class="hero-badge-pill" style="display:inline;padding:1px 6px;margin:0 1px;">Timeline</span>
+      with clear
+      <span class="hero-badge-pill" style="display:inline;padding:1px 6px;margin:0 1px;">Patterns</span>
+      — your documented truth stands by itself.
+    </p>
+  </div>
+
+  <!-- Convo cards -->
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+    <div style="background:rgba(29,184,122,0.08);border:1.5px solid rgba(29,184,122,0.25);border-radius:12px;padding:12px 16px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--safe);margin-bottom:6px;">What you text to 1-888-799-LOGS</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;display:flex;flex-direction:column;gap:3px;">
+        <div style="display:flex;gap:8px;"><span style="color:var(--safe);">›</span><span>Incident at 500 Main St. Manager raised voice. Witnesses: Sarah, Tom.</span></div>
+        <div style="display:flex;gap:8px;"><span style="color:var(--safe);">›</span><span>Received written warning with no prior verbal notice. Documentation retained.</span></div>
+        <div style="display:flex;gap:8px;"><span style="color:var(--safe);">›</span><span>ANALYZE: [paste email or document text for AI analysis]</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:2px 10px;">
+      <div style="flex:1;height:1px;background:rgba(29,184,122,0.2);"></div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      <div style="flex:1;height:1px;background:rgba(29,184,122,0.2);"></div>
+    </div>
+    <div style="background:rgba(29,184,122,0.05);border:1.5px solid rgba(29,184,122,0.15);border-radius:12px;padding:12px 16px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--safe);margin-bottom:6px;">What SOSLogs confirms back</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;display:flex;flex-direction:column;gap:3px;">
+        <div style="display:flex;gap:8px;"><span style="color:var(--safe);">✓</span><span>SOSLog received. Your record is saved.</span></div>
+        <div style="display:flex;gap:8px;"><span style="color:var(--safe);">✓</span><span>Analysis complete — reply CONFIRM to save or EDIT to discard.</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(29,184,122,0.04);border:1px solid rgba(29,184,122,0.1);border-radius:10px;">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-size:13px;font-weight:700;color:var(--white);">+1 (888) 799-5647</span>
+        <span style="font-size:13px;font-weight:700;color:var(--safe);">1-888-799-LOGS</span>
+      </div>
+      <div style="flex:1;"></div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </div>
+  </div>
+
+  <!-- Pricing cards in center col (the current pricing-inner content) -->
+
 <div class="pricing-inner">
   <div class="pricing-title">Choose your plan</div>
   <div class="pricing-cards">
@@ -851,10 +985,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 
 
-  </div><!-- end pricing-cards -->
-</div><!-- end pricing-inner -->
-</div><!-- end login-right -->
-</div><!-- end login-body -->
+</div><!-- end login-col-hero -->
+
+<!-- Right: Pricing -->
+<div class="login-col-pricing">
+  <div class="pricing-title" style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">Choose your plan</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+  </div><!-- end pricing cards flex -->
+</div><!-- end login-col-pricing -->
+</div><!-- end login-three-col -->
 
 <!-- Footer - bottom center -->
 <footer style="position:relative;z-index:1;text-align:center;padding:20px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:2;">
@@ -2599,6 +2739,32 @@ window.saveAnalysis = async function(){
   }
 };
 
+// ── Theme Toggle ─────────────────────────────────────────────
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('soslogs-theme', next);
+  const btn = document.getElementById('theme-toggle');
+  if(btn) btn.textContent = next === 'light' ? '🌙' : '☀️';
+  // Also update dashboard theme btn if exists
+  const dbtn = document.getElementById('dash-theme-toggle');
+  if(dbtn) dbtn.textContent = next === 'light' ? '🌙' : '☀️';
+}
+// Apply saved theme on load
+(function(){
+  const saved = localStorage.getItem('soslogs-theme');
+  if(saved && saved !== 'dark'){
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if(btn) btn.textContent = saved === 'light' ? '🌙' : '☀️';
+      const dbtn = document.getElementById('dash-theme-toggle');
+      if(dbtn) dbtn.textContent = saved === 'light' ? '🌙' : '☀️';
+    });
+  }
+})();
+
 // ── Phone OTP Verification ───────────────────────────────────
 let phoneVerified = false;
 // DEV Railway URL
@@ -2825,27 +2991,6 @@ function saveInsightAsPDF(question, answer, btn){
   }, 300);
 }
 
-// ── Theme Toggle ─────────────────────────────────────────────
-function toggleTheme(){
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('soslogs-theme', next);
-  document.getElementById('theme-toggle').textContent = next === 'light' ? '🌙' : '☀️';
-}
-
-// Apply saved theme on load
-(function(){
-  const saved = localStorage.getItem('soslogs-theme');
-  if(saved){
-    document.documentElement.setAttribute('data-theme', saved);
-    // Will update icon after DOM loads
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('theme-toggle');
-      if(btn) btn.textContent = saved === 'light' ? '🌙' : '☀️';
-    });
-  }
-})();
 
 const DARK_MAP=[{elementType:'geometry',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a0c0e'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8099'}]},{featureType:'administrative',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#161c21'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1b242c'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#080a0c'}]},{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}];
 </script>
