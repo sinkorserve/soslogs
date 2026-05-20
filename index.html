@@ -68,7 +68,7 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 /* Auth + pricing row */
 .login-body{
   display:grid;
-  grid-template-columns:20% 1fr 20%;
+  grid-template-columns:25% 1fr 20%;
   position:relative;
   z-index:1;
   min-height:100dvh;
@@ -646,9 +646,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <div style="display:flex;flex-direction:column;height:100%;">
   <div>
     <!-- Brand -->
-    <div class="pl-brand">
-      <svg width="22" height="22" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/></svg>
-      <svg width="22" height="22" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="pl-brand" style="font-size:28px;margin-bottom:20px;">
+      <svg width="32" height="32" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#rg1)"/></svg>
+      <svg width="32" height="32" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.5)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="5" ry="3.5" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       SOS<span class="ai">Logs</span>
     </div>
 
@@ -662,11 +662,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
       <!-- What you text in -->
       <div class="convo-card card-you">
         <div class="convo-card-label">📲 What you text to 1-888-799-LOGS</div>
-        <div class="convo-item"><div class="convo-dot"></div><div><strong>Incidents</strong> — What happened, where, when, and who was present</div></div>
-        <div class="convo-item"><div class="convo-dot"></div><div><strong>Evidence</strong> — Paste emails, documents, or communications for AI analysis</div></div>
-        <div class="convo-item"><div class="convo-dot"></div><div><strong>Location</strong> — Include an address for accurate map pins and geocoding</div></div>
-        <div class="convo-item"><div class="convo-dot"></div><div><strong>ANALYZE:</strong> — Prefix any text for structured AI analysis with court relevance scoring</div></div>
-        <div class="convo-item"><div class="convo-dot"></div><div><strong>CONFIRM</strong> — Reply to save a Claude analysis to your permanent record</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>Incidents</strong> — What happened, where, when, who witnessed it</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>ANALYZE:</strong> [paste email or document] — AI breaks it down with court relevance score</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>CONFIRM</strong> — Save the analysis to your permanent record</div></div>
       </div>
 
       <!-- Number bridge -->
@@ -693,19 +691,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
         <div class="convo-card-label">🤖 What SOSLogs texts back</div>
         <div class="persona">
           <div class="persona-dot" style="background:#1db87a;"></div>
-          <div><div class="persona-name">On a standard log</div><div class="persona-quote">"SOSLog received. Your record is saved. Include your address for accurate location tracking."</div></div>
+          <div><div class="persona-name">Log saved</div><div class="persona-quote">"SOSLog received. Your record is saved."</div></div>
         </div>
         <div class="persona">
           <div class="persona-dot" style="background:#3b82f6;"></div>
-          <div><div class="persona-name">On an ANALYZE: request</div><div class="persona-quote">"Analysis complete — Date: May 12. Your Action: Sent email requesting coverage details. Court Relevance: High. Reply CONFIRM to save or EDIT to discard."</div></div>
+          <div><div class="persona-name">Analysis ready</div><div class="persona-quote">"Court Relevance: High. Reply CONFIRM to save or EDIT to discard."</div></div>
         </div>
         <div class="persona">
           <div class="persona-dot" style="background:#a855f7;"></div>
-          <div><div class="persona-name">Devil's Advocate flag</div><div class="persona-quote">"'Not sure if he was covered' gives opposing counsel room to claim prior coverage you weren't informed of. Be prepared with documentation."</div></div>
-        </div>
-        <div class="persona">
-          <div class="persona-dot" style="background:#f5a623;"></div>
-          <div><div class="persona-name">On CONFIRM</div><div class="persona-quote">"Analysis saved to your SOSLogs record. View your full dashboard at soslogs.org"</div></div>
+          <div><div class="persona-name">Devil's advocate</div><div class="persona-quote">"Opposing counsel could challenge this — be prepared with documentation."</div></div>
         </div>
       </div>
 
