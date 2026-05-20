@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
 <title>SOSLogs — Personal Safety Documentation</title>
 <style>
 :root{
@@ -103,6 +104,34 @@ html,body{height:100%;font-family:var(--font);background:var(--black);color:var(
 }
 
 .login-wrap{position:relative;z-index:1;width:100%;animation:fadeUp 0.4s cubic-bezier(.22,.68,0,1.2) both;}
+/* ── Fitlogs-style convo cards ──────────────────────────────── */
+.convo-pair{display:flex;flex-direction:column;gap:0;margin-bottom:16px;}
+.convo-card{padding:14px 16px;border-radius:14px;margin-bottom:0;}
+.convo-card.card-you{background:rgba(29,184,122,0.1);border:1.5px solid rgba(29,184,122,0.3);}
+.convo-card.card-ai{background:rgba(29,184,122,0.06);border:1.5px solid rgba(29,184,122,0.18);}
+.convo-card-label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--safe);margin-bottom:10px;}
+.convo-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px;color:var(--text);line-height:1.5;}
+.convo-item:last-child{margin-bottom:0;}
+.convo-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--safe);}
+.convo-item strong{color:var(--safe2);font-weight:600;}
+.num-bridge{display:flex;flex-direction:row;align-items:center;gap:14px;padding:14px 18px;background:rgba(14,19,24,0.9);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);}
+.num-bridge-arrows{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.num-bridge-numbers{display:flex;flex-direction:column;gap:4px;}
+.num-bridge .num{font-size:16px;font-weight:700;color:#fff;letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:#fff;}
+.num-bridge .vanity{font-size:16px;font-weight:700;color:var(--safe);letter-spacing:0.5px;white-space:nowrap;-webkit-text-fill-color:var(--safe);}
+.num-bridge-tagline{text-align:center;font-size:11px;color:var(--muted);letter-spacing:0.2px;padding:0 18px 12px;font-style:italic;}
+.persona{display:flex;align-items:flex-start;gap:10px;padding:7px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-bottom:6px;}
+.persona:last-child{margin-bottom:0;}
+.persona-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.persona-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.persona-quote{font-size:11px;color:var(--muted);line-height:1.45;font-style:italic;}
+.pl-headline{font-size:clamp(18px,2.5vw,24px);font-weight:800;line-height:1.2;letter-spacing:-0.5px;margin-bottom:6px;color:var(--white);}
+.pl-headline em{font-style:normal;color:var(--safe);}
+.pl-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;max-width:420px;}
+.pl-brand{font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--white);}
+.pl-brand .ai{color:var(--safe);}
+.pl-footer{font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:auto;}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
 .login-logo-text{font-size:26px;font-weight:800;color:var(--white);}
@@ -613,36 +642,89 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 <!-- LOGIN -->
 <div id="login-screen" class="screen active">
 
-<!-- Hero - full width top -->
-<div class="login-hero">
-  <div class="hero-logo">
-    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient><radialGradient id="rg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.58)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="ri1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#e63e2f" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#ri1)"/><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#rg1)"/></svg>
-    <svg width="36" height="36" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient><radialGradient id="gg1" cx="36%" cy="20%" r="58%"><stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><radialGradient id="gi1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient></defs><circle cx="21" cy="21" r="19" fill="none" stroke="#1db87a" stroke-width="0.8" stroke-opacity="0.18"/><circle cx="21" cy="21" r="14.5" fill="url(#gi1)"/><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><ellipse cx="19" cy="17.5" rx="6" ry="4" fill="url(#gg1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="hero-logo-text">SOS<span>Logs</span></span>
-  </div>
-  <div class="hero-tagline">Documented · Transparent · Self-Evident</div>
-  <p class="hero-statement">
-    When incidents happen, everyone claims they did nothing wrong. You can make a strong case to decision makers by documenting timestamped events that are
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Specific</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Consistent</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Corroborated</span>
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Objective</span>
-    and part of an unbroken
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Timeline</span>
-    with clear
-    <span class="hero-badge-pill" style="display:inline;padding:1px 7px;margin:0 1px;">Patterns</span>
-    — your documented truth stands by itself, available when it matters most.
-  </p>
-  <div style="display:flex;justify-content:center;margin-top:12px;">
-    <div class="hero-sms">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1db87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.44 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.4a16 16 0 0 0 5.69 5.69l.78-.78a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      Text your logs to 1-888-799-LOGS
-    </div>
-  </div>
-</div>
-
 <div class="login-body">
+
+<!-- Left panel: brand + convo cards (fitlogs style) -->
 <div class="login-left">
+<div style="display:flex;flex-direction:column;height:100%;">
+  <div>
+    <!-- Brand -->
+    <div class="pl-brand">
+      <svg width="22" height="22" viewBox="0 0 42 42"><defs><radialGradient id="rb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff7878"/><stop offset="35%" stop-color="#e63e2f"/><stop offset="80%" stop-color="#c0281a"/><stop offset="100%" stop-color="#8b1a10"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#rb1)"/></svg>
+      <svg width="22" height="22" viewBox="0 0 42 42"><defs><radialGradient id="gb1" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#6ee9b0"/><stop offset="35%" stop-color="#1db87a"/><stop offset="80%" stop-color="#0d7a50"/><stop offset="100%" stop-color="#064d32"/></radialGradient></defs><circle cx="21" cy="21" r="11.5" fill="url(#gb1)"/><path d="M16 21 L27 21 M23.5 17 L27 21 L23.5 25" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      SOS<span class="ai">Logs</span>
+    </div>
+
+    <!-- Headline -->
+    <div class="pl-headline">Your proof, <em>one text away.</em></div>
+    <p class="pl-sub">Document incidents, protect your rights, and build a credible record — no app, no login, just text.</p>
+
+    <!-- Convo cards -->
+    <div class="convo-pair">
+
+      <!-- What you text in -->
+      <div class="convo-card card-you">
+        <div class="convo-card-label">📲 What you text to 1-888-799-LOGS</div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>Incidents</strong> — What happened, where, when, and who was present</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>Evidence</strong> — Paste emails, documents, or communications for AI analysis</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>Location</strong> — Include an address for accurate map pins and geocoding</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>ANALYZE:</strong> — Prefix any text for structured AI analysis with court relevance scoring</div></div>
+        <div class="convo-item"><div class="convo-dot"></div><div><strong>CONFIRM</strong> — Reply to save a Claude analysis to your permanent record</div></div>
+      </div>
+
+      <!-- Number bridge -->
+      <div style="background:rgba(8,10,12,0.95);border-left:1.5px solid rgba(29,184,122,0.3);border-right:1.5px solid rgba(29,184,122,0.3);">
+        <div class="num-bridge">
+          <div class="num-bridge-arrows">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+              <path d="M14 4 L14 44" stroke="#1db87a" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M7 36 L14 44 L21 36" stroke="#1db87a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M34 44 L34 4" stroke="#3dd68c" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M27 12 L34 4 L41 12" stroke="#3dd68c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="num-bridge-numbers">
+            <span class="num">+1 (888) 799-5647</span>
+            <span class="vanity">1-888-799-LOGS</span>
+          </div>
+        </div>
+        <div class="num-bridge-tagline">No app to download. Just you and your record, by text.</div>
+      </div>
+
+      <!-- What SOSLogs texts back -->
+      <div class="convo-card card-ai">
+        <div class="convo-card-label">🤖 What SOSLogs texts back</div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#1db87a;"></div>
+          <div><div class="persona-name">On a standard log</div><div class="persona-quote">"SOSLog received. Your record is saved. Include your address for accurate location tracking."</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#3b82f6;"></div>
+          <div><div class="persona-name">On an ANALYZE: request</div><div class="persona-quote">"Analysis complete — Date: May 12. Your Action: Sent email requesting coverage details. Court Relevance: High. Reply CONFIRM to save or EDIT to discard."</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#a855f7;"></div>
+          <div><div class="persona-name">Devil's Advocate flag</div><div class="persona-quote">"'Not sure if he was covered' gives opposing counsel room to claim prior coverage you weren't informed of. Be prepared with documentation."</div></div>
+        </div>
+        <div class="persona">
+          <div class="persona-dot" style="background:#f5a623;"></div>
+          <div><div class="persona-name">On CONFIRM</div><div class="persona-quote">"Analysis saved to your SOSLogs record. View your full dashboard at soslogs.org"</div></div>
+        </div>
+      </div>
+
+    </div><!-- end convo-pair -->
+  </div>
+
+  <!-- Footer -->
+  <div class="pl-footer">
+    © 2026 Athens Innovation and Development LLC ·
+    <a href="/about.html" style="color:var(--muted);text-decoration:none;">About</a> ·
+    <a href="/privacy.html" style="color:var(--muted);text-decoration:none;">Privacy</a> ·
+    <a href="/terms.html" style="color:var(--muted);text-decoration:none;">Terms</a> ·
+    <a href="mailto:admin@soslogs.org" style="color:var(--muted);text-decoration:none;">Contact</a>
+  </div>
+</div><!-- end left inner flex -->
+
 <div class="login-wrap">
 
   <!-- Auth tabs -->
