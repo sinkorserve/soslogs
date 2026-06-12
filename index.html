@@ -302,6 +302,19 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Settings Modal ─────────────────────────────────────────── */
+.settings-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;}
+.settings-backdrop.active{display:flex;}
+.settings-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:420px;position:relative;animation:fadeUp 0.25s ease both;}
+.settings-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.settings-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.settings-current{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--dark);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--muted);}
+.settings-current strong{color:var(--text);font-weight:600;}
+.settings-step{display:none;}
+.settings-step.active{display:block;}
+.settings-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px;}
+.settings-close:hover{color:var(--text);}
+
 /* ── PDF Print Styles ────────────────────────────────────────── */
 @media print {
   body * { visibility: hidden; }
@@ -913,6 +926,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
     </div>
     <div class="dash-nav-right">
       <div class="phone-chip"><div class="udot"></div><span id="nav-phone">...</span></div>
+      <button class="nav-btn" onclick="openSettings()" aria-label="Account settings" style="background:transparent;border:1px solid var(--border);">⚙️</button>
       <button class="nav-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </nav>
@@ -2652,6 +2666,99 @@ window.saveAnalysis = async function(){
     alert('Could not save. Please try again.');
     btn.disabled = false;
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm and Save';
+  }
+};
+
+// ── Settings Modal — Phone Number Update ─────────────────────
+let settingsNewPhone = '';
+
+window.openSettings = function(){
+  document.getElementById('settings-current-phone').textContent = fmtPhone(currentPhone);
+  document.getElementById('settings-backdrop').classList.add('active');
+  // Reset to step 1
+  ['settings-step1','settings-step2','settings-step3'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById('settings-step1').classList.add('active');
+  document.getElementById('settings-new-phone').value = '';
+  document.getElementById('settings-otp').value = '';
+  clearMsg('settings-err1'); clearMsg('settings-err2');
+};
+
+window.closeSettings = function(){
+  document.getElementById('settings-backdrop').classList.remove('active');
+};
+
+window.sendSettingsOtp = async function(){
+  const digits = document.getElementById('settings-new-phone').value.replace(/\D/g,'');
+  clearMsg('settings-err1');
+  if(digits.length !== 10){ showErr('settings-err1','Please enter a valid 10-digit US number.'); return; }
+  settingsNewPhone = '+1' + digits;
+  if(settingsNewPhone === currentPhone){ showErr('settings-err1','That is already your current number.'); return; }
+
+  const btn = document.getElementById('settings-send-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try{
+    const res = await fetch(RAILWAY_URL_BASE + '/verify/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phone: settingsNewPhone})
+    });
+    const data = await res.json();
+    if(data.status === 'pending'){
+      document.getElementById('settings-step1').classList.remove('active');
+      document.getElementById('settings-step2').classList.add('active');
+    } else {
+      showErr('settings-err1', data.error || 'Could not send code. Try again.');
+    }
+  } catch(e){
+    showErr('settings-err1','Connection error. Please try again.');
+  } finally {
+    btn.textContent = 'Send Verification Code'; btn.disabled = false;
+  }
+};
+
+window.verifySettingsOtp = async function(){
+  const code = document.getElementById('settings-otp').value.trim();
+  clearMsg('settings-err2');
+  if(code.length !== 6){ showErr('settings-err2','Please enter the 6-digit code.'); return; }
+
+  const btn = document.getElementById('settings-verify-btn');
+  btn.textContent = 'Verifying...'; btn.disabled = true;
+
+  try{
+    // Step 1: Verify OTP
+    const verifyRes = await fetch(RAILWAY_URL_BASE + '/verify/check', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phone: settingsNewPhone, code})
+    });
+    const verifyData = await verifyRes.json();
+    if(verifyData.status !== 'approved'){
+      showErr('settings-err2', 'Invalid code. Please try again.');
+      btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
+      return;
+    }
+
+    // Step 2: Migrate records on backend
+    btn.textContent = 'Migrating records...';
+    const migrateRes = await fetch(RAILWAY_URL_BASE + '/account/update-phone', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        old_phone: currentPhone,
+        new_phone: settingsNewPhone,
+        email: auth.currentUser?.email || ''
+      })
+    });
+    const migrateData = await migrateRes.json();
+    if(migrateData.status === 'ok'){
+      document.getElementById('settings-step2').classList.remove('active');
+      document.getElementById('settings-step3').classList.add('active');
+    } else {
+      showErr('settings-err2', migrateData.error || 'Migration failed. Contact support.');
+      btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
+    }
+  } catch(e){
+    showErr('settings-err2','Connection error. Please try again.');
+    btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
   }
 };
 
