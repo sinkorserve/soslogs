@@ -302,6 +302,20 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Media Upload ───────────────────────────────────────────── */
+.media-upload-area{border:1.5px dashed var(--border2);border-radius:10px;padding:12px;margin-top:8px;display:none;}
+.media-upload-area.has-file{border-color:rgba(29,184,122,0.4);background:rgba(29,184,122,0.04);}
+.media-preview{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text);}
+.media-preview img,.media-preview video{max-width:80px;max-height:60px;border-radius:6px;object-fit:cover;}
+.media-remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;}
+.media-remove-btn:hover{color:var(--danger);}
+.media-status{font-size:11px;color:var(--muted);margin-top:4px;}
+.media-status.error{color:var(--danger);}
+.media-status.ok{color:var(--safe);}
+.media-moderation-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.media-moderation-badge.approved{background:rgba(29,184,122,0.1);color:var(--safe);}
+.media-moderation-badge.rejected{background:rgba(230,62,47,0.1);color:var(--danger);}
+
 /* ── Settings Modal ─────────────────────────────────────────── */
 .settings-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;}
 .settings-backdrop.active{display:flex;}
@@ -1126,9 +1140,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="log-action-btns">
                 <button class="log-action-btn" id="le-mic-btn" onclick="toggleVoice('le-ta','le-mic-btn')" title="Voice input">🎤</button>
-                <label class="log-action-btn" title="Attach file">
+                <label class="log-action-btn" title="Attach photo or video" id="le-attach-label">
                   📎
-                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'le')">
+                  <input type="file" id="le-file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleMediaSelect(event,'le')">
                 </label>
               </div>
               <span class="log-char-count" id="le-count">0 / 500</span>
@@ -1141,6 +1155,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
               </button>
             </div>
           </div>
+        <div class="media-upload-area" id="le-media-area">
+          <div class="media-preview" id="le-media-preview"></div>
+          <div class="media-status" id="le-media-status"></div>
+        </div>
         </div>
 
         <!-- HR / Workplace box -->
@@ -1154,9 +1172,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="log-action-btns">
                 <button class="log-action-btn" id="hr-mic-btn" onclick="toggleVoice('hr-ta','hr-mic-btn')" title="Voice input">🎤</button>
-                <label class="log-action-btn" title="Attach file">
+                <label class="log-action-btn" title="Attach photo or video" id="hr-attach-label">
                   📎
-                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'hr')">
+                  <input type="file" id="hr-file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleMediaSelect(event,'hr')">
                 </label>
               </div>
               <span class="log-char-count" id="hr-count">0 / 500</span>
@@ -1252,6 +1270,7 @@ function updateThemeButtons(theme){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -1268,6 +1287,7 @@ const fbApp = initializeApp({
   appId:             "1:591855516889:web:316ac5c9acabd9383012c8"
 });
 const auth = getAuth(fbApp);
+const storage = getStorage(fbApp);
 const db   = getFirestore(fbApp);
 
 const encEmail = e => e.replace(/\./g,'_dot_').replace(/@/g,'_at_');
@@ -2761,6 +2781,127 @@ window.verifySettingsOtp = async function(){
     btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
   }
 };
+
+// ── Media Upload with Claude Moderation ──────────────────────
+const mediaState = { le: null, hr: null }; // {file, url, approved}
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_TYPES = ['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+
+window.handleMediaSelect = async function(event, box){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const area   = document.getElementById(`${box}-media-area`);
+  const status = document.getElementById(`${box}-media-status`);
+  const preview = document.getElementById(`${box}-media-preview`);
+
+  // Reset
+  mediaState[box] = null;
+  area.classList.remove('has-file');
+  preview.innerHTML = '';
+  status.className = 'media-status';
+
+  // Validate size
+  if(file.size > MAX_FILE_SIZE){
+    area.style.display = 'block';
+    status.textContent = 'File too large. Maximum size is 50MB.';
+    status.className = 'media-status error';
+    return;
+  }
+
+  // Show area
+  area.style.display = 'block';
+  status.textContent = '🔍 Screening content with AI...';
+
+  // Build preview element
+  let previewEl;
+  if(file.type.startsWith('image/')){
+    previewEl = document.createElement('img');
+    previewEl.src = URL.createObjectURL(file);
+  } else {
+    previewEl = document.createElement('span');
+    previewEl.textContent = '📄';
+    previewEl.style.fontSize = '32px';
+  }
+
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = file.name;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'media-remove-btn';
+  removeBtn.textContent = '×';
+  removeBtn.onclick = () => clearMedia(box);
+
+  preview.appendChild(previewEl);
+  preview.appendChild(nameSpan);
+  preview.appendChild(removeBtn);
+
+  // Claude moderation for images
+  if(file.type.startsWith('image/')){
+    try{
+      const base64 = await fileToBase64(file);
+      const res = await fetch(RAILWAY_URL + '/moderate-media', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          media_type: file.type,
+          base64_data: base64,
+          phone: currentPhone
+        })
+      });
+      const data = await res.json();
+      if(data.approved){
+        status.innerHTML = '<span class="media-moderation-badge approved">✓ Content approved</span>';
+        status.className = 'media-status ok';
+        area.classList.add('has-file');
+        mediaState[box] = { file, approved: true };
+      } else {
+        status.innerHTML = `<span class="media-moderation-badge rejected">✗ Content rejected</span> ${data.reason || 'Inappropriate content detected.'}`;
+        status.className = 'media-status error';
+        preview.innerHTML = '';
+        event.target.value = '';
+      }
+    } catch(e){
+      status.textContent = 'Moderation check failed. Please try again.';
+      status.className = 'media-status error';
+    }
+  } else {
+    // Non-image files (video, PDF) — skip Claude moderation, just validate
+    status.innerHTML = '<span class="media-moderation-badge approved">✓ Ready to upload</span>';
+    status.className = 'media-status ok';
+    area.classList.add('has-file');
+    mediaState[box] = { file, approved: true };
+  }
+};
+
+window.clearMedia = function(box){
+  mediaState[box] = null;
+  const area = document.getElementById(`${box}-media-area`);
+  area.style.display = 'none';
+  area.classList.remove('has-file');
+  document.getElementById(`${box}-media-preview`).innerHTML = '';
+  document.getElementById(`${box}-media-status`).textContent = '';
+  document.getElementById(`${box}-file-input`).value = '';
+};
+
+async function uploadMediaToStorage(file, phone, box){
+  const ext = file.name.split('.').pop();
+  const path = `users/${phone}/${box}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const fileRef = storageRef(storage, path);
+  const snapshot = await uploadBytes(fileRef, file);
+  const url = await getDownloadURL(snapshot.ref);
+  return { url, path, fileName: file.name, fileType: file.type, fileSize: file.size };
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 // ── Phone OTP Verification ───────────────────────────────────
 let phoneVerified = false;
