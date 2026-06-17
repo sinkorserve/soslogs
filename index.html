@@ -302,6 +302,33 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
 
 .map-legend{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--muted);}
 .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── Media Upload ───────────────────────────────────────────── */
+.media-upload-area{border:1.5px dashed var(--border2);border-radius:10px;padding:12px;margin-top:8px;display:none;}
+.media-upload-area.has-file{border-color:rgba(29,184,122,0.4);background:rgba(29,184,122,0.04);}
+.media-preview{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text);}
+.media-preview img,.media-preview video{max-width:80px;max-height:60px;border-radius:6px;object-fit:cover;}
+.media-remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;}
+.media-remove-btn:hover{color:var(--danger);}
+.media-status{font-size:11px;color:var(--muted);margin-top:4px;}
+.media-status.error{color:var(--danger);}
+.media-status.ok{color:var(--safe);}
+.media-moderation-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.media-moderation-badge.approved{background:rgba(29,184,122,0.1);color:var(--safe);}
+.media-moderation-badge.rejected{background:rgba(230,62,47,0.1);color:var(--danger);}
+
+/* ── Settings Modal ─────────────────────────────────────────── */
+.settings-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;}
+.settings-backdrop.active{display:flex;}
+.settings-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:420px;position:relative;animation:fadeUp 0.25s ease both;}
+.settings-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.settings-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.settings-current{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--dark);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--muted);}
+.settings-current strong{color:var(--text);font-weight:600;}
+.settings-step{display:none;}
+.settings-step.active{display:block;}
+.settings-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px;}
+.settings-close:hover{color:var(--text);}
+
 /* ── PDF Print Styles ────────────────────────────────────────── */
 @media print {
   body * { visibility: hidden; }
@@ -913,6 +940,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
     </div>
     <div class="dash-nav-right">
       <div class="phone-chip"><div class="udot"></div><span id="nav-phone">...</span></div>
+      <button class="nav-btn" onclick="openSettings()" aria-label="Account settings" style="background:transparent;border:1px solid var(--border);">⚙️</button>
       <button class="nav-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </nav>
@@ -1112,9 +1140,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="log-action-btns">
                 <button class="log-action-btn" id="le-mic-btn" onclick="toggleVoice('le-ta','le-mic-btn')" title="Voice input">🎤</button>
-                <label class="log-action-btn" title="Attach file">
+                <label class="log-action-btn" title="Attach photo or video" id="le-attach-label">
                   📎
-                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'le')">
+                  <input type="file" id="le-file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleMediaSelect(event,'le')">
                 </label>
               </div>
               <span class="log-char-count" id="le-count">0 / 500</span>
@@ -1127,6 +1155,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
               </button>
             </div>
           </div>
+        <div class="media-upload-area" id="le-media-area">
+          <div class="media-preview" id="le-media-preview"></div>
+          <div class="media-status" id="le-media-status"></div>
+        </div>
         </div>
 
         <!-- HR / Workplace box -->
@@ -1140,9 +1172,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,[contenteditable]:focu
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="log-action-btns">
                 <button class="log-action-btn" id="hr-mic-btn" onclick="toggleVoice('hr-ta','hr-mic-btn')" title="Voice input">🎤</button>
-                <label class="log-action-btn" title="Attach file">
+                <label class="log-action-btn" title="Attach photo or video" id="hr-attach-label">
                   📎
-                  <input type="file" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onchange="handleAttach(event,'hr')">
+                  <input type="file" id="hr-file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleMediaSelect(event,'hr')">
                 </label>
               </div>
               <span class="log-char-count" id="hr-count">0 / 500</span>
@@ -1238,6 +1270,7 @@ function updateThemeButtons(theme){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -1254,6 +1287,7 @@ const fbApp = initializeApp({
   appId:             "1:873518719449:web:6a2202cd4241a6b252b9c8"
 });
 const auth = getAuth(fbApp);
+const storage = getStorage(fbApp);
 const db   = getFirestore(fbApp);
 
 const encEmail = e => e.replace(/\./g,'_dot_').replace(/@/g,'_at_');
@@ -2654,6 +2688,220 @@ window.saveAnalysis = async function(){
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirm and Save';
   }
 };
+
+// ── Settings Modal — Phone Number Update ─────────────────────
+let settingsNewPhone = '';
+
+window.openSettings = function(){
+  document.getElementById('settings-current-phone').textContent = fmtPhone(currentPhone);
+  document.getElementById('settings-backdrop').classList.add('active');
+  // Reset to step 1
+  ['settings-step1','settings-step2','settings-step3'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById('settings-step1').classList.add('active');
+  document.getElementById('settings-new-phone').value = '';
+  document.getElementById('settings-otp').value = '';
+  clearMsg('settings-err1'); clearMsg('settings-err2');
+};
+
+window.closeSettings = function(){
+  document.getElementById('settings-backdrop').classList.remove('active');
+};
+
+window.sendSettingsOtp = async function(){
+  const digits = document.getElementById('settings-new-phone').value.replace(/\D/g,'');
+  clearMsg('settings-err1');
+  if(digits.length !== 10){ showErr('settings-err1','Please enter a valid 10-digit US number.'); return; }
+  settingsNewPhone = '+1' + digits;
+  if(settingsNewPhone === currentPhone){ showErr('settings-err1','That is already your current number.'); return; }
+
+  const btn = document.getElementById('settings-send-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try{
+    const res = await fetch(RAILWAY_URL_BASE + '/verify/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phone: settingsNewPhone})
+    });
+    const data = await res.json();
+    if(data.status === 'pending'){
+      document.getElementById('settings-step1').classList.remove('active');
+      document.getElementById('settings-step2').classList.add('active');
+    } else {
+      showErr('settings-err1', data.error || 'Could not send code. Try again.');
+    }
+  } catch(e){
+    showErr('settings-err1','Connection error. Please try again.');
+  } finally {
+    btn.textContent = 'Send Verification Code'; btn.disabled = false;
+  }
+};
+
+window.verifySettingsOtp = async function(){
+  const code = document.getElementById('settings-otp').value.trim();
+  clearMsg('settings-err2');
+  if(code.length !== 6){ showErr('settings-err2','Please enter the 6-digit code.'); return; }
+
+  const btn = document.getElementById('settings-verify-btn');
+  btn.textContent = 'Verifying...'; btn.disabled = true;
+
+  try{
+    // Step 1: Verify OTP
+    const verifyRes = await fetch(RAILWAY_URL_BASE + '/verify/check', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phone: settingsNewPhone, code})
+    });
+    const verifyData = await verifyRes.json();
+    if(verifyData.status !== 'approved'){
+      showErr('settings-err2', 'Invalid code. Please try again.');
+      btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
+      return;
+    }
+
+    // Step 2: Migrate records on backend
+    btn.textContent = 'Migrating records...';
+    const migrateRes = await fetch(RAILWAY_URL_BASE + '/account/update-phone', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        old_phone: currentPhone,
+        new_phone: settingsNewPhone,
+        email: auth.currentUser?.email || ''
+      })
+    });
+    const migrateData = await migrateRes.json();
+    if(migrateData.status === 'ok'){
+      document.getElementById('settings-step2').classList.remove('active');
+      document.getElementById('settings-step3').classList.add('active');
+    } else {
+      showErr('settings-err2', migrateData.error || 'Migration failed. Contact support.');
+      btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
+    }
+  } catch(e){
+    showErr('settings-err2','Connection error. Please try again.');
+    btn.textContent = 'Confirm & Update Number'; btn.disabled = false;
+  }
+};
+
+// ── Media Upload with Claude Moderation ──────────────────────
+const mediaState = { le: null, hr: null }; // {file, url, approved}
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_TYPES = ['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+
+window.handleMediaSelect = async function(event, box){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const area   = document.getElementById(`${box}-media-area`);
+  const status = document.getElementById(`${box}-media-status`);
+  const preview = document.getElementById(`${box}-media-preview`);
+
+  // Reset
+  mediaState[box] = null;
+  area.classList.remove('has-file');
+  preview.innerHTML = '';
+  status.className = 'media-status';
+
+  // Validate size
+  if(file.size > MAX_FILE_SIZE){
+    area.style.display = 'block';
+    status.textContent = 'File too large. Maximum size is 50MB.';
+    status.className = 'media-status error';
+    return;
+  }
+
+  // Show area
+  area.style.display = 'block';
+  status.textContent = '🔍 Screening content with AI...';
+
+  // Build preview element
+  let previewEl;
+  if(file.type.startsWith('image/')){
+    previewEl = document.createElement('img');
+    previewEl.src = URL.createObjectURL(file);
+  } else {
+    previewEl = document.createElement('span');
+    previewEl.textContent = '📄';
+    previewEl.style.fontSize = '32px';
+  }
+
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = file.name;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'media-remove-btn';
+  removeBtn.textContent = '×';
+  removeBtn.onclick = () => clearMedia(box);
+
+  preview.appendChild(previewEl);
+  preview.appendChild(nameSpan);
+  preview.appendChild(removeBtn);
+
+  // Claude moderation for images
+  if(file.type.startsWith('image/')){
+    try{
+      const base64 = await fileToBase64(file);
+      const res = await fetch(RAILWAY_URL + '/moderate-media', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          media_type: file.type,
+          base64_data: base64,
+          phone: currentPhone
+        })
+      });
+      const data = await res.json();
+      if(data.approved){
+        status.innerHTML = '<span class="media-moderation-badge approved">✓ Content approved</span>';
+        status.className = 'media-status ok';
+        area.classList.add('has-file');
+        mediaState[box] = { file, approved: true };
+      } else {
+        status.innerHTML = `<span class="media-moderation-badge rejected">✗ Content rejected</span> ${data.reason || 'Inappropriate content detected.'}`;
+        status.className = 'media-status error';
+        preview.innerHTML = '';
+        event.target.value = '';
+      }
+    } catch(e){
+      status.textContent = 'Moderation check failed. Please try again.';
+      status.className = 'media-status error';
+    }
+  } else {
+    // Non-image files (video, PDF) — skip Claude moderation, just validate
+    status.innerHTML = '<span class="media-moderation-badge approved">✓ Ready to upload</span>';
+    status.className = 'media-status ok';
+    area.classList.add('has-file');
+    mediaState[box] = { file, approved: true };
+  }
+};
+
+window.clearMedia = function(box){
+  mediaState[box] = null;
+  const area = document.getElementById(`${box}-media-area`);
+  area.style.display = 'none';
+  area.classList.remove('has-file');
+  document.getElementById(`${box}-media-preview`).innerHTML = '';
+  document.getElementById(`${box}-media-status`).textContent = '';
+  document.getElementById(`${box}-file-input`).value = '';
+};
+
+async function uploadMediaToStorage(file, phone, box){
+  const ext = file.name.split('.').pop();
+  const path = `users/${phone}/${box}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const fileRef = storageRef(storage, path);
+  const snapshot = await uploadBytes(fileRef, file);
+  const url = await getDownloadURL(snapshot.ref);
+  return { url, path, fileName: file.name, fileType: file.type, fileSize: file.size };
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 // ── Phone OTP Verification ───────────────────────────────────
 let phoneVerified = false;
